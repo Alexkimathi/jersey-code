@@ -674,7 +674,7 @@ export default function ProductForm({ params }: ProductFormProps) {
 
         {/* Variants section — only available after the product is created */}
         {productId ? (
-          <VariantsManager productId={productId} supabase={supabase} />
+          <VariantsManager productId={productId} supabase={supabase as any} />
         ) : (
           <p className="mt-8 text-sm text-gray-400 border-t border-gray-200 pt-6">
             Save the product first to manage its sizes and stock.
