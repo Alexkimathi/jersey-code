@@ -33,10 +33,22 @@ const BADGES: { value: JerseyBadge; label: string }[] = [
   { value: "crest",  label: "Club Crest  +KES 200" },
 ];
 
+const JERSEY_VIEWS = ["Front", "Back", "Side", "Badge"] as const;
+
 export function ProductDetailClient({ product, variants }: ProductDetailClientProps) {
   const [selectedSize, setSelectedSize] = useState<string>(variants[0]?.size || "");
   const [quantity, setQuantity] = useState(1);
+  const [activeView, setActiveView] = useState(0);
   const addItem = useCartStore((state) => state.addItem);
+
+  // Only the first view (Front) has an actual image for now
+  const viewImages: (string | null)[] = [
+    product.image_url ?? null,
+    null,
+    null,
+    null,
+  ];
+  const activeImageUrl = viewImages[activeView] ?? product.image_url ?? null;
 
   // Customization state
   const [edition, setEdition]         = useState<JerseyEdition>("fan");
@@ -99,19 +111,24 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
     <div className="grid gap-10 lg:grid-cols-[0.95fr_0.75fr] items-start">
       {/* Left — image + info tiles */}
       <div className="space-y-8">
+        {/* Main image */}
         <div className="relative overflow-hidden rounded-[1.75rem] bg-gray-100 aspect-[4/3] shadow-sm">
-          {product.image_url ? (
+          {activeImageUrl ? (
             <Image
-              src={product.image_url}
-              alt={product.name}
+              src={activeImageUrl}
+              alt={`${product.name} — ${JERSEY_VIEWS[activeView]} view`}
               fill
-              className="object-cover"
+              unoptimized
+              className="object-contain p-6"
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-gray-400">
-              No Image Available
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-400">
+              <svg className="w-10 h-10 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm font-medium">{JERSEY_VIEWS[activeView]} view coming soon</span>
             </div>
           )}
           <div className="absolute top-4 left-4 flex flex-wrap gap-2">
@@ -124,6 +141,44 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               {product.sport}
             </span>
           </div>
+        </div>
+
+        {/* Thumbnail strip */}
+        <div className="flex gap-3">
+          {JERSEY_VIEWS.map((label, i) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setActiveView(i)}
+              className={`relative flex-1 aspect-square rounded-xl overflow-hidden border-2 transition-all duration-150 ${
+                activeView === i
+                  ? "border-slate-900 shadow-sm"
+                  : "border-slate-200 hover:border-slate-400"
+              }`}
+            >
+              {viewImages[i] ? (
+                <Image
+                  src={viewImages[i]!}
+                  alt={`${label} view`}
+                  fill
+                  unoptimized
+                  className="object-contain p-2"
+                  sizes="10vw"
+                />
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center bg-slate-50 gap-1">
+                  <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              )}
+              <span className={`absolute bottom-1 left-0 right-0 text-center text-[9px] font-bold uppercase tracking-wider ${
+                activeView === i ? "text-slate-900" : "text-slate-400"
+              }`}>
+                {label}
+              </span>
+            </button>
+          ))}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
