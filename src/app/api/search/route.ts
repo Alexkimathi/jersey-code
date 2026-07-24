@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
       `,
         { count: 'exact' }
       )
-      .eq('is_hidden', false);
+      .eq('is_hidden', false)
+      .not('image_url', 'is', null);
 
     // Text search
     if (query) {
