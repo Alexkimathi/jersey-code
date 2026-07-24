@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Product, ProductVariant, JerseyEdition, JerseyBadge } from "@/lib/supabase/types";
 import { useCartStore } from "@/hooks/useCartStore";
+import { TEAM_IMAGES } from "@/lib/teamImages";
 import { Button } from "@/components/ui/Button";
 import { ShoppingBag, Minus, Plus, ShieldCheck, Sparkles, Star } from "lucide-react";
 
@@ -41,14 +42,14 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const [activeView, setActiveView] = useState(0);
   const addItem = useCartStore((state) => state.addItem);
 
-  // Only the first view (Front) has an actual image for now
+  const teamExtra = product.team ? (TEAM_IMAGES[product.team] ?? {}) : {};
   const viewImages: (string | null)[] = [
     product.image_url ?? null,
-    null,
-    null,
-    null,
+    teamExtra.back ?? null,
+    teamExtra.side ?? null,
+    teamExtra.badge ?? null,
   ];
-  const activeImageUrl = viewImages[activeView] ?? product.image_url ?? null;
+  const activeImageUrl = viewImages[activeView] ?? null;
 
   // Customization state
   const [edition, setEdition]         = useState<JerseyEdition>("fan");
