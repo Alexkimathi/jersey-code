@@ -128,8 +128,6 @@ function expandToScrollItems<T>(items: T[], minCount = 10): T[] {
   });
 }
 
-export const dynamic = "force-dynamic";
-
 export default async function HomePage() {
   const [featuredProductsRaw, banners, variants]: [Product[], Banner[], ProductVariant[]] = await Promise.all([
     getFeaturedProducts(),
