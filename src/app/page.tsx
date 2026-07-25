@@ -7,12 +7,30 @@ import { BannerCarousel } from "@/components/storefront/BannerCarousel";
 import { MarqueeBanner } from "@/components/storefront/MarqueeBanner";
 import { FeaturedProducts } from "@/components/storefront/FeaturedProducts";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { EPL_TEAMS } from "@/lib/categories";
 
-const sportCategories = [
-  { name: "Football", slug: "football", emoji: "⚽" },
+const navCategories = [
+  { name: "Featured", slug: "featured", emoji: "⭐" },
+  { name: "EPL", slug: "epl", emoji: "⚽" },
+  { name: "Others", slug: "others", emoji: "🌍" },
   { name: "Rugby", slug: "rugby", emoji: "🏉" },
-  { name: "Basketball", slug: "basketball", emoji: "🏀" },
-  { name: "Cricket", slug: "cricket", emoji: "🏏" },
+  { name: "Formula One", slug: "formula-one", emoji: "🏎️" },
+];
+
+const OTHERS_TEAMS = [
+  "Barcelona",
+  "Real Madrid",
+  "Bayern Munich",
+  "Borussia Dortmund",
+  "RB Leipzig",
+  "Bayer Leverkusen",
+  "Juventus",
+  "AC Milan",
+  "Inter Milan",
+  "Napoli",
+  "Argentina",
+  "Brazil",
+  "Harambee Stars",
 ];
 
 async function getFeaturedProducts(): Promise<Product[]> {
@@ -59,42 +77,6 @@ async function getProductVariants(): Promise<ProductVariant[]> {
   return data || [];
 }
 
-async function getProductsByTeam(team: string): Promise<Product[]> {
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .ilike("team", `%${team}%`)
-    .eq("is_hidden", false)
-    .not("image_url", "is", null)
-    .order("image_url", { ascending: false, nullsFirst: false })
-    .limit(10);
-
-  if (error) {
-    console.error("Error fetching products by team:", error);
-    return [];
-  }
-
-  return data || [];
-}
-
-async function getProductsBySport(sport: string): Promise<Product[]> {
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("sport", sport)
-    .eq("is_hidden", false)
-    .limit(10);
-
-  if (error) {
-    console.error("Error fetching products by sport:", error);
-    return [];
-  }
-
-  return data || [];
-}
-
 async function getProductsByTeams(teams: string[]): Promise<Product[]> {
   if (teams.length === 0) {
     return [];
@@ -112,6 +94,24 @@ async function getProductsByTeams(teams: string[]): Promise<Product[]> {
 
   if (error) {
     console.error("Error fetching products by teams:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function getProductsBySport(sport: string): Promise<Product[]> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("sport", sport)
+    .eq("is_hidden", false)
+    .not("image_url", "is", null)
+    .limit(10);
+
+  if (error) {
+    console.error("Error fetching products by sport:", error);
     return [];
   }
 
@@ -136,35 +136,10 @@ export default async function HomePage() {
   ]);
 
   const featuredProducts = expandToScrollItems(featuredProductsRaw, 10);
-  const harambee = expandToScrollItems(await getProductsByTeam("Harambee"), 10);
-  const premier = expandToScrollItems(
-    await getProductsByTeams([
-      "Manchester United",
-      "Arsenal",
-      "Chelsea",
-      "Liverpool",
-      "Manchester City",
-    ]),
-    10
-  );
-  const bundesliga = expandToScrollItems(
-    await getProductsByTeams([
-      "Bayern Munich",
-      "Borussia Dortmund",
-      "RB Leipzig",
-      "Bayer Leverkusen",
-    ]),
-    10
-  );
-  const seriea = expandToScrollItems(
-    await getProductsByTeams([
-      "Juventus",
-      "AC Milan",
-      "Inter Milan",
-      "Napoli",
-    ]),
-    10
-  );
+  const eplProducts = expandToScrollItems(await getProductsByTeams(EPL_TEAMS), 10);
+  const othersProducts = expandToScrollItems(await getProductsByTeams(OTHERS_TEAMS), 10);
+  const rugbyProducts = expandToScrollItems(await getProductsBySport("rugby"), 10);
+  const f1Products = expandToScrollItems(await getProductsBySport("formula_one"), 10);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -177,9 +152,9 @@ export default async function HomePage() {
 
 <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-12">
 
-        {/* Sport category chips */}
+        {/* Category chips */}
         <div className="flex items-center gap-3 overflow-x-auto pb-2 mb-12 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
-          {sportCategories.map((cat) => (
+          {navCategories.map((cat) => (
             <Link
               key={cat.slug}
               href={`/products/${cat.slug}`}
@@ -198,46 +173,20 @@ export default async function HomePage() {
         {/* League / team rows */}
         <section className="mt-12 space-y-14">
 
-          {harambee.length > 0 && (
-            <div>
-              <div className="flex items-end justify-between mb-5">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Football · Kenya</p>
-                  <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Harambee Stars</h2>
-                </div>
-                <Link href="/products/football" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
-                  View all →
-                </Link>
-              </div>
-              <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
-                <div className="flex gap-5 min-w-max">
-                  {harambee.map((product, index) => {
-                    const productVariants = variants.filter((v: any) => v.product_id === product.id);
-                    return (
-                      <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
-                        <ProductCard product={product} variants={productVariants} index={index} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {premier.length > 0 && (
+          {eplProducts.length > 0 && (
             <div>
               <div className="flex items-end justify-between mb-5">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Football · England</p>
                   <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Premier League</h2>
                 </div>
-                <Link href="/products/football" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
+                <Link href="/products/epl" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
                   View all →
                 </Link>
               </div>
               <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
                 <div className="flex gap-5 min-w-max">
-                  {premier.map((product, index) => {
+                  {eplProducts.map((product, index) => {
                     const productVariants = variants.filter((v: any) => v.product_id === product.id);
                     return (
                       <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
@@ -250,20 +199,20 @@ export default async function HomePage() {
             </div>
           )}
 
-          {bundesliga.length > 0 && (
+          {othersProducts.length > 0 && (
             <div>
               <div className="flex items-end justify-between mb-5">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Football · Germany</p>
-                  <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Bundesliga</h2>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Football · World</p>
+                  <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">World Football</h2>
                 </div>
-                <Link href="/products/football" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
+                <Link href="/products/others" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
                   View all →
                 </Link>
               </div>
               <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
                 <div className="flex gap-5 min-w-max">
-                  {bundesliga.map((product, index) => {
+                  {othersProducts.map((product, index) => {
                     const productVariants = variants.filter((v: any) => v.product_id === product.id);
                     return (
                       <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
@@ -276,20 +225,46 @@ export default async function HomePage() {
             </div>
           )}
 
-          {seriea.length > 0 && (
+          {rugbyProducts.length > 0 && (
             <div>
               <div className="flex items-end justify-between mb-5">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Football · Italy</p>
-                  <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Serie A</h2>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Rugby</p>
+                  <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Rugby</h2>
                 </div>
-                <Link href="/products/football" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
+                <Link href="/products/rugby" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
                   View all →
                 </Link>
               </div>
               <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
                 <div className="flex gap-5 min-w-max">
-                  {seriea.map((product, index) => {
+                  {rugbyProducts.map((product, index) => {
+                    const productVariants = variants.filter((v: any) => v.product_id === product.id);
+                    return (
+                      <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
+                        <ProductCard product={product} variants={productVariants} index={index} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {f1Products.length > 0 && (
+            <div>
+              <div className="flex items-end justify-between mb-5">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Motorsport</p>
+                  <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Formula One</h2>
+                </div>
+                <Link href="/products/formula-one" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
+                  View all →
+                </Link>
+              </div>
+              <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
+                <div className="flex gap-5 min-w-max">
+                  {f1Products.map((product, index) => {
                     const productVariants = variants.filter((v: any) => v.product_id === product.id);
                     return (
                       <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
@@ -317,14 +292,14 @@ export default async function HomePage() {
                 Official game jerseys for every fan and every sport.
               </h2>
               <p className="mt-5 text-base text-slate-400 leading-relaxed max-w-lg">
-                Football, rugby, basketball and cricket jerseys — with fast local delivery, M-Pesa checkout, and unbeatable fan style.
+                Football, rugby, Formula One and more — with fast local delivery, M-Pesa checkout, and unbeatable fan style.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  href="/products/football"
+                  href="/products/epl"
                   className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-900 shadow-lg hover:scale-105 hover:shadow-xl transition-all"
                 >
-                  Shop Football
+                  Shop EPL
                 </Link>
                 <Link
                   href="/search"

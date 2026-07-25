@@ -320,6 +320,7 @@ export default function ProductForm({ params }: ProductFormProps) {
   const router = useRouter();
   const { adminUser, permissions, isLoading } = useAdminAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [productId, setProductId] = useState<string | null>(null);
 
@@ -422,6 +423,37 @@ export default function ProductForm({ params }: ProductFormProps) {
     setUploading(false);
   };
 
+  const handleDelete = async () => {
+    if (!productId || !confirm("Delete this product and all its sizes? This cannot be undone.")) return;
+    setIsDeleting(true);
+    setError(null);
+
+    const { error: variantsError } = await supabase
+      .from("product_variants")
+      .delete()
+      .eq("product_id", productId);
+
+    if (variantsError) {
+      setError(variantsError.message);
+      setIsDeleting(false);
+      return;
+    }
+
+    const { error: productError } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", productId);
+
+    if (productError) {
+      setError(productError.message);
+      setIsDeleting(false);
+      return;
+    }
+
+    router.push("/admin/products");
+    router.refresh();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -511,9 +543,21 @@ export default function ProductForm({ params }: ProductFormProps) {
   return (
     <AdminLayout>
       <div className="max-w-3xl p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
-          {productId ? "Edit Product" : "New Product"}
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {productId ? "Edit Product" : "New Product"}
+          </h1>
+          {productId && adminUser?.role === "super_admin" && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting…" : "Delete product"}
+            </button>
+          )}
+        </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -549,6 +593,7 @@ export default function ProductForm({ params }: ProductFormProps) {
                 <option value="rugby">Rugby</option>
                 <option value="basketball">Basketball</option>
                 <option value="cricket">Cricket</option>
+                <option value="formula_one">Formula One</option>
               </select>
             </div>
             <div>

@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { initiateStkPush } from "@/lib/mpesa";
 import { CheckoutFormData } from "@/lib/supabase/types";
 
-type RequestBody = CheckoutFormData & { items: any[]; total: number; couponId?: string };
+type RequestBody = CheckoutFormData & { items: any[]; total: number };
 
 async function createOrderItems(supabase: any, orderId: string, items: any[]) {
   const orderItems = items.map((item) => ({
@@ -65,18 +65,6 @@ async function postCheckoutSideEffects(
     }
   }
 
-  // Apply coupon if provided
-  if (body.couponId) {
-    try {
-      await fetch(new URL("/api/coupons/apply", requestUrl).toString(), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ couponId: body.couponId }),
-      });
-    } catch (err) {
-      console.error("Error applying coupon:", err);
-    }
-  }
 }
 
 export async function POST(request: Request) {

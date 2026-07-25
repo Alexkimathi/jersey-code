@@ -13,8 +13,6 @@ import {
   Truck,
   MapPin,
   Smartphone,
-  Store,
-  Banknote,
   X,
   Lock,
   RefreshCw,
@@ -46,20 +44,6 @@ const paymentOptions = [
     sub: "STK push sent to your phone — instant",
     icon: <Smartphone className="w-5 h-5" />,
     badge: "Popular",
-  },
-  {
-    value: "pay_on_pickup" as PaymentMethod,
-    label: "Pay at Pickup",
-    sub: "Pay when you collect your order",
-    icon: <Store className="w-5 h-5" />,
-    badge: null,
-  },
-  {
-    value: "cash_on_delivery" as PaymentMethod,
-    label: "Cash on Delivery",
-    sub: "Pay the rider when your order arrives",
-    icon: <Banknote className="w-5 h-5" />,
-    badge: null,
   },
 ];
 
@@ -93,16 +77,8 @@ export function CheckoutForm() {
     formData.fulfillmentMethod === "delivery" &&
     formData.customerPhone.replace(/\D/g, "").length >= 10;
 
-  // When the fulfillment method changes, reset incompatible payment selections
   const handleFulfillmentChange = (method: FulfillmentMethod) => {
-    let paymentMethod = formData.paymentMethod;
-    if (method === "pickup" && paymentMethod === "cash_on_delivery") {
-      paymentMethod = "pay_on_pickup";
-    }
-    if (method === "delivery" && paymentMethod === "pay_on_pickup") {
-      paymentMethod = "mpesa";
-    }
-    setFormData({ ...formData, fulfillmentMethod: method, paymentMethod, deliveryAddress: null });
+    setFormData({ ...formData, fulfillmentMethod: method, deliveryAddress: null });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -345,11 +321,6 @@ export function CheckoutForm() {
 
           <div className="space-y-3">
             {paymentOptions.map((opt) => {
-              // Only show delivery-specific options for delivery orders
-              if (opt.value === "cash_on_delivery" && formData.fulfillmentMethod !== "delivery") return null;
-              // Only show pickup option for pickup orders
-              if (opt.value === "pay_on_pickup" && formData.fulfillmentMethod !== "pickup") return null;
-
               const active = formData.paymentMethod === opt.value;
               return (
                 <label
@@ -393,12 +364,6 @@ export function CheckoutForm() {
             <p className="mt-4 text-xs text-slate-400 flex items-center gap-1.5">
               <Smartphone className="w-3.5 h-3.5" />
               An STK push will be sent to your phone number when you place the order.
-            </p>
-          )}
-          {formData.paymentMethod === "cash_on_delivery" && (
-            <p className="mt-4 text-xs text-slate-400 flex items-center gap-1.5">
-              <Banknote className="w-3.5 h-3.5" />
-              Have exact change ready. Our rider will collect payment on arrival.
             </p>
           )}
         </div>

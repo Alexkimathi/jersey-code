@@ -80,4 +80,35 @@ export const TEAM_IMAGES: Record<string, TeamImages> = {
     back:  "https://cdn.shopify.com/s/files/1/0280/8365/0642/files/SSC_NAPOLI_HOME_MATCH_SHIRT_2024_2025_2.jpg?v=1723607699",
     side:  "https://cdn.shopify.com/s/files/1/0280/8365/0642/files/SSC_NAPOLI_HOME_MATCH_SHIRT_2024_2025_3.jpg?v=1723607695",
   },
+  // Formula One teams
+  "Red Bull Racing": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/red-bull-racing-f1-badge.png",
+  },
+  "Scuderia Ferrari": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/ferrari-f1-badge.png",
+  },
+  "Mercedes-AMG Petronas": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/mercedes-f1-badge.png",
+  },
+  "McLaren F1 Team": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/mclaren-f1-badge.png",
+  },
+  "Aston Martin F1": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/aston-martin-f1-badge.png",
+  },
+  "Alpine F1 Team": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/alpine-f1-badge.png",
+  },
+  "Williams Racing": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/williams-f1-badge.png",
+  },
+  "Haas F1 Team": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/haas-f1-badge.png",
+  },
+  "Visa Cash App RB": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/rb-f1-badge.png",
+  },
+  "Kick Sauber": {
+    badge: "https://r2.thesportsdb.com/images/media/team/badge/kick-sauber-f1-badge.png",
+  },
 };

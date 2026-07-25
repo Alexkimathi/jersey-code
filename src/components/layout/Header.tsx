@@ -6,6 +6,14 @@ import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const categoryLinks = [
+  { label: "Featured", href: "/products/featured", emoji: "⭐" },
+  { label: "EPL", href: "/products/epl", emoji: "⚽" },
+  { label: "Others", href: "/products/others", emoji: "🌍" },
+  { label: "Rugby", href: "/products/rugby", emoji: "🏉" },
+  { label: "Formula One", href: "/products/formula-one", emoji: "🏎️" },
+];
+
 const navLinks = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
@@ -69,13 +77,23 @@ export function Header() {
             </button>
           </form>
 
-          {/* Desktop nav */}
+          {/* Desktop nav — category links + secondary links */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map(({ label, href }) => (
+            {categoryLinks.map(({ label, href, emoji }) => (
               <Link
                 key={href}
                 href={href}
                 className="relative px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all group"
+              >
+                <span className="mr-1">{emoji}</span>{label}
+                <span className="absolute bottom-1 left-3 right-3 h-0.5 bg-sky-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left rounded-full" />
+              </Link>
+            ))}
+            {navLinks.map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="relative px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all group"
               >
                 {label}
                 <span className="absolute bottom-1 left-3 right-3 h-0.5 bg-sky-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left rounded-full" />
@@ -151,11 +169,22 @@ export function Header() {
                 </button>
               </form>
               <div className="grid grid-cols-2 gap-2">
-                {navLinks.map(({ label, href }, i) => (
+                {categoryLinks.map(({ label, href, emoji }, i) => (
                   <motion.div key={href} custom={i} variants={menuItemVariants} initial="hidden" animate="visible">
                     <Link
                       href={href}
-                      className="flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <span>{emoji}</span>{label}
+                    </Link>
+                  </motion.div>
+                ))}
+                {navLinks.map(({ label, href }, i) => (
+                  <motion.div key={href} custom={categoryLinks.length + i} variants={menuItemVariants} initial="hidden" animate="visible">
+                    <Link
+                      href={href}
+                      className="flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {label}

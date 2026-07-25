@@ -4,7 +4,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useSupabase } from "@/app/providers";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Tag, FileText, Image, BarChart3, LogOut, X } from "lucide-react";
+import { LayoutDashboard, Package, FileText, Image, BarChart3, LogOut, X } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -12,7 +12,6 @@ const navItems = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/inventory", label: "Inventory", icon: BarChart3 },
   { href: "/admin/banners", label: "Banners", icon: Image },
-  { href: "/admin/promotions", label: "Promotions", icon: Tag },
   { href: "/admin/audit", label: "Audit Log", icon: FileText },
 ];
 

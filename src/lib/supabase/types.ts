@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Sport = "football" | "rugby" | "basketball" | "cricket";
+export type Sport = "football" | "rugby" | "basketball" | "cricket" | "formula_one";
 
 export type FulfillmentMethod = "delivery" | "pickup";
 export type PaymentMethod = "mpesa" | "pay_on_pickup" | "cash_on_delivery";
@@ -51,21 +51,6 @@ export interface ProductVariant {
   size: string;
   stock_quantity: number;
   sku: string | null;
-}
-
-export interface Promotion {
-  id: string;
-  name: string;
-  description: string | null;
-  discount_type: "percentage" | "fixed";
-  discount_value: number;
-  scope: "storewide" | "sport" | "product";
-  scope_sport: Sport | null;
-  starts_at: string | null;
-  ends_at: string | null;
-  is_active: boolean;
-  created_by: string | null;
-  created_at: string;
 }
 
 export interface Banner {
@@ -189,16 +174,6 @@ export interface Database {
         Row: ProductVariant;
         Insert: Omit<ProductVariant, "id">;
         Update: Partial<ProductVariant>;
-      };
-      promotions: {
-        Row: Promotion;
-        Insert: Omit<Promotion, "created_at">;
-        Update: Partial<Omit<Promotion, "created_at">>;
-      };
-      promotion_products: {
-        Row: { promotion_id: string; product_id: string };
-        Insert: { promotion_id: string; product_id: string };
-        Update: never;
       };
       banners: {
         Row: Banner;
