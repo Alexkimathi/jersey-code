@@ -35,12 +35,22 @@ export default async function OthersPage() {
     getProductVariants(),
   ]);
 
+  const isKids = (p: Product) => {
+    const n = p.name.toLowerCase();
+    return n.includes("kids") || n.includes("youth") || n.includes("junior");
+  };
   const isVintage = (p: Product) => p.name.toLowerCase().includes("vintage");
+  const isSpecialEdition = (p: Product) => {
+    const n = p.name.toLowerCase();
+    return n.includes("special") || n.includes("limited") || n.includes("edition");
+  };
 
   const tabs = [
-    { label: "League Jerseys",      products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p)) },
-    { label: "Vintage Jerseys",     products: allFootball.filter(p => isVintage(p) && CLUB_TEAMS.includes(p.team ?? "")) },
-    { label: "International Teams", products: allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")) },
+    { label: "League Jerseys",       products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)) },
+    { label: "Kids Jerseys",         products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isKids(p)) },
+    { label: "Vintage Jerseys",      products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isVintage(p)) },
+    { label: "Special Edition Kits", products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)) },
+    { label: "National Teams Kits",  products: allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")) },
   ];
 
   return (

@@ -149,16 +149,28 @@ export default async function HomePage() {
     getProductsBySport("accessories"),
   ]);
 
+  const isKids = (p: Product) => {
+    const n = p.name.toLowerCase();
+    return n.includes("kids") || n.includes("youth") || n.includes("junior");
+  };
   const isVintage = (p: Product) => p.name.toLowerCase().includes("vintage");
+  const isSpecialEdition = (p: Product) => {
+    const n = p.name.toLowerCase();
+    return n.includes("special") || n.includes("limited") || n.includes("edition");
+  };
 
   // EPL tabs
-  const eplLeague   = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && !isVintage(p)));
-  const eplVintage  = pad(allFootball.filter(p => isVintage(p) && EPL_TEAMS.includes(p.team ?? "")));
-  const nationalAll = pad(allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")));
+  const eplLeague    = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)));
+  const eplKids      = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isKids(p)));
+  const eplVintage   = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isVintage(p)));
+  const eplSpecial   = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)));
+  const nationalAll  = pad(allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")));
 
   // Others tabs
-  const clubLeague  = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p)));
-  const clubVintage = pad(allFootball.filter(p => isVintage(p) && CLUB_TEAMS.includes(p.team ?? "")));
+  const clubLeague  = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)));
+  const clubKids    = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isKids(p)));
+  const clubVintage = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isVintage(p)));
+  const clubSpecial = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)));
 
   const balls = accessoriesAll.filter((p) => p.team === "Balls");
   const flags = accessoriesAll.filter((p) => p.team === "Flags");
@@ -210,7 +222,7 @@ export default async function HomePage() {
         <section className="space-y-14">
 
           {/* EPL */}
-          {eplLeague.length > 0 && (
+          {(eplLeague.length > 0 || eplKids.length > 0 || eplVintage.length > 0 || eplSpecial.length > 0 || nationalAll.length > 0) && (
             <div>
               <div className="flex items-end justify-between mb-4">
                 <div>
@@ -223,9 +235,11 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "League Jerseys",      products: eplLeague },
-                  { label: "Vintage Jerseys",     products: eplVintage },
-                  { label: "International Teams", products: nationalAll },
+                  { label: "League Jerseys",        products: eplLeague },
+                  { label: "Kids Jerseys",           products: eplKids },
+                  { label: "Vintage Jerseys",        products: eplVintage },
+                  { label: "Special Edition Kits",   products: eplSpecial },
+                  { label: "National Teams Kits",    products: nationalAll },
                 ]}
                 defaultTab="League Jerseys"
                 variants={variants}
@@ -234,7 +248,7 @@ export default async function HomePage() {
           )}
 
           {/* Others */}
-          {clubLeague.length > 0 && (
+          {(clubLeague.length > 0 || clubKids.length > 0 || clubVintage.length > 0 || clubSpecial.length > 0 || nationalAll.length > 0) && (
             <div>
               <div className="flex items-end justify-between mb-4">
                 <div>
@@ -247,9 +261,11 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "League Jerseys",      products: clubLeague },
-                  { label: "Vintage Jerseys",     products: clubVintage },
-                  { label: "International Teams", products: nationalAll },
+                  { label: "League Jerseys",        products: clubLeague },
+                  { label: "Kids Jerseys",           products: clubKids },
+                  { label: "Vintage Jerseys",        products: clubVintage },
+                  { label: "Special Edition Kits",   products: clubSpecial },
+                  { label: "National Teams Kits",    products: nationalAll },
                 ]}
                 defaultTab="League Jerseys"
                 variants={variants}
