@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Sport = "football" | "rugby" | "basketball" | "cricket" | "formula_one";
+export type Sport = "football" | "rugby" | "basketball" | "cricket" | "formula_one" | "accessories";
 
 export type FulfillmentMethod = "delivery" | "pickup";
 export type PaymentMethod = "mpesa" | "pay_on_pickup" | "cash_on_delivery";

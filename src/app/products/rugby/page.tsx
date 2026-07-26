@@ -4,30 +4,27 @@ import { CategoryTabs } from "@/components/storefront/CategoryTabs";
 
 export const dynamic = "force-dynamic";
 
-async function getF1Products(): Promise<Product[]> {
+async function getRugbyJerseys(): Promise<Product[]> {
   const supabase = createServerClient();
   const { data } = await supabase
     .from("products")
     .select("*")
-    .eq("sport", "formula_one")
+    .eq("sport", "rugby")
     .eq("is_hidden", false)
     .not("image_url", "is", null)
-    .not("name", "ilike", "%hoodie%")
     .order("created_at", { ascending: false });
   return data || [];
 }
 
-async function getF1Hoodies(): Promise<Product[]> {
+async function getAccessories(): Promise<Product[]> {
   const supabase = createServerClient();
   const { data } = await supabase
     .from("products")
     .select("*")
-    .eq("sport", "formula_one")
-    .ilike("name", "%hoodie%")
+    .eq("sport", "accessories")
     .eq("is_hidden", false)
     .not("image_url", "is", null)
-    .order("is_featured", { ascending: false })
-    .order("name", { ascending: true });
+    .order("created_at", { ascending: false });
   return data || [];
 }
 
@@ -37,32 +34,31 @@ async function getProductVariants(): Promise<ProductVariant[]> {
   return (data as ProductVariant[]) || [];
 }
 
-export default async function FormulaOnePage() {
-  const [jerseys, hoodies, variants] = await Promise.all([
-    getF1Products(),
-    getF1Hoodies(),
+export default async function RugbyPage() {
+  const [jerseys, accessories, variants] = await Promise.all([
+    getRugbyJerseys(),
+    getAccessories(),
     getProductVariants(),
   ]);
 
   const tabs = [
     { label: "Jerseys", products: jerseys },
-    { label: "Hoodies & Polos", products: hoodies },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-gradient-to-r from-slate-950 to-sky-700 text-white">
+      <div className="bg-gradient-to-r from-slate-950 to-emerald-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="max-w-3xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-sky-300">
-              Formula One Collection
+            <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">
+              Rugby Collection
             </p>
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-              Formula One
+              Rugby
             </h1>
             <p className="mt-6 text-base leading-8 text-slate-200">
-              Official F1 team jerseys and hoodies — represent your favourite
-              team on and off the track.
+              Official rugby jerseys and accessories — built for the game, worn
+              by the fans.
             </p>
           </div>
         </div>

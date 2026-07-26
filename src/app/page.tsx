@@ -5,9 +5,22 @@ import { createServerClient } from "@/lib/supabase/server";
 import { Product, Banner, ProductVariant } from "@/lib/supabase/types";
 import { BannerCarousel } from "@/components/storefront/BannerCarousel";
 import { MarqueeBanner } from "@/components/storefront/MarqueeBanner";
-import { FeaturedProducts } from "@/components/storefront/FeaturedProducts";
-import { ProductCard } from "@/components/storefront/ProductCard";
+import { HomeSectionTabs } from "@/components/storefront/HomeSectionTabs";
 import { EPL_TEAMS } from "@/lib/categories";
+
+const EPL_SET = new Set(EPL_TEAMS);
+const BIG_CLUBS = new Set([
+  "Barcelona", "Real Madrid", "Bayern Munich",
+  "Borussia Dortmund", "Juventus", "AC Milan", "Inter Milan", "Napoli",
+]);
+
+function footballFirst(products: Product[]): Product[] {
+  const rank = (p: Product) =>
+    EPL_SET.has(p.team ?? "") ? 0 :
+    BIG_CLUBS.has(p.team ?? "") ? 1 :
+    p.sport === "football" ? 2 : 3;
+  return [...products].sort((a, b) => rank(a) - rank(b));
+}
 
 const navCategories = [
   { name: "Featured", slug: "featured", emoji: "⭐" },
@@ -15,142 +28,148 @@ const navCategories = [
   { name: "Others", slug: "others", emoji: "🌍" },
   { name: "Rugby", slug: "rugby", emoji: "🏉" },
   { name: "Formula One", slug: "formula-one", emoji: "🏎️" },
+  { name: "Accessories", slug: "accessories", emoji: "🛍️" },
 ];
 
-const OTHERS_TEAMS = [
-  "Barcelona",
-  "Real Madrid",
-  "Bayern Munich",
-  "Borussia Dortmund",
-  "RB Leipzig",
-  "Bayer Leverkusen",
-  "Juventus",
-  "AC Milan",
-  "Inter Milan",
-  "Napoli",
-  "Argentina",
-  "Brazil",
-  "Harambee Stars",
+const CLUB_TEAMS = [
+  "Barcelona", "Real Madrid", "Bayern Munich", "Borussia Dortmund",
+  "RB Leipzig", "Bayer Leverkusen", "Juventus", "AC Milan", "Inter Milan", "Napoli",
 ];
 
-async function getFeaturedProducts(): Promise<Product[]> {
-  const supabase = createServerClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("is_featured", true)
-    .eq("is_hidden", false)
-    .order("image_url", { ascending: false, nullsFirst: false })
-    .limit(10);
+const NATIONAL_TEAMS = ["Argentina", "Brazil", "Harambee Stars"];
 
-  if (error) {
-    console.error("Error fetching featured products:", error);
-    return [];
-  }
-
-  return data || [];
-}
+// ── data fetchers ──────────────────────────────────────────────
 
 async function getBanners(): Promise<Banner[]> {
   const supabase = createServerClient();
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("banners")
     .select("*")
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
-
-  if (error) {
-    console.error("Error fetching banners:", error);
-    return [];
-  }
-
   return data || [];
 }
 
-async function getProductVariants(): Promise<ProductVariant[]> {
+async function getVariants(): Promise<ProductVariant[]> {
   const supabase = createServerClient();
-  const { data, error } = await supabase.from("product_variants").select("*");
-  if (error) {
-    console.error("Error fetching variants:", error);
-    return [];
-  }
-  return data || [];
+  const { data } = await supabase.from("product_variants").select("*");
+  return (data as ProductVariant[]) || [];
 }
 
-async function getProductsByTeams(teams: string[]): Promise<Product[]> {
-  if (teams.length === 0) {
-    return [];
-  }
-
+async function getNewestProducts(): Promise<Product[]> {
   const supabase = createServerClient();
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("products")
     .select("*")
-    .in("team", teams)
     .eq("is_hidden", false)
     .not("image_url", "is", null)
-    .order("image_url", { ascending: false, nullsFirst: false })
-    .limit(10);
+    .neq("sport", "accessories")
+    .order("created_at", { ascending: false });
+  return data || [];
+}
 
-  if (error) {
-    console.error("Error fetching products by teams:", error);
-    return [];
-  }
+async function getBestSellers(): Promise<Product[]> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("products")
+    .select("*")
+    .eq("is_featured", true)
+    .eq("is_hidden", false)
+    .not("image_url", "is", null)
+    .neq("sport", "accessories")
+    .order("created_at", { ascending: false });
+  return data || [];
+}
 
+async function getAllFootballProducts(): Promise<Product[]> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("products")
+    .select("*")
+    .eq("sport", "football")
+    .eq("is_hidden", false)
+    .not("image_url", "is", null)
+    .order("created_at", { ascending: false });
   return data || [];
 }
 
 async function getProductsBySport(sport: string): Promise<Product[]> {
   const supabase = createServerClient();
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("products")
     .select("*")
     .eq("sport", sport)
     .eq("is_hidden", false)
     .not("image_url", "is", null)
-    .limit(10);
-
-  if (error) {
-    console.error("Error fetching products by sport:", error);
-    return [];
-  }
-
+    .order("created_at", { ascending: false })
+    .limit(12);
   return data || [];
 }
 
-function expandToScrollItems<T>(items: T[], minCount = 10): T[] {
-  if (items.length === 0) {
-    return items;
-  }
-
-  return Array.from({ length: Math.max(minCount, items.length) }, (_, index) => {
-    return items[index % items.length];
-  });
+async function getF1Hoodies(): Promise<Product[]> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("products")
+    .select("*")
+    .eq("sport", "formula_one")
+    .ilike("name", "%hoodie%")
+    .eq("is_hidden", false)
+    .not("image_url", "is", null)
+    .order("created_at", { ascending: false });
+  return data || [];
 }
 
+function pad<T>(items: T[], min = 10): T[] {
+  if (!items.length) return items;
+  return Array.from({ length: Math.max(min, items.length) }, (_, i) => items[i % items.length]);
+}
+
+// ── page ───────────────────────────────────────────────────────
+
 export default async function HomePage() {
-  const [featuredProductsRaw, banners, variants]: [Product[], Banner[], ProductVariant[]] = await Promise.all([
-    getFeaturedProducts(),
+  const [
+    banners,
+    variants,
+    newestProducts,
+    bestSellers,
+    allFootball,
+    rugbyProducts,
+    f1Products,
+    f1Hoodies,
+    accessoriesAll,
+  ] = await Promise.all([
     getBanners(),
-    getProductVariants(),
+    getVariants(),
+    getNewestProducts(),
+    getBestSellers(),
+    getAllFootballProducts(),
+    getProductsBySport("rugby"),
+    getProductsBySport("formula_one"),
+    getF1Hoodies(),
+    getProductsBySport("accessories"),
   ]);
 
-  const featuredProducts = expandToScrollItems(featuredProductsRaw, 10);
-  const eplProducts = expandToScrollItems(await getProductsByTeams(EPL_TEAMS), 10);
-  const othersProducts = expandToScrollItems(await getProductsByTeams(OTHERS_TEAMS), 10);
-  const rugbyProducts = expandToScrollItems(await getProductsBySport("rugby"), 10);
-  const f1Products = expandToScrollItems(await getProductsBySport("formula_one"), 10);
+  const isVintage = (p: Product) => p.name.toLowerCase().includes("vintage");
+
+  // EPL tabs
+  const eplLeague   = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && !isVintage(p)));
+  const eplVintage  = pad(allFootball.filter(p => isVintage(p) && EPL_TEAMS.includes(p.team ?? "")));
+  const nationalAll = pad(allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")));
+
+  // Others tabs
+  const clubLeague  = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p)));
+  const clubVintage = pad(allFootball.filter(p => isVintage(p) && CLUB_TEAMS.includes(p.team ?? "")));
+
+  const balls = accessoriesAll.filter((p) => p.team === "Balls");
+  const flags = accessoriesAll.filter((p) => p.team === "Flags");
+  const socks = accessoriesAll.filter((p) => p.team === "Socks");
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {banners.length > 0 && (
-        <BannerCarousel banners={banners} />
-      )}
-
-      {/* Scrolling ad ticker */}
+      {banners.length > 0 && <BannerCarousel banners={banners} />}
       <MarqueeBanner />
 
-<main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-12">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-12">
 
         {/* Category chips */}
         <div className="flex items-center gap-3 overflow-x-auto pb-2 mb-12 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
@@ -166,16 +185,34 @@ export default async function HomePage() {
           ))}
         </div>
 
-        {featuredProducts.length > 0 && (
-          <FeaturedProducts products={featuredProducts} />
-        )}
-
-        {/* League / team rows */}
-        <section className="mt-12 space-y-14">
-
-          {eplProducts.length > 0 && (
+        {/* ── Featured ── */}
+        <section className="mb-14">
+          <div className="flex items-end justify-between mb-4">
             <div>
-              <div className="flex items-end justify-between mb-5">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Hand-picked</p>
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Featured</h2>
+            </div>
+            <Link href="/products/featured" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
+              View all →
+            </Link>
+          </div>
+          <HomeSectionTabs
+            tabs={[
+              { label: "New Arrival", products: pad(footballFirst(newestProducts).slice(0, 12)) },
+              { label: "Best Seller", products: pad(footballFirst(bestSellers).slice(0, 12)) },
+            ]}
+            defaultTab="New Arrival"
+            variants={variants}
+          />
+        </section>
+
+        {/* ── League / team rows ── */}
+        <section className="space-y-14">
+
+          {/* EPL */}
+          {eplLeague.length > 0 && (
+            <div>
+              <div className="flex items-end justify-between mb-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Football · England</p>
                   <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Premier League</h2>
@@ -184,24 +221,22 @@ export default async function HomePage() {
                   View all →
                 </Link>
               </div>
-              <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
-                <div className="flex gap-5 min-w-max">
-                  {eplProducts.map((product, index) => {
-                    const productVariants = variants.filter((v: any) => v.product_id === product.id);
-                    return (
-                      <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
-                        <ProductCard product={product} variants={productVariants} index={index} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <HomeSectionTabs
+                tabs={[
+                  { label: "League Jerseys",      products: eplLeague },
+                  { label: "Vintage Jerseys",     products: eplVintage },
+                  { label: "International Teams", products: nationalAll },
+                ]}
+                defaultTab="League Jerseys"
+                variants={variants}
+              />
             </div>
           )}
 
-          {othersProducts.length > 0 && (
+          {/* Others */}
+          {clubLeague.length > 0 && (
             <div>
-              <div className="flex items-end justify-between mb-5">
+              <div className="flex items-end justify-between mb-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Football · World</p>
                   <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">World Football</h2>
@@ -210,24 +245,22 @@ export default async function HomePage() {
                   View all →
                 </Link>
               </div>
-              <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
-                <div className="flex gap-5 min-w-max">
-                  {othersProducts.map((product, index) => {
-                    const productVariants = variants.filter((v: any) => v.product_id === product.id);
-                    return (
-                      <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
-                        <ProductCard product={product} variants={productVariants} index={index} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <HomeSectionTabs
+                tabs={[
+                  { label: "League Jerseys",      products: clubLeague },
+                  { label: "Vintage Jerseys",     products: clubVintage },
+                  { label: "International Teams", products: nationalAll },
+                ]}
+                defaultTab="League Jerseys"
+                variants={variants}
+              />
             </div>
           )}
 
+          {/* Rugby */}
           {rugbyProducts.length > 0 && (
             <div>
-              <div className="flex items-end justify-between mb-5">
+              <div className="flex items-end justify-between mb-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Rugby</p>
                   <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Rugby</h2>
@@ -236,24 +269,20 @@ export default async function HomePage() {
                   View all →
                 </Link>
               </div>
-              <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
-                <div className="flex gap-5 min-w-max">
-                  {rugbyProducts.map((product, index) => {
-                    const productVariants = variants.filter((v: any) => v.product_id === product.id);
-                    return (
-                      <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
-                        <ProductCard product={product} variants={productVariants} index={index} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <HomeSectionTabs
+                tabs={[
+                  { label: "Jerseys", products: pad(rugbyProducts) },
+                ]}
+                defaultTab="Jerseys"
+                variants={variants}
+              />
             </div>
           )}
 
+          {/* Formula One */}
           {f1Products.length > 0 && (
             <div>
-              <div className="flex items-end justify-between mb-5">
+              <div className="flex items-end justify-between mb-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-1">Motorsport</p>
                   <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Formula One</h2>
@@ -262,27 +291,47 @@ export default async function HomePage() {
                   View all →
                 </Link>
               </div>
-              <div className="overflow-x-auto pb-4 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 no-scrollbar">
-                <div className="flex gap-5 min-w-max">
-                  {f1Products.map((product, index) => {
-                    const productVariants = variants.filter((v: any) => v.product_id === product.id);
-                    return (
-                      <div key={`${product.id}-${index}`} className="min-w-[72vw] sm:min-w-[260px] md:min-w-[300px] h-[420px]">
-                        <ProductCard product={product} variants={productVariants} index={index} />
-                      </div>
-                    );
-                  })}
+              <HomeSectionTabs
+                tabs={[
+                  { label: "Jerseys", products: pad(f1Products) },
+                  { label: "Hoodies & Polos", products: pad(f1Hoodies) },
+                ]}
+                defaultTab="Jerseys"
+                variants={variants}
+              />
+            </div>
+          )}
+
+          {/* Accessories */}
+          {accessoriesAll.length > 0 && (
+            <div>
+              <div className="flex items-end justify-between mb-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-500 mb-1">Shop</p>
+                  <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Accessories</h2>
                 </div>
+                <Link href="/products/accessories" className="text-sm font-semibold text-slate-400 hover:text-slate-900 transition-colors">
+                  View all →
+                </Link>
               </div>
+              <HomeSectionTabs
+                tabs={[
+                  { label: "Balls", products: balls },
+                  { label: "Flags", products: flags },
+                  { label: "Socks", products: socks },
+                ]}
+                defaultTab="Balls"
+                variants={variants}
+                layout="grid"
+              />
             </div>
           )}
 
         </section>
 
-        {/* Bottom CTA hero */}
+        {/* Bottom CTA */}
         <section className="mt-24 rounded-3xl overflow-hidden bg-slate-950 shadow-2xl">
           <div className="relative px-10 py-14 sm:px-16 sm:py-20">
-            {/* Subtle gradient blob */}
             <div className="absolute inset-0 bg-gradient-to-br from-sky-600/20 via-transparent to-transparent pointer-events-none" />
             <div className="relative max-w-2xl">
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-sky-400 mb-4">
@@ -316,16 +365,12 @@ export default async function HomePage() {
         <section className="mt-24 mb-12">
           <div className="rounded-3xl overflow-hidden border border-slate-100 bg-white shadow-sm">
             <div className="grid lg:grid-cols-2">
-
-              {/* Info panel */}
               <div className="flex flex-col justify-center px-10 py-12 sm:px-14 sm:py-16">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-sky-500 mb-3">Come see us</p>
                 <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-8">
                   Visit our store
                 </h2>
-
                 <div className="space-y-5">
-                  {/* Address */}
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-none">
                       <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -339,8 +384,6 @@ export default async function HomePage() {
                       <p className="text-sm text-slate-500">Tom Mboya St, Nairobi</p>
                     </div>
                   </div>
-
-                  {/* WhatsApp */}
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-none">
                       <svg className="w-5 h-5 text-slate-600" viewBox="0 0 32 32" fill="currentColor">
@@ -352,8 +395,6 @@ export default async function HomePage() {
                       <p className="text-sm text-slate-500 mt-0.5">+254 708 353 465</p>
                     </div>
                   </div>
-
-                  {/* Hours */}
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-none">
                       <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -367,7 +408,6 @@ export default async function HomePage() {
                     </div>
                   </div>
                 </div>
-
                 <div className="mt-10 flex flex-wrap gap-3">
                   <a
                     href="https://maps.app.goo.gl/i8RcoaucfxFfboaK9"
@@ -391,8 +431,6 @@ export default async function HomePage() {
                   </a>
                 </div>
               </div>
-
-              {/* Map */}
               <div className="h-72 lg:h-auto min-h-[420px]">
                 <iframe
                   src="https://www.google.com/maps?q=Jersey+Code,+New+Generation+Exhibition,+Tom+Mboya+St,+Nairobi,+Kenya&output=embed&z=17"
@@ -405,7 +443,6 @@ export default async function HomePage() {
                   title="Jersey Code store location"
                 />
               </div>
-
             </div>
           </div>
         </section>

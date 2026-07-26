@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCartStore } from "@/hooks/useCartStore";
 import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -12,6 +13,7 @@ const categoryLinks = [
   { label: "Others", href: "/products/others", emoji: "🌍" },
   { label: "Rugby", href: "/products/rugby", emoji: "🏉" },
   { label: "Formula One", href: "/products/formula-one", emoji: "🏎️" },
+  { label: "Accessories", href: "/products/accessories", emoji: "🛍️" },
 ];
 
 const navLinks = [
@@ -49,16 +51,15 @@ export function Header() {
         <div className="flex items-center justify-between h-16 gap-6">
 
           {/* Logo */}
-          <Link href="/" className="flex-none flex items-center gap-2.5 group">
-            <motion.span
-              whileHover={{ rotate: [0, -8, 8, 0], transition: { duration: 0.4 } }}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white text-xs font-black tracking-tight group-hover:bg-sky-600 transition-colors"
-            >
-              JS
-            </motion.span>
-            <span className="text-lg font-extrabold tracking-tight text-slate-900 hidden sm:block">
-              Jersey Code
-            </span>
+          <Link href="/" className="flex-none">
+            <Image
+              src="/images/logo-cropped.png"
+              alt="Jersey Code"
+              width={571}
+              height={282}
+              className="h-10 w-auto"
+              priority
+            />
           </Link>
 
           {/* Search */}

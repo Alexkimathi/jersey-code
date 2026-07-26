@@ -106,56 +106,98 @@ export default function CartPage() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h3 className="text-base font-semibold text-slate-900 leading-tight">{item.name}</h3>
-                            <p className="text-sm text-slate-500 mt-0.5">
-                              Size: {item.size}
-                              {c?.edition === "player" && " · Player Authentic"}
-                            </p>
-                            {c && (c.printName || c.printNumber) && (
-                              <p className="text-xs text-sky-600 font-medium mt-1">
-                                {[
-                                  c.printName && `#${c.printNumber || ""} ${c.printName}`.trim(),
-                                  c.font,
-                                  c.printColor,
-                                ].filter(Boolean).join(" · ")}
-                              </p>
-                            )}
-                            {c?.badge && c.badge !== "none" && (
-                              <p className="text-xs text-slate-400 mt-0.5">
-                                {c.badge === "league" ? "League Badge" : "Club Crest"}
-                              </p>
-                            )}
+                      <div className="flex flex-col gap-3 min-w-0">
+                        {/* Header row */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="text-sm font-bold text-slate-900 leading-snug line-clamp-2">{item.name}</h3>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                                Size {item.size}
+                              </span>
+                              {c?.edition === "player" && (
+                                <span className="inline-flex items-center rounded-full bg-sky-50 border border-sky-200 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700">
+                                  Player Authentic
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <motion.button
                             whileTap={{ scale: 0.85 }}
                             onClick={() => removeItem(key)}
-                            className="rounded-full p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500 flex-none"
+                            className="rounded-full p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500 flex-none"
                             aria-label="Remove item"
                           >
                             <Trash2 className="h-4 w-4" />
                           </motion.button>
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
-                          <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50">
+                        {/* Customization summary */}
+                        {c && (c.printName || c.printNumber || (c.badge && c.badge !== "none")) && (
+                          <div className="rounded-2xl border border-slate-100 bg-slate-50 overflow-hidden">
+                            <p className="px-3 pt-2.5 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                              Customization
+                            </p>
+                            <div className="divide-y divide-slate-100">
+                              {c.printName && (
+                                <div className="flex items-center justify-between px-3 py-2">
+                                  <span className="text-xs text-slate-500">Print Name</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-slate-900 tracking-wide">{c.printName}</span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES {c.printNumber ? "350" : "700"}</span>
+                                  </div>
+                                </div>
+                              )}
+                              {c.printNumber && (
+                                <div className="flex items-center justify-between px-3 py-2">
+                                  <span className="text-xs text-slate-500">Print Number</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-slate-900">#{c.printNumber}</span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES {c.printName ? "350" : "700"}</span>
+                                  </div>
+                                </div>
+                              )}
+                              {(c.printName || c.printNumber) && c.font && (
+                                <div className="flex items-center justify-between px-3 py-2">
+                                  <span className="text-xs text-slate-500">Font</span>
+                                  <span className="text-xs font-semibold text-slate-700">
+                                    {c.font}{c.printColor ? ` · ${c.printColor}` : ""}
+                                  </span>
+                                </div>
+                              )}
+                              {c.badge && c.badge !== "none" && (
+                                <div className="flex items-center justify-between px-3 py-2">
+                                  <span className="text-xs text-slate-500">Badge</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-slate-900">
+                                      {c.badge === "league" ? "League Badge" : "Club Crest"}
+                                    </span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES 200</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Qty + price */}
+                        <div className="flex items-center justify-between gap-3 pt-1">
+                          <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50">
                             <motion.button
                               whileTap={{ scale: 0.85 }}
                               onClick={() => updateQuantity(key, Math.max(1, item.quantity - 1))}
-                              className="h-10 w-10 flex items-center justify-center text-slate-600 transition hover:bg-slate-100 rounded-l-2xl"
+                              className="h-9 w-9 flex items-center justify-center text-slate-600 transition hover:bg-slate-100 rounded-l-xl"
                             >
-                              <Minus className="h-4 w-4" />
+                              <Minus className="h-3.5 w-3.5" />
                             </motion.button>
                             <AnimatePresence mode="popLayout" initial={false}>
                               <motion.span
                                 key={item.quantity}
-                                initial={{ y: -10, opacity: 0 }}
+                                initial={{ y: -8, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
-                                exit={{ y: 10, opacity: 0 }}
-                                transition={{ duration: 0.15 }}
-                                className="inline-flex h-10 min-w-[2.75rem] items-center justify-center text-sm font-semibold text-slate-900"
+                                exit={{ y: 8, opacity: 0 }}
+                                transition={{ duration: 0.12 }}
+                                className="inline-flex h-9 min-w-[2.5rem] items-center justify-center text-sm font-bold text-slate-900"
                               >
                                 {item.quantity}
                               </motion.span>
@@ -163,12 +205,12 @@ export default function CartPage() {
                             <motion.button
                               whileTap={{ scale: 0.85 }}
                               onClick={() => updateQuantity(key, item.quantity + 1)}
-                              className="h-10 w-10 flex items-center justify-center text-slate-600 transition hover:bg-slate-100 rounded-r-2xl"
+                              className="h-9 w-9 flex items-center justify-center text-slate-600 transition hover:bg-slate-100 rounded-r-xl"
                             >
-                              <Plus className="h-4 w-4" />
+                              <Plus className="h-3.5 w-3.5" />
                             </motion.button>
                           </div>
-                          <p className="text-sm font-bold text-slate-900">
+                          <p className="text-base font-extrabold text-slate-900">
                             KES {(unitPrice * item.quantity).toLocaleString()}
                           </p>
                         </div>

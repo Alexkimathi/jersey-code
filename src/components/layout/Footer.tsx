@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const sports = ["Football", "Rugby", "Basketball", "Cricket"];
 
@@ -8,7 +9,13 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold">Jersey Code</h3>
+            <Image
+              src="/images/logo-cropped.png"
+              alt="Jersey Code"
+              width={571}
+              height={282}
+              className="h-12 w-auto brightness-0 invert opacity-90"
+            />
             <p className="text-sm text-slate-400 leading-6">
               Official-quality jerseys backed by fast delivery, secure checkout, and local support.
             </p>
