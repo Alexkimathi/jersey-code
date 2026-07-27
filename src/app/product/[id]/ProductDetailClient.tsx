@@ -298,23 +298,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               </div>
             )}
 
-            {/* Badge */}
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-3">Badge / Patch</label>
-              <div className="flex flex-wrap gap-2">
-                {badgeOptions.map((b) => (
-                  <button key={b.value} type="button" onClick={() => setBadge(b.value)}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                      badge === b.value
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                    }`}>
-                    {b.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Name & Number */}
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-3">Name &amp; Number</label>
@@ -407,6 +390,23 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                 </div>
               </div>
             )}
+
+            {/* Badge */}
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-3">Badge / Patch</label>
+              <div className="flex flex-wrap gap-2">
+                {badgeOptions.map((b) => (
+                  <button key={b.value} type="button" onClick={() => setBadge(b.value)}
+                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                      badge === b.value
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                    }`}>
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
