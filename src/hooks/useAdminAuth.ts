@@ -6,20 +6,27 @@ import { useRouter } from "next/navigation";
 import { AdminUser } from "@/lib/supabase/types";
 
 export function useAdminAuth() {
-  const { user, isLoading } = useSupabase();
+  const { user, isLoading: isAuthLoading } = useSupabase();
   const { supabase } = useSupabase();
   const router = useRouter();
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [permissions, setPermissions] = useState<{ can_create: boolean; can_edit: boolean; can_hide: boolean } | null>(null);
+  // Separate loading state for the admin_users DB fetch so the layout never
+  // briefly shows "not logged in" while the fetch is in-flight.
+  const [isAdminLoading, setIsAdminLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
     async function fetchAdminData() {
+      // Wait until the auth session is fully resolved before querying the DB.
+      if (isAuthLoading) return;
+
       if (!user) {
         if (!cancelled) {
           setAdminUser(null);
           setPermissions(null);
+          setIsAdminLoading(false);
         }
         return;
       }
@@ -41,18 +48,18 @@ export function useAdminAuth() {
             .select("*")
             .eq("admin_id", user.id)
             .single();
-          setPermissions(perms);
+          if (!cancelled) setPermissions(perms);
         } else {
-          setPermissions({
-            can_create: true,
-            can_edit: true,
-            can_hide: true,
-          });
+          if (!cancelled) setPermissions({ can_create: true, can_edit: true, can_hide: true });
         }
       } else {
-        setAdminUser(null);
-        setPermissions(null);
+        if (!cancelled) {
+          setAdminUser(null);
+          setPermissions(null);
+        }
       }
+
+      if (!cancelled) setIsAdminLoading(false);
     }
 
     fetchAdminData();
@@ -60,7 +67,8 @@ export function useAdminAuth() {
     return () => {
       cancelled = true;
     };
-  }, [user, supabase, router]);
+  }, [user, supabase, router, isAuthLoading]);
 
-  return { user, adminUser, permissions, isLoading };
+  // Expose a single isLoading that covers both auth and admin DB fetch.
+  return { user, adminUser, permissions, isLoading: isAuthLoading || isAdminLoading };
 }

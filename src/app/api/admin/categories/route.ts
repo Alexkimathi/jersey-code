@@ -39,21 +39,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid list type" }, { status: 400 });
   }
 
+  const validListType = list_type as "epl" | "national" | "other";
   const supabase = createServiceClient();
 
+  const db = supabase as any;
+
   // Determine next sort_order for this list_type
-  const { data: existing } = await supabase
+  const { data: existing } = await db
     .from("team_lists")
     .select("sort_order")
-    .eq("list_type", list_type)
+    .eq("list_type", validListType)
     .order("sort_order", { ascending: false })
     .limit(1);
 
-  const nextSortOrder = existing && existing.length > 0 ? existing[0].sort_order + 1 : 1;
+  const nextSortOrder =
+    existing && existing.length > 0 ? (existing[0].sort_order as number) + 1 : 1;
 
-  const { error } = await supabase.from("team_lists").insert({
+  const { error } = await db.from("team_lists").insert({
     name: name.trim(),
-    list_type,
+    list_type: validListType,
     sort_order: nextSortOrder,
   });
 

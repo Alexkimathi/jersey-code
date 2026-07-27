@@ -12,6 +12,28 @@ import { Plus, Trash2 } from "lucide-react";
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
+async function compressImage(file: File, maxWidth = 1200, quality = 0.82): Promise<Blob> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      let { width, height } = img;
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => resolve(blob ?? file), "image/jpeg", quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+    img.src = objectUrl;
+  });
+}
+
 interface ProductFormProps {
   params: Promise<{ id?: string }>;
 }
@@ -328,6 +350,14 @@ export default function ProductForm({ params }: ProductFormProps) {
     params.then((p) => setProductId(p.id || null));
   }, [params]);
 
+  type ImageSlot = "front" | "back" | "side" | "badge";
+  const IMAGE_SLOTS: { slot: ImageSlot; label: string; field: "image_url" | "back_image_url" | "side_image_url" | "badge_url" }[] = [
+    { slot: "front", label: "Front",  field: "image_url" },
+    { slot: "back",  label: "Back",   field: "back_image_url" },
+    { slot: "side",  label: "Side",   field: "side_image_url" },
+    { slot: "badge", label: "Badge",  field: "badge_url" },
+  ];
+
   const [formData, setFormData] = useState({
     name: "",
     sport: "football" as Sport,
@@ -335,11 +365,14 @@ export default function ProductForm({ params }: ProductFormProps) {
     description: "",
     price: "",
     image_url: "",
+    back_image_url: "",
+    side_image_url: "",
+    badge_url: "",
     is_hidden: false,
     is_featured: false,
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [selectedFiles, setSelectedFiles] = useState<Record<ImageSlot, File | null>>({ front: null, back: null, side: null, badge: null });
+  const [previews, setPreviews] = useState<Record<ImageSlot, string>>({ front: "", back: "", side: "", badge: "" });
   const [uploading, setUploading] = useState(false);
 
   const supabase = useMemo(
@@ -369,10 +402,18 @@ export default function ProductForm({ params }: ProductFormProps) {
           description: data.description || "",
           price: data.price.toString(),
           image_url: data.image_url || "",
+          back_image_url: data.back_image_url || "",
+          side_image_url: data.side_image_url || "",
+          badge_url: data.badge_url || "",
           is_hidden: data.is_hidden,
           is_featured: data.is_featured,
         });
-        setPreviewUrl(data.image_url || "");
+        setPreviews({
+          front: data.image_url || "",
+          back:  data.back_image_url || "",
+          side:  data.side_image_url || "",
+          badge: data.badge_url || "",
+        });
       }
     }
 
@@ -381,47 +422,13 @@ export default function ProductForm({ params }: ProductFormProps) {
 
   useEffect(() => {
     return () => {
-      if (previewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  const handleFileUpload = async () => {
-    if (!selectedFile) return;
-    setUploading(true);
-    setError(null);
-
-    const filePath = `products/${productId || "draft"}/${Date.now()}-${selectedFile.name}`;
-    const { data, error: uploadError } = await supabase.storage
-      .from("product-images")
-      .upload(filePath, selectedFile, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: selectedFile.type,
+      Object.values(previews).forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
       });
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    if (uploadError || !data) {
-      setError(uploadError?.message || "Failed to upload image.");
-      setUploading(false);
-      return;
-    }
-
-    const urlData = supabase.storage
-      .from("product-images")
-      .getPublicUrl(data.path);
-
-    if (!urlData.data?.publicUrl) {
-      setError("Failed to get upload URL.");
-      setUploading(false);
-      return;
-    }
-
-    setFormData({ ...formData, image_url: urlData.data.publicUrl });
-    setPreviewUrl(urlData.data.publicUrl);
-    setSelectedFile(null);
-    setUploading(false);
-  };
 
   const handleDelete = async () => {
     if (!productId || !confirm("Delete this product and all its sizes? This cannot be undone.")) return;
@@ -469,15 +476,47 @@ export default function ProductForm({ params }: ProductFormProps) {
       return;
     }
 
-    if (!formData.image_url.trim()) {
-      setError("Product image is required. Upload a file or paste an image URL.");
-      return;
-    }
-
     setIsSubmitting(true);
+
+    // Upload any pending image files (compress first for speed)
+    const updatedUrls: Partial<Record<"image_url" | "back_image_url" | "side_image_url" | "badge_url", string>> = {};
+    const hasPending = Object.values(selectedFiles).some(Boolean);
+
+    if (hasPending) {
+      setUploading(true);
+      for (const { slot, field } of IMAGE_SLOTS) {
+        const file = selectedFiles[slot];
+        if (!file) continue;
+        try {
+          const compressed = await compressImage(file);
+          const ext = file.name.split(".").pop() ?? "jpg";
+          const filePath = `products/${productId || "draft"}/${slot}-${Date.now()}.${ext}`;
+          const { data, error: uploadError } = await supabase.storage
+            .from("product-images")
+            .upload(filePath, compressed, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
+          if (uploadError || !data) {
+            setError(`Failed to upload ${slot} image: ${uploadError?.message ?? "unknown error"}`);
+            setIsSubmitting(false);
+            setUploading(false);
+            return;
+          }
+          const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(data.path);
+          updatedUrls[field] = urlData.publicUrl;
+          setPreviews((prev) => ({ ...prev, [slot]: urlData.publicUrl }));
+        } catch {
+          setError(`Failed to upload ${slot} image.`);
+          setIsSubmitting(false);
+          setUploading(false);
+          return;
+        }
+      }
+      setSelectedFiles({ front: null, back: null, side: null, badge: null });
+      setUploading(false);
+    }
 
     const payload = {
       ...formData,
+      ...updatedUrls,
       price: priceValue,
     };
 
@@ -637,50 +676,44 @@ export default function ProductForm({ params }: ProductFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product Image
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Product Images
             </label>
-            <div className="space-y-3">
-              <div className="flex items-center gap-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setSelectedFile(file);
-                    if (file) setPreviewUrl(URL.createObjectURL(file));
-                  }}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-slate-100 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-200"
-                />
-                <button
-                  type="button"
-                  onClick={handleFileUpload}
-                  disabled={!selectedFile || uploading}
-                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500"
-                >
-                  {uploading ? "Uploading..." : "Upload Image"}
-                </button>
-              </div>
-
-              {previewUrl && (
-                <div className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
-                  <img src={previewUrl} alt="Preview" className="w-full h-56 object-cover" />
+            {uploading && (
+              <p className="text-sm text-blue-600 font-medium mb-3">Compressing &amp; uploading images...</p>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              {IMAGE_SLOTS.map(({ slot, label, field }) => (
+                <div key={slot} className="space-y-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
+                  {previews[slot] && (
+                    <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                      <img src={previews[slot]} alt={`${label} preview`} className="w-full h-36 object-cover" />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      if (!file) return;
+                      setSelectedFiles((prev) => ({ ...prev, [slot]: file }));
+                      setPreviews((prev) => ({ ...prev, [slot]: URL.createObjectURL(file) }));
+                    }}
+                    className="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:bg-slate-100 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-200"
+                  />
+                  {selectedFiles[slot] && !uploading && (
+                    <p className="text-xs text-amber-600">Ready — uploads on save</p>
+                  )}
+                  <input
+                    type="url"
+                    value={formData[field]}
+                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="https://... or leave blank"
+                  />
                 </div>
-              )}
-
-              <label className="block text-sm font-medium text-gray-700">
-                Image URL
-              </label>
-              <input
-                type="url"
-                required
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                className={fieldClass}
-              />
-              <p className="text-xs text-slate-500">
-                If you already have an image URL, paste it here. Otherwise upload a file above.
-              </p>
+              ))}
             </div>
           </div>
 
@@ -707,7 +740,7 @@ export default function ProductForm({ params }: ProductFormProps) {
 
           <div className="flex items-center space-x-4">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : productId ? "Update Product" : "Create Product"}
+              {uploading ? "Uploading images..." : isSubmitting ? "Saving..." : productId ? "Update Product" : "Create Product"}
             </Button>
             <Link href="/admin/products">
               <Button variant="outline" type="button">

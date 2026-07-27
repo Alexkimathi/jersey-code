@@ -34,10 +34,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   const teamExtra = product.team ? (TEAM_IMAGES[product.team] ?? {}) : {};
   const viewImages: (string | null)[] = [
-    product.image_url ?? null,
-    teamExtra.back  ?? null,
-    teamExtra.side  ?? null,
-    teamExtra.badge ?? null,
+    product.image_url      ?? null,
+    product.back_image_url ?? teamExtra.back  ?? null,
+    product.side_image_url ?? teamExtra.side  ?? null,
+    product.badge_url      ?? teamExtra.badge ?? null,
   ];
   const activeImageUrl = viewImages[activeView] ?? null;
 

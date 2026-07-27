@@ -10,7 +10,7 @@ async function verifySuperAdmin(token: string) {
     .from("admin_users")
     .select("id, role")
     .eq("id", user.id)
-    .single();
+    .single() as unknown as { data: { id: string; role: string } | null };
 
   if (!adminUser || adminUser.role !== "super_admin") return null;
   return { user, adminUser };
@@ -75,8 +75,10 @@ export async function POST(req: NextRequest) {
 
   const newUserId = authData.user.id;
 
+  const db = supabase as any;
+
   // Insert into admin_users
-  const { error: insertError } = await supabase.from("admin_users").insert({
+  const { error: insertError } = await db.from("admin_users").insert({
     id: newUserId,
     role,
     full_name: full_name?.trim() || null,
@@ -94,7 +96,7 @@ export async function POST(req: NextRequest) {
 
   // Insert permissions for regular admin role
   if (role === "admin") {
-    await supabase.from("admin_permissions").insert({
+    await db.from("admin_permissions").insert({
       admin_id: newUserId,
       can_create: can_create ?? false,
       can_edit: can_edit ?? false,

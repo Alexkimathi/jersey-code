@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { OrderStatus, PaymentStatus } from "@/lib/supabase/types";
 
 const VALID_ORDER_STATUSES = ["processing", "ready", "out_for_delivery", "completed", "cancelled"];
 const VALID_PAYMENT_STATUSES = ["pending", "paid", "failed", "cancelled"];
@@ -13,15 +14,16 @@ async function getCallerAdminUser(token: string) {
     .from("admin_users")
     .select("id, role")
     .eq("id", user.id)
-    .single();
+    .single() as unknown as { data: { id: string; role: string } | null };
 
   return adminUser;
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.split(" ")[1];
 
@@ -42,13 +44,13 @@ export async function PATCH(
   }
 
   const { order_status, payment_status } = body;
-  const updateData: Record<string, string> = {};
+  const updateData: { order_status?: OrderStatus; payment_status?: PaymentStatus } = {};
 
   if (order_status !== undefined) {
     if (!VALID_ORDER_STATUSES.includes(order_status)) {
       return NextResponse.json({ error: "Invalid order status" }, { status: 400 });
     }
-    updateData.order_status = order_status;
+    updateData.order_status = order_status as OrderStatus;
   }
 
   if (payment_status !== undefined) {
@@ -61,7 +63,7 @@ export async function PATCH(
     if (!VALID_PAYMENT_STATUSES.includes(payment_status)) {
       return NextResponse.json({ error: "Invalid payment status" }, { status: 400 });
     }
-    updateData.payment_status = payment_status;
+    updateData.payment_status = payment_status as PaymentStatus;
   }
 
   if (Object.keys(updateData).length === 0) {
@@ -69,10 +71,10 @@ export async function PATCH(
   }
 
   const supabase = createServiceClient();
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from("orders")
     .update(updateData)
-    .eq("id", params.id);
+    .eq("id", id);
 
   if (error) {
     console.error("Error updating order:", error);

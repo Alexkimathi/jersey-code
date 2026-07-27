@@ -10,15 +10,16 @@ async function verifyAdmin(token: string) {
     .from("admin_users")
     .select("id, role")
     .eq("id", user.id)
-    .single();
+    .single() as unknown as { data: { id: string; role: string } | null };
 
   return adminUser ?? null;
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const token = req.headers.get("authorization")?.split(" ")[1];
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -26,7 +27,7 @@ export async function DELETE(
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const supabase = createServiceClient();
-  const { error } = await supabase.from("team_lists").delete().eq("id", params.id);
+  const { error } = await supabase.from("team_lists").delete().eq("id", id);
 
   if (error) {
     console.error("Error deleting team:", error);

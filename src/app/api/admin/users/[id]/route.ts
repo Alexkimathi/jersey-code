@@ -10,7 +10,7 @@ async function verifySuperAdmin(token: string) {
     .from("admin_users")
     .select("id, role")
     .eq("id", user.id)
-    .single();
+    .single() as unknown as { data: { id: string; role: string } | null };
 
   if (!adminUser || adminUser.role !== "super_admin") return null;
   return { user, adminUser };
@@ -18,8 +18,9 @@ async function verifySuperAdmin(token: string) {
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.split(" ")[1];
 
@@ -35,14 +36,14 @@ export async function DELETE(
     );
   }
 
-  if (params.id === caller.user.id) {
+  if (id === caller.user.id) {
     return NextResponse.json({ error: "Cannot delete your own account" }, { status: 400 });
   }
 
   const supabase = createServiceClient();
 
   // Deleting the auth user cascades to admin_users via FK
-  const { error } = await supabase.auth.admin.deleteUser(params.id);
+  const { error } = await supabase.auth.admin.deleteUser(id);
 
   if (error) {
     console.error("Error deleting admin user:", error);

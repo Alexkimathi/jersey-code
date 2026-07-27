@@ -6,6 +6,14 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export interface TeamList {
+  id: string;
+  name: string;
+  list_type: "epl" | "national" | "other";
+  sort_order: number;
+  created_at: string;
+}
+
 export type Sport = "football" | "rugby" | "basketball" | "cricket" | "formula_one" | "accessories";
 
 export type FulfillmentMethod = "delivery" | "pickup";
@@ -38,6 +46,9 @@ export interface Product {
   description: string | null;
   price: number;
   image_url: string | null;
+  back_image_url: string | null;
+  side_image_url: string | null;
+  badge_url: string | null;
   is_hidden: boolean;
   is_featured: boolean;
   created_by: string | null;
@@ -159,42 +170,60 @@ export interface Database {
         Row: AdminUser;
         Insert: Omit<AdminUser, "created_at">;
         Update: Partial<Omit<AdminUser, "created_at">>;
+        Relationships: [];
       };
       admin_permissions: {
         Row: AdminPermissions;
         Insert: AdminPermissions;
         Update: Partial<AdminPermissions>;
+        Relationships: [];
       };
       products: {
         Row: Product;
         Insert: Omit<Product, "created_at" | "updated_at">;
         Update: Partial<Omit<Product, "created_at" | "updated_at">>;
+        Relationships: [];
       };
       product_variants: {
         Row: ProductVariant;
         Insert: Omit<ProductVariant, "id">;
         Update: Partial<ProductVariant>;
+        Relationships: [];
       };
       banners: {
         Row: Banner;
         Insert: Omit<Banner, "created_at">;
         Update: Partial<Omit<Banner, "created_at">>;
+        Relationships: [];
       };
       orders: {
         Row: Order;
         Insert: Omit<Order, "id" | "created_at">;
         Update: Partial<Omit<Order, "id" | "created_at">>;
+        Relationships: [];
       };
       order_items: {
         Row: OrderItem;
         Insert: Omit<OrderItem, "id">;
         Update: Partial<OrderItem>;
+        Relationships: [];
       };
       audit_log: {
         Row: AuditLog;
         Insert: Omit<AuditLog, "id" | "created_at">;
         Update: never;
+        Relationships: [];
+      };
+      team_lists: {
+        Row: TeamList;
+        Insert: Omit<TeamList, "id" | "created_at">;
+        Update: Partial<Omit<TeamList, "id" | "created_at">>;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }

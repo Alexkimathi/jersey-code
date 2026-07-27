@@ -93,7 +93,7 @@ export default async function AdminProductsPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end space-x-2">
-                      <Link href={`/admin/products/${product.id}`}>
+                      <Link href={`/admin/products/${product.id}/edit`}>
                         <Button variant="ghost" size="sm">
                           <Edit className="w-4 h-4" />
                         </Button>

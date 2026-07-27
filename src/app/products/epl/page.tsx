@@ -6,7 +6,7 @@ import { EPL_TEAMS, NATIONAL_TEAMS } from "@/lib/categories";
 export const dynamic = "force-dynamic";
 
 async function getTeamList(listType: "epl" | "national"): Promise<string[]> {
-  const supabase = createServerClient();
+  const supabase = createServerClient() as any;
   const { data } = await supabase
     .from("team_lists")
     .select("name")
@@ -16,7 +16,7 @@ async function getTeamList(listType: "epl" | "national"): Promise<string[]> {
   if (!data || data.length === 0) {
     return listType === "epl" ? EPL_TEAMS : NATIONAL_TEAMS;
   }
-  return data.map((t) => t.name);
+  return (data as { name: string }[]).map((t) => t.name);
 }
 
 async function getAllFootballProducts(): Promise<Product[]> {

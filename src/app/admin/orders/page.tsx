@@ -52,9 +52,9 @@ export const dynamic = "force-dynamic";
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: { status?: string };
+  searchParams: Promise<{ status?: string }>;
 }) {
-  const statusFilter = searchParams.status;
+  const { status: statusFilter } = await searchParams;
   const orders = await getOrders(statusFilter);
 
   return (
