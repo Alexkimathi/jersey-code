@@ -6,7 +6,7 @@ import { Product, ProductVariant, JerseyEdition } from "@/lib/supabase/types";
 import { useCartStore } from "@/hooks/useCartStore";
 import { TEAM_IMAGES } from "@/lib/teamImages";
 import { EPL_TEAMS } from "@/lib/categories";
-import { TEAM_SQUADS, getLeagueBadges, getBadgeLabel, Player } from "@/lib/football-customization";
+import { getLeagueBadges, getBadgeLabel } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import { SizeGuideModal } from "@/components/storefront/SizeGuideModal";
 import { getProductDescription, getProductDetailPoints } from "@/lib/product-descriptions";
@@ -43,6 +43,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   // ── Which customizations apply ───────────────────────────────
   const isFootball = product.sport === "football";
+  const isRugby    = product.sport === "rugby";
 
   const isEplLeagueJersey = useMemo(() => {
     if (!isFootball) return false;
@@ -60,14 +61,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const [badge, setBadge] = useState<string>("none");
   const badgeOptions = useMemo(() => getLeagueBadges(product.team), [product.team]);
 
-  // Name & Number mode (football only): none | player | personalize
-  const [nameMode, setNameMode] = useState<"none" | "player" | "personalize">("none");
-
-  // Select Player sub-state
-  const [rosterGender, setRosterGender] = useState<"men" | "women">("men");
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const squad = useMemo(() => TEAM_SQUADS[product.team ?? ""] ?? { men: [], women: [] }, [product.team]);
-  const hasWomen = squad.women.length > 0;
+  // Name & Number mode: none | personalize
+  const [nameMode, setNameMode] = useState<"none" | "personalize">("none");
 
   // Personalize sub-state
   const [nameEnabled,   setNameEnabled]   = useState(false);
@@ -83,22 +78,19 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const inStock = selectedVariant && selectedVariant.stock_quantity > 0;
 
   const activeName = useMemo(() => {
-    if (nameMode === "player" && selectedPlayer) return selectedPlayer.name;
     if (nameMode === "personalize" && nameEnabled) return printName;
     return "";
-  }, [nameMode, selectedPlayer, nameEnabled, printName]);
+  }, [nameMode, nameEnabled, printName]);
 
   const activeNumber = useMemo(() => {
-    if (nameMode === "player" && selectedPlayer) return String(selectedPlayer.number);
     if (nameMode === "personalize" && numberEnabled) return printNumber;
     return "";
-  }, [nameMode, selectedPlayer, numberEnabled, printNumber]);
+  }, [nameMode, numberEnabled, printNumber]);
 
   const addOnPrice = useMemo(() => {
     let total = 0;
     if (isEplLeagueJersey && edition === "player") total += 1500;
     if (badge !== "none") total += 200;
-    if (nameMode === "player")      total += 400; // name + number both
     if (nameMode === "personalize") {
       if (nameEnabled)   total += 200;
       if (numberEnabled) total += 200;
@@ -329,11 +321,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               <div className="flex flex-wrap gap-2 mb-4">
                 {([
                   { value: "none",        label: "None" },
-                  { value: "player",      label: "Select Player  +KES 400" },
                   { value: "personalize", label: "Personalize" },
                 ] as const).map((m) => (
                   <button key={m.value} type="button"
-                    onClick={() => { setNameMode(m.value); setSelectedPlayer(null); }}
+                    onClick={() => setNameMode(m.value)}
                     className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
                       nameMode === m.value
                         ? "border-slate-900 bg-slate-900 text-white"
@@ -343,49 +334,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                   </button>
                 ))}
               </div>
-
-              {/* Select Player */}
-              {nameMode === "player" && (
-                <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 space-y-3">
-                  {/* Men's / Women's toggle */}
-                  {hasWomen && (
-                    <div className="inline-flex items-center bg-white border border-slate-200 rounded-full p-0.5">
-                      {(["men", "women"] as const).map((g) => (
-                        <button key={g} type="button" onClick={() => { setRosterGender(g); setSelectedPlayer(null); }}
-                          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                            rosterGender === g ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-700"
-                          }`}>
-                          {g === "men" ? "Men's" : "Women's"}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Player list */}
-                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-                    {/* None option */}
-                    <button type="button" onClick={() => setSelectedPlayer(null)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition ${
-                        !selectedPlayer ? "bg-slate-900 text-white" : "hover:bg-white text-slate-600"
-                      }`}>
-                      <span className="w-8 text-center text-xs font-bold opacity-50">—</span>
-                      <span className="font-semibold">None</span>
-                    </button>
-                    {(squad[rosterGender] ?? []).map((player) => (
-                      <button key={`${player.name}-${player.number}`} type="button"
-                        onClick={() => setSelectedPlayer(player)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition ${
-                          selectedPlayer?.name === player.name && selectedPlayer?.number === player.number
-                            ? "bg-slate-900 text-white"
-                            : "hover:bg-white text-slate-600"
-                        }`}>
-                        <span className="w-8 text-center text-xs font-bold opacity-60">{player.number}</span>
-                        <span className="font-semibold tracking-wide">{player.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Personalize */}
               {nameMode === "personalize" && (
@@ -462,6 +410,105 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
           </div>
         )}
 
+        {/* ── Rugby customization ── */}
+        {isRugby && (
+          <div className="border-t border-slate-100 pt-5 space-y-6">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500">Customize Your Kit</p>
+
+            {/* Name & Number */}
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-3">Name &amp; Number</label>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {([
+                  { value: "none",        label: "None" },
+                  { value: "personalize", label: "Personalize" },
+                ] as const).map((m) => (
+                  <button key={m.value} type="button"
+                    onClick={() => { setNameMode(m.value as "none" | "personalize"); setNameEnabled(false); setNumberEnabled(false); }}
+                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                      nameMode === m.value
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                    }`}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+
+              {nameMode === "personalize" && (
+                <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 space-y-4">
+                  {/* Name */}
+                  <div className="flex items-start gap-3">
+                    <button type="button" onClick={() => setNameEnabled(!nameEnabled)}
+                      className={`mt-0.5 flex-none w-5 h-5 rounded border-2 flex items-center justify-center transition ${
+                        nameEnabled ? "border-slate-900 bg-slate-900" : "border-slate-300 bg-white"
+                      }`}>
+                      {nameEnabled && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+                    </button>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-sm font-semibold text-slate-700">Name <span className="text-slate-400 font-normal">+KES 200</span></p>
+                        <span className="text-xs text-slate-400">max 10 chars</span>
+                      </div>
+                      <input type="text" disabled={!nameEnabled} value={printName}
+                        onChange={e => setPrintName(e.target.value.toUpperCase().slice(0, 10))}
+                        placeholder="e.g. LOMU"
+                        className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 uppercase tracking-wide placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
+                    </div>
+                  </div>
+
+                  {/* Number */}
+                  <div className="flex items-start gap-3">
+                    <button type="button" onClick={() => setNumberEnabled(!numberEnabled)}
+                      className={`mt-0.5 flex-none w-5 h-5 rounded border-2 flex items-center justify-center transition ${
+                        numberEnabled ? "border-slate-900 bg-slate-900" : "border-slate-300 bg-white"
+                      }`}>
+                      {numberEnabled && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+                    </button>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-sm font-semibold text-slate-700">Number <span className="text-slate-400 font-normal">+KES 200</span></p>
+                        <span className="text-xs text-slate-400">1–99</span>
+                      </div>
+                      <input type="number" min="1" max="99" disabled={!numberEnabled} value={printNumber}
+                        onChange={e => setPrintNumber(e.target.value.slice(0, 2))}
+                        placeholder="7"
+                        className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Font — shown when name/number active */}
+            {(activeName || activeNumber) && (
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-3">Font Style</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { value: "league", label: "League Font", sub: "+KES 0" },
+                    { value: "team",   label: "Team Font",   sub: "+KES 0" },
+                  ] as const).map((f) => (
+                    <button key={f.value} type="button" onClick={() => setFontType(f.value)}
+                      className={`rounded-xl border p-3 text-left transition ${
+                        fontType === f.value
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                      }`}>
+                      <p className="text-sm font-bold leading-tight" style={FONT_STYLES[f.value]}>
+                        {activeName || "NAME"}
+                      </p>
+                      <p className={`text-[11px] mt-1 ${fontType === f.value ? "text-slate-300" : "text-slate-400"}`}>
+                        {f.label} · {f.sub}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Quantity */}
         <div className="border-t border-slate-100 pt-5">
           <label className="block text-sm font-bold text-slate-700 mb-3">Quantity</label>
@@ -495,11 +542,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             {badge !== "none" && (
               <div className="flex justify-between text-slate-500">
                 <span>{getBadgeLabel(badge, product.team)} badge</span><span>+KES 200</span>
-              </div>
-            )}
-            {nameMode === "player" && selectedPlayer && (
-              <div className="flex justify-between text-slate-500">
-                <span>Player print ({selectedPlayer.name} #{selectedPlayer.number})</span><span>+KES 400</span>
               </div>
             )}
             {nameMode === "personalize" && nameEnabled && (

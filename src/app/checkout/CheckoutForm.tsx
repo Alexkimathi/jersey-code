@@ -17,6 +17,7 @@ import {
   Lock,
   RefreshCw,
 } from "lucide-react";
+
 import CustomerAddressBook from "@/components/storefront/CustomerAddressBook";
 
 const inputClass =
@@ -439,6 +440,7 @@ export function CheckoutForm() {
             <Lock className="w-3 h-3" />
             Secured with 256-bit encryption
           </p>
+
         </div>
 
         {/* Help */}
