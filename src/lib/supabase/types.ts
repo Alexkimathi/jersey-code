@@ -106,7 +106,7 @@ export interface AuditLog {
 }
 
 export type JerseyEdition = 'fan' | 'player';
-export type JerseyBadge = 'none' | 'league' | 'crest';
+export type JerseyBadge = string; // 'none' | 'champions_league' | 'league' | etc.
 
 export interface JerseyCustomization {
   edition: JerseyEdition;
