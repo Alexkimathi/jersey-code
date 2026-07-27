@@ -9,7 +9,8 @@ import { EPL_TEAMS } from "@/lib/categories";
 import { TEAM_SQUADS, getLeagueBadges, getBadgeLabel, Player } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import { SizeGuideModal } from "@/components/storefront/SizeGuideModal";
-import { ShoppingBag, Minus, Plus, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { getProductDescription, getProductDetailPoints } from "@/lib/product-descriptions";
+import { ShoppingBag, Minus, Plus, ChevronDown } from "lucide-react";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -28,6 +29,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const [quantity, setQuantity]         = useState(1);
   const [activeView, setActiveView]     = useState(0);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const [descOpen, setDescOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
 
   const teamExtra = product.team ? (TEAM_IMAGES[product.team] ?? {}) : {};
@@ -249,10 +251,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">{product.name}</h1>
           {product.team && <p className="mt-1.5 text-base text-slate-500">{product.team}</p>}
         </div>
-
-        {product.description && (
-          <p className="text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-5">{product.description}</p>
-        )}
 
         {/* Size */}
         {variants.length > 0 && (
@@ -530,21 +528,36 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
           <p className="text-sm font-semibold text-red-600">This size is currently out of stock.</p>
         )}
 
-        {/* Trust badges */}
-        <div className="space-y-3.5 border-t border-slate-100 pt-5 text-sm text-slate-500">
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-4 w-4 text-sky-500 flex-none" />
-            <span><strong className="text-slate-800">Authentic quality</strong> — genuine fabric and stitching built for fans</span>
-          </div>
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-0.5 h-4 w-4 text-sky-500 flex-none" />
-            <span><strong className="text-slate-800">Professional printing</strong> — heat-pressed, wash-resistant lettering</span>
-          </div>
-          <div className="flex items-start gap-3">
-            <Star className="mt-0.5 h-4 w-4 text-sky-500 flex-none" />
-            <span><strong className="text-slate-800">Free delivery</strong> on orders over KES 5,000</span>
-          </div>
+        {/* Product description accordion */}
+        <div className="border-t border-slate-100">
+          <button type="button" onClick={() => setDescOpen(!descOpen)}
+            className="w-full flex items-center justify-between py-4 text-left">
+            <span className="text-sm font-bold text-slate-900">Product description</span>
+            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${descOpen ? "rotate-180" : ""}`} />
+          </button>
+          {descOpen && (
+            <div className="pb-4 space-y-4">
+              <div className="space-y-3">
+                {getProductDescription(product).split("\n\n").map((para, i) => (
+                  <p key={i} className="text-sm text-slate-600 leading-relaxed">{para}</p>
+                ))}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800 mb-3">Details:</p>
+                <ul className="space-y-2">
+                  {getProductDetailPoints(product).map((point, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
+                      <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-slate-300 flex-none" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
+
+
       </div>
     </div>
 
