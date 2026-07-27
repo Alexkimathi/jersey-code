@@ -115,11 +115,6 @@ export default function CartPage() {
                               <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
                                 Size {item.size}
                               </span>
-                              {c?.edition === "player" && (
-                                <span className="inline-flex items-center rounded-full bg-sky-50 border border-sky-200 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700">
-                                  Player Authentic
-                                </span>
-                              )}
                             </div>
                           </div>
                           <motion.button

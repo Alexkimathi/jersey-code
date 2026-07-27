@@ -2,10 +2,9 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { Product, ProductVariant, JerseyEdition } from "@/lib/supabase/types";
+import { Product, ProductVariant } from "@/lib/supabase/types";
 import { useCartStore } from "@/hooks/useCartStore";
 import { TEAM_IMAGES } from "@/lib/teamImages";
-import { EPL_TEAMS } from "@/lib/categories";
 import { getLeagueBadges, getBadgeLabel } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import { SizeGuideModal } from "@/components/storefront/SizeGuideModal";
@@ -45,17 +44,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const isFootball = product.sport === "football";
   const isRugby    = product.sport === "rugby";
 
-  const isEplLeagueJersey = useMemo(() => {
-    if (!isFootball) return false;
-    if (!EPL_TEAMS.includes(product.team ?? "")) return false;
-    const n = product.name.toLowerCase();
-    return !n.includes("kids") && !n.includes("youth") && !n.includes("junior")
-        && !n.includes("vintage") && !n.includes("special")
-        && !n.includes("limited") && !n.includes("edition");
-  }, [isFootball, product]);
-
   // ── Customization state ──────────────────────────────────────
-  const [edition, setEdition] = useState<JerseyEdition>("fan");
 
   // Badge (football only)
   const [badge, setBadge] = useState<string>("none");
@@ -89,14 +78,13 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   const addOnPrice = useMemo(() => {
     let total = 0;
-    if (isEplLeagueJersey && edition === "player") total += 1500;
     if (badge !== "none") total += 200;
     if (nameMode === "personalize") {
       if (nameEnabled)   total += 200;
       if (numberEnabled) total += 200;
     }
     return total;
-  }, [isEplLeagueJersey, edition, badge, nameMode, nameEnabled, numberEnabled]);
+  }, [badge, nameMode, nameEnabled, numberEnabled]);
 
   const totalPerItem = product.price + addOnPrice;
 
@@ -106,7 +94,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
     const cartKey = [
       selectedVariant.id,
-      edition,
       badge,
       nameMode,
       activeName,
@@ -124,7 +111,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
       quantity,
       image_url:  product.image_url,
       customization: {
-        edition,
+        edition: "fan",
         badge,
         printName:   activeName   || undefined,
         printNumber: activeNumber || undefined,
@@ -274,29 +261,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
         {isFootball && (
           <div className="border-t border-slate-100 pt-5 space-y-6">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500">Customize Your Jersey</p>
-
-            {/* Edition — EPL league jerseys only */}
-            {isEplLeagueJersey && (
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-3">Edition</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { value: "fan",    label: "Fan Edition",      sub: "Replica · standard fit" },
-                    { value: "player", label: "Player Authentic", sub: "+KES 1,500 · match quality" },
-                  ] as const).map((opt) => (
-                    <button key={opt.value} type="button" onClick={() => setEdition(opt.value)}
-                      className={`rounded-xl border p-3.5 text-left transition ${
-                        edition === opt.value
-                          ? "border-slate-900 bg-slate-900 text-white"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                      }`}>
-                      <p className="text-sm font-bold leading-tight">{opt.label}</p>
-                      <p className={`text-[11px] mt-0.5 ${edition === opt.value ? "text-slate-300" : "text-slate-400"}`}>{opt.sub}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Name & Number */}
             <div>
@@ -534,11 +498,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             <div className="flex justify-between text-slate-600">
               <span>Base price</span><span>KES {product.price.toLocaleString()}</span>
             </div>
-            {isEplLeagueJersey && edition === "player" && (
-              <div className="flex justify-between text-slate-500">
-                <span>Player Authentic</span><span>+KES 1,500</span>
-              </div>
-            )}
             {badge !== "none" && (
               <div className="flex justify-between text-slate-500">
                 <span>{getBadgeLabel(badge, product.team)} badge</span><span>+KES 200</span>

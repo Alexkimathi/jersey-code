@@ -387,7 +387,6 @@ export function CheckoutForm() {
                     <p className="text-sm font-semibold text-slate-900 leading-tight truncate">{item.name}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
                       Size {item.size}
-                      {c?.edition === "player" && " · Player Auth"}
                       {" · "}×{item.quantity}
                     </p>
                     {c && (c.printName || c.printNumber) && (
