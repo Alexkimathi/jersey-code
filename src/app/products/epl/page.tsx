@@ -1,11 +1,23 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { Product, ProductVariant } from "@/lib/supabase/types";
 import { CategoryTabs } from "@/components/storefront/CategoryTabs";
-import { EPL_TEAMS } from "@/lib/categories";
+import { EPL_TEAMS, NATIONAL_TEAMS } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
-const NATIONAL_TEAMS = ["Argentina", "Brazil", "Harambee Stars"];
+async function getTeamList(listType: "epl" | "national"): Promise<string[]> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("team_lists")
+    .select("name")
+    .eq("list_type", listType)
+    .order("sort_order", { ascending: true });
+
+  if (!data || data.length === 0) {
+    return listType === "epl" ? EPL_TEAMS : NATIONAL_TEAMS;
+  }
+  return data.map((t) => t.name);
+}
 
 async function getAllFootballProducts(): Promise<Product[]> {
   const supabase = createServerClient();
@@ -26,7 +38,9 @@ async function getProductVariants(): Promise<ProductVariant[]> {
 }
 
 export default async function EplPage() {
-  const [allFootball, variants] = await Promise.all([
+  const [eplTeams, nationalTeams, allFootball, variants] = await Promise.all([
+    getTeamList("epl"),
+    getTeamList("national"),
     getAllFootballProducts(),
     getProductVariants(),
   ]);
@@ -42,11 +56,11 @@ export default async function EplPage() {
   };
 
   const tabs = [
-    { label: "League Jerseys",       products: allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)) },
-    { label: "Kids Jerseys",         products: allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isKids(p)) },
-    { label: "Vintage Jerseys",      products: allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isVintage(p)) },
-    { label: "Special Edition Kits", products: allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)) },
-    { label: "National Teams Kits",  products: allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")) },
+    { label: "League Jerseys",       products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)) },
+    { label: "Kids Jerseys",         products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && isKids(p)) },
+    { label: "Vintage Jerseys",      products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && isVintage(p)) },
+    { label: "Special Edition Kits", products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && isSpecialEdition(p)) },
+    { label: "National Teams Kits",  products: allFootball.filter(p => nationalTeams.includes(p.team ?? "")) },
   ];
 
   return (

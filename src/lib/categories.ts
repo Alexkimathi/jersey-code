@@ -1,6 +1,6 @@
 /**
- * EPL team names used to split football products into
- * "Premier League" vs "World Football — Other Leagues & Nations".
+ * EPL team names — static fallback used when the team_lists DB table
+ * is unavailable or returns no data.
  */
 export const EPL_TEAMS = [
   "Manchester United",
@@ -24,3 +24,6 @@ export const EPL_TEAMS = [
   "Ipswich Town",
   "Southampton",
 ];
+
+/** National teams — static fallback. */
+export const NATIONAL_TEAMS = ["Argentina", "Brazil", "Harambee Stars"];
