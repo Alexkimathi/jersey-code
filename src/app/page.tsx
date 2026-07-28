@@ -104,10 +104,6 @@ async function getF1Hoodies(): Promise<Product[]> {
   return all.filter(p => p.sub_category === "hoodie_polo" || p.name.toLowerCase().includes("hoodie"));
 }
 
-function pad<T>(items: T[], min = 10): T[] {
-  if (!items.length) return items;
-  return Array.from({ length: Math.max(min, items.length) }, (_, i) => items[i % items.length]);
-}
 
 // ── page ───────────────────────────────────────────────────────
 
@@ -135,19 +131,19 @@ export default async function HomePage() {
   ]);
 
   // EPL tabs — routed by sub_category
-  const eplLeague    = pad(allFootball.filter(p => p.sub_category === "epl_club"));
-  const eplKids      = pad(allFootball.filter(p => p.sub_category === "epl_kids"));
-  const eplVintage   = pad(allFootball.filter(p => p.sub_category === "epl_vintage"));
-  const eplSpecial   = pad(allFootball.filter(p => p.sub_category === "epl_special"));
-  const nationalAll  = pad(allFootball.filter(p => p.sub_category === "national"));
+  const eplLeague    = allFootball.filter(p => p.sub_category === "epl_club");
+  const eplKids      = allFootball.filter(p => p.sub_category === "epl_kids");
+  const eplVintage   = allFootball.filter(p => p.sub_category === "epl_vintage");
+  const eplSpecial   = allFootball.filter(p => p.sub_category === "epl_special");
+  const nationalAll  = allFootball.filter(p => p.sub_category === "national");
 
   // World Football tabs
-  const clubLeague     = pad(allFootball.filter(p => p.sub_category === "world_club"));
-  const clubKids       = pad(allFootball.filter(p => p.sub_category === "world_kids"));
-  const clubVintage    = pad(allFootball.filter(p => p.sub_category === "world_vintage"));
-  const clubSpecial    = pad(allFootball.filter(p => p.sub_category === "world_special"));
-  const clubTracksuits = pad(allFootball.filter(p => p.sub_category === "world_tracksuit"));
-  const clubClearance  = pad(allFootball.filter(p => p.sub_category === "world_clearance"));
+  const clubLeague     = allFootball.filter(p => p.sub_category === "world_club");
+  const clubKids       = allFootball.filter(p => p.sub_category === "world_kids");
+  const clubVintage    = allFootball.filter(p => p.sub_category === "world_vintage");
+  const clubSpecial    = allFootball.filter(p => p.sub_category === "world_special");
+  const clubTracksuits = allFootball.filter(p => p.sub_category === "world_tracksuit");
+  const clubClearance  = allFootball.filter(p => p.sub_category === "world_clearance");
 
   // Accessories — sub_category takes priority, team field as legacy fallback
   const balls = accessoriesAll.filter(p => p.sub_category === "Balls" || (!p.sub_category && p.team === "Balls"));
@@ -188,8 +184,8 @@ export default async function HomePage() {
           </div>
           <HomeSectionTabs
             tabs={[
-              { label: "New Arrival", products: pad(footballFirst(newestProducts).slice(0, 12)) },
-              { label: "Best Seller", products: pad(footballFirst(bestSellers).slice(0, 12)) },
+              { label: "New Arrival", products: footballFirst(newestProducts).slice(0, 12) },
+              { label: "Best Seller", products: footballFirst(bestSellers).slice(0, 12) },
             ]}
             defaultTab="New Arrival"
             variants={variants}
@@ -267,7 +263,7 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "Jerseys", products: pad(rugbyProducts) },
+                  { label: "Jerseys", products: rugbyProducts },
                 ]}
                 defaultTab="Jerseys"
                 variants={variants}
@@ -289,8 +285,8 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "Jerseys", products: pad(f1Products.filter(p => p.sub_category !== "hoodie_polo" && !p.name.toLowerCase().includes("hoodie"))) },
-                  { label: "Hoodies & Polos", products: pad(f1Hoodies) },
+                  { label: "Jerseys", products: f1Products.filter(p => p.sub_category !== "hoodie_polo" && !p.name.toLowerCase().includes("hoodie")) },
+                  { label: "Hoodies & Polos", products: f1Hoodies },
                 ]}
                 defaultTab="Jerseys"
                 variants={variants}
