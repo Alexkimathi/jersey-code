@@ -13,6 +13,7 @@
   --color-primary-900: #0c4a6e;
   --color-primary-950: #082f49;
 
+  /* Legacy purple — kept to avoid breaking other pages */
   --color-accent-50: #fdf4ff;
   --color-accent-100: #fae8ff;
   --color-accent-200: #f5d0fe;
@@ -24,6 +25,11 @@
   --color-accent-800: #86198f;
   --color-accent-900: #701a75;
   --color-accent-950: #4a044e;
+
+  /* Kenyan-pride accents */
+  --color-accent-green: #16a34a;
+  --color-accent-red: #dc2626;
+  --color-dark-bg: #0a0f1e;
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
