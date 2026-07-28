@@ -41,8 +41,9 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const activeImageUrl = viewImages[activeView] ?? null;
 
   // ── Which customizations apply ───────────────────────────────
-  const isFootball = product.sport === "football";
-  const isRugby    = product.sport === "rugby";
+  const isTracksuit = product.name.toLowerCase().includes("tracksuit");
+  const isFootball  = product.sport === "football" && !isTracksuit;
+  const isRugby     = product.sport === "rugby"    && !isTracksuit;
 
   // ── Customization state ──────────────────────────────────────
 
@@ -296,10 +297,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1.5">
                         <p className="text-sm font-semibold text-slate-700">Name <span className="text-slate-400 font-normal">+KES 200</span></p>
-                        <span className="text-xs text-slate-400">max 10 chars</span>
+                        <span className="text-xs text-slate-400">max 15 chars</span>
                       </div>
                       <input type="text" disabled={!nameEnabled} value={printName}
-                        onChange={e => setPrintName(e.target.value.toUpperCase().slice(0, 10))}
+                        onChange={e => setPrintName(e.target.value.toUpperCase().slice(0, 15))}
                         placeholder="e.g. OCHIENG"
                         className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 uppercase tracking-wide placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
                     </div>
@@ -318,8 +319,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                         <p className="text-sm font-semibold text-slate-700">Number <span className="text-slate-400 font-normal">+KES 200</span></p>
                         <span className="text-xs text-slate-400">0–99</span>
                       </div>
-                      <input type="number" min="0" max="99" disabled={!numberEnabled} value={printNumber}
-                        onChange={e => setPrintNumber(e.target.value.slice(0, 2))}
+                      <input type="text" inputMode="numeric" disabled={!numberEnabled} value={printNumber}
+                        onChange={e => setPrintNumber(e.target.value.replace(/\D/g, "").slice(0, 2))}
                         placeholder="10"
                         className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
                     </div>
@@ -412,10 +413,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1.5">
                         <p className="text-sm font-semibold text-slate-700">Name <span className="text-slate-400 font-normal">+KES 200</span></p>
-                        <span className="text-xs text-slate-400">max 10 chars</span>
+                        <span className="text-xs text-slate-400">max 15 chars</span>
                       </div>
                       <input type="text" disabled={!nameEnabled} value={printName}
-                        onChange={e => setPrintName(e.target.value.toUpperCase().slice(0, 10))}
+                        onChange={e => setPrintName(e.target.value.toUpperCase().slice(0, 15))}
                         placeholder="e.g. LOMU"
                         className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 uppercase tracking-wide placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
                     </div>
@@ -434,8 +435,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                         <p className="text-sm font-semibold text-slate-700">Number <span className="text-slate-400 font-normal">+KES 200</span></p>
                         <span className="text-xs text-slate-400">1–99</span>
                       </div>
-                      <input type="number" min="1" max="99" disabled={!numberEnabled} value={printNumber}
-                        onChange={e => setPrintNumber(e.target.value.slice(0, 2))}
+                      <input type="text" inputMode="numeric" disabled={!numberEnabled} value={printNumber}
+                        onChange={e => setPrintNumber(e.target.value.replace(/\D/g, "").slice(0, 2))}
                         placeholder="7"
                         className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
                     </div>

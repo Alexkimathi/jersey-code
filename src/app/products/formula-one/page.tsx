@@ -12,9 +12,11 @@ async function getF1Products(): Promise<Product[]> {
     .eq("sport", "formula_one")
     .eq("is_hidden", false)
     .not("image_url", "is", null)
-    .not("name", "ilike", "%hoodie%")
     .order("created_at", { ascending: false });
-  return data || [];
+  const all = (data ?? []) as Product[];
+  return all.filter(
+    (p) => p.sub_category !== "hoodie_polo" && !p.name.toLowerCase().includes("hoodie")
+  );
 }
 
 async function getF1Hoodies(): Promise<Product[]> {
@@ -23,12 +25,14 @@ async function getF1Hoodies(): Promise<Product[]> {
     .from("products")
     .select("*")
     .eq("sport", "formula_one")
-    .ilike("name", "%hoodie%")
     .eq("is_hidden", false)
     .not("image_url", "is", null)
     .order("is_featured", { ascending: false })
     .order("name", { ascending: true });
-  return data || [];
+  const all = (data ?? []) as Product[];
+  return all.filter(
+    (p) => p.sub_category === "hoodie_polo" || p.name.toLowerCase().includes("hoodie")
+  );
 }
 
 async function getProductVariants(): Promise<ProductVariant[]> {

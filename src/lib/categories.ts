@@ -25,5 +25,36 @@ export const EPL_TEAMS = [
   "Southampton",
 ];
 
-/** National teams — static fallback. */
+/**
+ * World Football club teams — products with these teams appear on the
+ * World Football (/products/others) page.
+ */
+export const WORLD_FOOTBALL_TEAMS = [
+  "Barcelona",
+  "Real Madrid",
+  "Bayern Munich",
+  "Borussia Dortmund",
+  "RB Leipzig",
+  "Bayer Leverkusen",
+  "Juventus",
+  "AC Milan",
+  "Inter Milan",
+  "Napoli",
+];
+
+/** National teams — appear on both EPL and World Football pages. */
 export const NATIONAL_TEAMS = ["Argentina", "Brazil", "Harambee Stars"];
+
+/** Formula One teams */
+export const F1_TEAMS = [
+  "Ferrari",
+  "Red Bull",
+  "Mercedes",
+  "McLaren",
+  "Aston Martin",
+  "Alpine",
+  "Williams",
+  "Haas",
+  "AlphaTauri",
+  "Alfa Romeo",
+];

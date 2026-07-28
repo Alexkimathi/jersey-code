@@ -10,11 +10,12 @@ async function getAccessoriesByType(type: string): Promise<Product[]> {
     .from("products")
     .select("*")
     .eq("sport", "accessories")
-    .eq("team", type)
     .eq("is_hidden", false)
     .not("image_url", "is", null)
     .order("created_at", { ascending: false });
-  return data || [];
+  const all = (data ?? []) as Product[];
+  // sub_category takes priority (set by admin form); fall back to team field for legacy products
+  return all.filter((p) => p.sub_category === type || (!p.sub_category && p.team === type));
 }
 
 async function getProductVariants(): Promise<ProductVariant[]> {

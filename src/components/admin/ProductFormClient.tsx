@@ -291,6 +291,7 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
     is_hidden: false,
     is_featured: false,
     is_clearance: false,
+    sub_category: "",
   });
   const [selectedFiles, setSelectedFiles] = useState<Record<ImageSlot, File | null>>({ front: null, back: null, side: null, badge: null });
   const [previews, setPreviews] = useState<Record<ImageSlot, string>>({ front: "", back: "", side: "", badge: "" });
@@ -322,6 +323,7 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
           is_hidden: data.is_hidden,
           is_featured: data.is_featured,
           is_clearance: (data as any).is_clearance ?? false,
+          sub_category: (data as any).sub_category ?? "",
         });
         setPreviews({
           front: data.image_url || "",
@@ -469,7 +471,7 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sport *</label>
               <select value={formData.sport}
-                onChange={(e) => setFormData({ ...formData, sport: e.target.value as Sport })}
+                onChange={(e) => setFormData({ ...formData, sport: e.target.value as Sport, sub_category: "" })}
                 className={fieldClass}>
                 <option value="football">Football</option>
                 <option value="rugby">Rugby</option>
@@ -486,11 +488,50 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
-            <input type="text" value={formData.team}
-              onChange={(e) => setFormData({ ...formData, team: e.target.value })}
-              className={fieldClass} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
+              <input type="text" value={formData.team}
+                onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                className={fieldClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sub-category</label>
+              <select
+                value={formData.sub_category}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, sub_category: val, is_clearance: val === "clearance" });
+                }}
+                className={fieldClass}>
+                {formData.sport === "football" && <>
+                  <option value="">Club Jersey (default)</option>
+                  <option value="kids">Kids Jersey</option>
+                  <option value="vintage">Vintage Jersey</option>
+                  <option value="special_edition">Special Edition Kit</option>
+                  <option value="tracksuit">Tracksuit</option>
+                  <option value="national">National Team Kit</option>
+                  <option value="clearance">Clearance Sale</option>
+                </>}
+                {formData.sport === "rugby" && <>
+                  <option value="">Club Jersey (default)</option>
+                  <option value="kids">Kids Jersey</option>
+                  <option value="vintage">Vintage Jersey</option>
+                  <option value="special_edition">Special Edition Kit</option>
+                </>}
+                {(formData.sport === "basketball" || formData.sport === "cricket") && <>
+                  <option value="">Standard (default)</option>
+                  <option value="kids">Kids</option>
+                  <option value="vintage">Vintage</option>
+                  <option value="clearance">Clearance Sale</option>
+                </>}
+                {formData.sport === "formula_one" && <>
+                  <option value="">Standard (default)</option>
+                  <option value="clearance">Clearance Sale</option>
+                </>}
+              </select>
+              <p className="mt-1 text-xs text-gray-400">Controls which tab this product appears under on the storefront.</p>
+            </div>
           </div>
 
           <div>

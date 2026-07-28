@@ -370,6 +370,8 @@ export default function ProductForm({ params }: ProductFormProps) {
     badge_url: "",
     is_hidden: false,
     is_featured: false,
+    is_clearance: false,
+    sub_category: "",
   });
   const [selectedFiles, setSelectedFiles] = useState<Record<ImageSlot, File | null>>({ front: null, back: null, side: null, badge: null });
   const [previews, setPreviews] = useState<Record<ImageSlot, string>>({ front: "", back: "", side: "", badge: "" });
@@ -407,6 +409,8 @@ export default function ProductForm({ params }: ProductFormProps) {
           badge_url: data.badge_url || "",
           is_hidden: data.is_hidden,
           is_featured: data.is_featured,
+          is_clearance: (data as any).is_clearance ?? false,
+          sub_category: (data as any).sub_category ?? "",
         });
         setPreviews({
           front: data.image_url || "",
@@ -620,45 +624,81 @@ export default function ProductForm({ params }: ProductFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sport *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sport *</label>
               <select
                 value={formData.sport}
-                onChange={(e) => setFormData({ ...formData, sport: e.target.value as Sport })}
+                onChange={(e) => setFormData({ ...formData, sport: e.target.value as Sport, sub_category: "" })}
                 className={fieldClass}
               >
-                <option value="football">Football</option>
+                <option value="football">Football (EPL / World Football)</option>
                 <option value="rugby">Rugby</option>
-                <option value="basketball">Basketball</option>
-                <option value="cricket">Cricket</option>
                 <option value="formula_one">Formula One</option>
+                <option value="accessories">Accessories</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price (KES) *
-              </label>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sub-category</label>
+              <select
+                value={formData.sub_category}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({
+                    ...formData,
+                    sub_category: val,
+                    is_clearance: val === "world_clearance",
+                  });
+                }}
                 className={fieldClass}
-              />
+              >
+                {formData.sport === "football" && <>
+                  <option value="">— Select sub-category —</option>
+                  <optgroup label="Premier League (EPL page)">
+                    <option value="epl_club">Club Jersey</option>
+                    <option value="epl_kids">Kids Jersey</option>
+                    <option value="epl_vintage">Vintage Jersey</option>
+                    <option value="epl_special">Special Edition Kit</option>
+                  </optgroup>
+                  <optgroup label="World Football page">
+                    <option value="world_club">Club Jersey</option>
+                    <option value="world_kids">Kids Jersey</option>
+                    <option value="world_vintage">Vintage Jersey</option>
+                    <option value="world_special">Special Edition Kit</option>
+                    <option value="world_tracksuit">Tracksuit</option>
+                    <option value="world_clearance">Clearance Sale</option>
+                  </optgroup>
+                  <optgroup label="Both pages">
+                    <option value="national">National Team Kit</option>
+                  </optgroup>
+                </>}
+                {formData.sport === "rugby" && <>
+                  <option value="">Jersey</option>
+                </>}
+                {formData.sport === "formula_one" && <>
+                  <option value="">Jersey</option>
+                  <option value="hoodie_polo">Hoodie &amp; Polo</option>
+                </>}
+                {formData.sport === "accessories" && <>
+                  <option value="">— Select type —</option>
+                  <option value="Balls">Balls</option>
+                  <option value="Flags">Flags</option>
+                  <option value="Socks">Socks</option>
+                </>}
+              </select>
+              <p className="mt-1 text-xs text-gray-400">
+                Determines which page and tab this product appears under on the storefront.
+              </p>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Team
-            </label>
+          <div className="max-w-xs">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price (KES) *</label>
             <input
-              type="text"
-              value={formData.team}
-              onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+              type="number"
+              required
+              min="0"
+              step="0.01"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               className={fieldClass}
             />
           </div>
@@ -717,25 +757,46 @@ export default function ProductForm({ params }: ProductFormProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-6">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.is_hidden}
-                onChange={(e) => setFormData({ ...formData, is_hidden: e.target.checked })}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">Hidden</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.is_featured}
-                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">Featured</span>
-            </label>
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-700">Visibility &amp; Placement</p>
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.is_hidden}
+                  onChange={(e) => setFormData({ ...formData, is_hidden: e.target.checked })}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">Hidden</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.is_featured}
+                  onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                  className="rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                />
+                <span className="text-sm text-gray-700">
+                  Best Seller
+                  <span className="ml-1.5 text-xs text-gray-400 font-normal">(Featured page)</span>
+                </span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.is_clearance}
+                  onChange={(e) => setFormData({ ...formData, is_clearance: e.target.checked })}
+                  className="rounded border-gray-300 text-orange-500 focus:ring-orange-400"
+                />
+                <span className="text-sm text-gray-700">
+                  Clearance Sale
+                  <span className="ml-1.5 text-xs text-gray-400 font-normal">(Clearance tab)</span>
+                </span>
+              </label>
+            </div>
+            <p className="text-xs text-gray-400">
+              All products with images automatically appear in <strong>Featured &rsaquo; New Arrival</strong>. Tick &ldquo;Best Seller&rdquo; to also appear in the Best Seller tab.
+            </p>
           </div>
 
           <div className="flex items-center space-x-4">

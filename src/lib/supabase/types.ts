@@ -52,6 +52,7 @@ export interface Product {
   is_hidden: boolean;
   is_featured: boolean;
   is_clearance: boolean;
+  sub_category: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

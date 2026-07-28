@@ -6,18 +6,10 @@ import { Product, Banner, ProductVariant } from "@/lib/supabase/types";
 import { BannerCarousel } from "@/components/storefront/BannerCarousel";
 import { MarqueeBanner } from "@/components/storefront/MarqueeBanner";
 import { HomeSectionTabs } from "@/components/storefront/HomeSectionTabs";
-import { EPL_TEAMS } from "@/lib/categories";
-
-const EPL_SET = new Set(EPL_TEAMS);
-const BIG_CLUBS = new Set([
-  "Barcelona", "Real Madrid", "Bayern Munich",
-  "Borussia Dortmund", "Juventus", "AC Milan", "Inter Milan", "Napoli",
-]);
-
 function footballFirst(products: Product[]): Product[] {
   const rank = (p: Product) =>
-    EPL_SET.has(p.team ?? "") ? 0 :
-    BIG_CLUBS.has(p.team ?? "") ? 1 :
+    (p.sub_category?.startsWith("epl")) ? 0 :
+    (p.sub_category?.startsWith("world")) ? 1 :
     p.sport === "football" ? 2 : 3;
   return [...products].sort((a, b) => rank(a) - rank(b));
 }
@@ -30,13 +22,6 @@ const navCategories = [
   { name: "Formula One", slug: "formula-one", emoji: "🏎️" },
   { name: "Accessories", slug: "accessories", emoji: "🛍️" },
 ];
-
-const CLUB_TEAMS = [
-  "Barcelona", "Real Madrid", "Bayern Munich", "Borussia Dortmund",
-  "RB Leipzig", "Bayer Leverkusen", "Juventus", "AC Milan", "Inter Milan", "Napoli",
-];
-
-const NATIONAL_TEAMS = ["Argentina", "Brazil", "Harambee Stars"];
 
 // ── data fetchers ──────────────────────────────────────────────
 
@@ -112,11 +97,11 @@ async function getF1Hoodies(): Promise<Product[]> {
     .from("products")
     .select("*")
     .eq("sport", "formula_one")
-    .ilike("name", "%hoodie%")
     .eq("is_hidden", false)
     .not("image_url", "is", null)
     .order("created_at", { ascending: false });
-  return data || [];
+  const all = (data ?? []) as Product[];
+  return all.filter(p => p.sub_category === "hoodie_polo" || p.name.toLowerCase().includes("hoodie"));
 }
 
 function pad<T>(items: T[], min = 10): T[] {
@@ -149,33 +134,25 @@ export default async function HomePage() {
     getProductsBySport("accessories"),
   ]);
 
-  const isKids = (p: Product) => {
-    const n = p.name.toLowerCase();
-    return n.includes("kids") || n.includes("youth") || n.includes("junior");
-  };
-  const isVintage = (p: Product) => p.name.toLowerCase().includes("vintage");
-  const isSpecialEdition = (p: Product) => {
-    const n = p.name.toLowerCase();
-    return n.includes("special") || n.includes("limited") || n.includes("edition");
-  };
+  // EPL tabs — routed by sub_category
+  const eplLeague    = pad(allFootball.filter(p => p.sub_category === "epl_club"));
+  const eplKids      = pad(allFootball.filter(p => p.sub_category === "epl_kids"));
+  const eplVintage   = pad(allFootball.filter(p => p.sub_category === "epl_vintage"));
+  const eplSpecial   = pad(allFootball.filter(p => p.sub_category === "epl_special"));
+  const nationalAll  = pad(allFootball.filter(p => p.sub_category === "national"));
 
-  // EPL tabs
-  const eplLeague    = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)));
-  const eplKids      = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isKids(p)));
-  const eplVintage   = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isVintage(p)));
-  const eplSpecial   = pad(allFootball.filter(p => EPL_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)));
-  const nationalAll  = pad(allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")));
+  // World Football tabs
+  const clubLeague     = pad(allFootball.filter(p => p.sub_category === "world_club"));
+  const clubKids       = pad(allFootball.filter(p => p.sub_category === "world_kids"));
+  const clubVintage    = pad(allFootball.filter(p => p.sub_category === "world_vintage"));
+  const clubSpecial    = pad(allFootball.filter(p => p.sub_category === "world_special"));
+  const clubTracksuits = pad(allFootball.filter(p => p.sub_category === "world_tracksuit"));
+  const clubClearance  = pad(allFootball.filter(p => p.sub_category === "world_clearance"));
 
-  // Others tabs
-  const clubLeague     = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)));
-  const clubKids       = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isKids(p)));
-  const clubVintage    = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isVintage(p)));
-  const clubSpecial    = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)));
-  const clubClearance  = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && p.is_clearance));
-
-  const balls = accessoriesAll.filter((p) => p.team === "Balls");
-  const flags = accessoriesAll.filter((p) => p.team === "Flags");
-  const socks = accessoriesAll.filter((p) => p.team === "Socks");
+  // Accessories — sub_category takes priority, team field as legacy fallback
+  const balls = accessoriesAll.filter(p => p.sub_category === "Balls" || (!p.sub_category && p.team === "Balls"));
+  const flags = accessoriesAll.filter(p => p.sub_category === "Flags" || (!p.sub_category && p.team === "Flags"));
+  const socks = accessoriesAll.filter(p => p.sub_category === "Socks" || (!p.sub_category && p.team === "Socks"));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -249,7 +226,7 @@ export default async function HomePage() {
           )}
 
           {/* Others */}
-          {(clubLeague.length > 0 || clubKids.length > 0 || clubVintage.length > 0 || clubSpecial.length > 0 || clubClearance.length > 0 || nationalAll.length > 0) && (
+          {(clubLeague.length > 0 || clubKids.length > 0 || clubVintage.length > 0 || clubSpecial.length > 0 || clubTracksuits.length > 0 || clubClearance.length > 0 || nationalAll.length > 0) && (
             <div>
               <div className="flex items-end justify-between mb-4">
                 <div>
@@ -266,6 +243,7 @@ export default async function HomePage() {
                   { label: "Kids Jerseys",           products: clubKids },
                   { label: "Vintage Jerseys",        products: clubVintage },
                   { label: "Special Edition Kits",   products: clubSpecial },
+                  { label: "Tracksuits",             products: clubTracksuits },
                   { label: "National Teams Kits",    products: nationalAll },
                   { label: "Clearance Sale",         products: clubClearance },
                 ]}
@@ -311,7 +289,7 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "Jerseys", products: pad(f1Products) },
+                  { label: "Jerseys", products: pad(f1Products.filter(p => p.sub_category !== "hoodie_polo" && !p.name.toLowerCase().includes("hoodie"))) },
                   { label: "Hoodies & Polos", products: pad(f1Hoodies) },
                 ]}
                 defaultTab="Jerseys"
