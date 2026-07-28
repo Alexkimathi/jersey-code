@@ -56,7 +56,7 @@ export default async function EplPage() {
   };
 
   const tabs = [
-    { label: "League Jerseys",       products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)) },
+    { label: "Club Jerseys",         products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)) },
     { label: "Kids Jerseys",         products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && isKids(p)) },
     { label: "Vintage Jerseys",      products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && isVintage(p)) },
     { label: "Special Edition Kits", products: allFootball.filter(p => eplTeams.includes(p.team ?? "") && isSpecialEdition(p)) },
@@ -80,7 +80,7 @@ export default async function EplPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <CategoryTabs tabs={tabs} defaultTab="League Jerseys" variants={variants} />
+        <CategoryTabs tabs={tabs} defaultTab="Club Jerseys" variants={variants} />
       </div>
     </div>
   );

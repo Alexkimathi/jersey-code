@@ -51,6 +51,7 @@ export interface Product {
   badge_url: string | null;
   is_hidden: boolean;
   is_featured: boolean;
+  is_clearance: boolean;
   created_by: string | null;
   created_at: string;
   updated_at: string;

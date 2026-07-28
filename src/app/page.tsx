@@ -88,7 +88,7 @@ async function getAllFootballProducts(): Promise<Product[]> {
     .select("*")
     .eq("sport", "football")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
+    .or("image_url.not.is.null,is_clearance.eq.true")
     .order("created_at", { ascending: false });
   return data || [];
 }
@@ -167,10 +167,11 @@ export default async function HomePage() {
   const nationalAll  = pad(allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")));
 
   // Others tabs
-  const clubLeague  = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)));
-  const clubKids    = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isKids(p)));
-  const clubVintage = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isVintage(p)));
-  const clubSpecial = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)));
+  const clubLeague     = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)));
+  const clubKids       = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isKids(p)));
+  const clubVintage    = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isVintage(p)));
+  const clubSpecial    = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)));
+  const clubClearance  = pad(allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && p.is_clearance));
 
   const balls = accessoriesAll.filter((p) => p.team === "Balls");
   const flags = accessoriesAll.filter((p) => p.team === "Flags");
@@ -235,20 +236,20 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "League Jerseys",        products: eplLeague },
+                  { label: "Club Jerseys",           products: eplLeague },
                   { label: "Kids Jerseys",           products: eplKids },
                   { label: "Vintage Jerseys",        products: eplVintage },
                   { label: "Special Edition Kits",   products: eplSpecial },
                   { label: "National Teams Kits",    products: nationalAll },
                 ]}
-                defaultTab="League Jerseys"
+                defaultTab="Club Jerseys"
                 variants={variants}
               />
             </div>
           )}
 
           {/* Others */}
-          {(clubLeague.length > 0 || clubKids.length > 0 || clubVintage.length > 0 || clubSpecial.length > 0 || nationalAll.length > 0) && (
+          {(clubLeague.length > 0 || clubKids.length > 0 || clubVintage.length > 0 || clubSpecial.length > 0 || clubClearance.length > 0 || nationalAll.length > 0) && (
             <div>
               <div className="flex items-end justify-between mb-4">
                 <div>
@@ -261,13 +262,14 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "League Jerseys",        products: clubLeague },
+                  { label: "Club Jerseys",           products: clubLeague },
                   { label: "Kids Jerseys",           products: clubKids },
                   { label: "Vintage Jerseys",        products: clubVintage },
                   { label: "Special Edition Kits",   products: clubSpecial },
                   { label: "National Teams Kits",    products: nationalAll },
+                  { label: "Clearance Sale",         products: clubClearance },
                 ]}
-                defaultTab="League Jerseys"
+                defaultTab="Club Jerseys"
                 variants={variants}
               />
             </div>

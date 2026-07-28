@@ -18,7 +18,7 @@ async function getAllFootballProducts(): Promise<Product[]> {
     .select("*")
     .eq("sport", "football")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
+    .or("image_url.not.is.null,is_clearance.eq.true")
     .order("created_at", { ascending: false });
   return data || [];
 }
@@ -46,11 +46,12 @@ export default async function OthersPage() {
   };
 
   const tabs = [
-    { label: "League Jerseys",       products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)) },
+    { label: "Club Jerseys",         products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && !isVintage(p) && !isKids(p) && !isSpecialEdition(p)) },
     { label: "Kids Jerseys",         products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isKids(p)) },
     { label: "Vintage Jerseys",      products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isVintage(p)) },
     { label: "Special Edition Kits", products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && isSpecialEdition(p)) },
     { label: "National Teams Kits",  products: allFootball.filter(p => NATIONAL_TEAMS.includes(p.team ?? "")) },
+    { label: "Clearance Sale",       products: allFootball.filter(p => CLUB_TEAMS.includes(p.team ?? "") && p.is_clearance) },
   ];
 
   return (
@@ -70,7 +71,7 @@ export default async function OthersPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <CategoryTabs tabs={tabs} defaultTab="League Jerseys" variants={variants} />
+        <CategoryTabs tabs={tabs} defaultTab="Club Jerseys" variants={variants} />
       </div>
     </div>
   );
