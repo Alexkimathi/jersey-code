@@ -11,6 +11,18 @@ import { Sport, ProductVariant } from "@/lib/supabase/types";
 import { Plus, Trash2 } from "lucide-react";
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+const SIZE_ORDER = SIZE_OPTIONS;
+
+function sortVariantsBySize(variants: ProductVariant[]): ProductVariant[] {
+  return [...variants].sort((a, b) => {
+    const ai = SIZE_ORDER.indexOf(a.size);
+    const bi = SIZE_ORDER.indexOf(b.size);
+    if (ai === -1 && bi === -1) return a.size.localeCompare(b.size);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
 
 async function compressImage(file: File, maxWidth = 1200, quality = 0.82): Promise<Blob> {
   return new Promise((resolve) => {
@@ -66,9 +78,8 @@ function VariantsManager({
     const { data, error } = await (supabase as any)
       .from("product_variants")
       .select("*")
-      .eq("product_id", productId)
-      .order("size");
-    if (!error) setVariants((data ?? []) as ProductVariant[]);
+      .eq("product_id", productId);
+    if (!error) setVariants(sortVariantsBySize((data ?? []) as ProductVariant[]));
     setLoading(false);
   }, [productId, supabase]);
 

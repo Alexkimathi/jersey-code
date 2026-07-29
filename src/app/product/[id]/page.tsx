@@ -23,19 +23,31 @@ async function getProduct(id: string): Promise<Product | null> {
   return data;
 }
 
+const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+
+function sortVariantsBySize(variants: ProductVariant[]): ProductVariant[] {
+  return [...variants].sort((a, b) => {
+    const ai = SIZE_ORDER.indexOf(a.size);
+    const bi = SIZE_ORDER.indexOf(b.size);
+    if (ai === -1 && bi === -1) return a.size.localeCompare(b.size);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
+
 async function getVariants(productId: string): Promise<ProductVariant[]> {
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from("product_variants")
     .select("*")
-    .eq("product_id", productId)
-    .order("size");
+    .eq("product_id", productId);
 
   if (error) {
     return [];
   }
 
-  return data || [];
+  return sortVariantsBySize(data || []);
 }
 
 export const dynamic = "force-dynamic";
