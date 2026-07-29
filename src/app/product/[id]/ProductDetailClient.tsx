@@ -8,7 +8,7 @@ import { TEAM_IMAGES } from "@/lib/teamImages";
 import { getLeagueBadges, getBadgeLabel } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import { SizeGuideModal } from "@/components/storefront/SizeGuideModal";
-import { getProductDescription, getProductDetailPoints } from "@/lib/product-descriptions";
+import { getProductDescription } from "@/lib/product-descriptions";
 import { ShoppingBag, Minus, Plus, ChevronDown } from "lucide-react";
 
 interface ProductDetailClientProps {
@@ -128,10 +128,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   return (
     <>
-    <div className="grid gap-10 lg:grid-cols-[0.95fr_0.75fr] items-start">
+    <div className="grid gap-6 lg:grid-cols-[0.95fr_0.75fr] items-start">
 
-      {/* ── Left: image + info tiles ── */}
-      <div className="space-y-8">
+      {/* ── Left: image + thumbnails ── */}
+      <div className="space-y-3">
 
         {/* Main image */}
         <div className="relative overflow-hidden rounded-[1.75rem] bg-gray-100 aspect-[4/3] shadow-sm">
@@ -140,7 +140,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               src={activeImageUrl}
               alt={`${product.name} — ${JERSEY_VIEWS[activeView]} view`}
               fill unoptimized
-              className="object-contain p-6"
+              className="object-cover"
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
@@ -184,57 +184,37 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
         {/* Thumbnail strip */}
         {viewImages.some(Boolean) && (
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             {JERSEY_VIEWS.map((label, i) => {
               if (!viewImages[i]) return null;
               return (
                 <button key={label} type="button" onClick={() => setActiveView(i)}
-                  className={`relative flex-1 aspect-square rounded-xl overflow-hidden border-2 transition-all duration-150 ${
+                  className={`relative flex-1 aspect-square rounded-lg overflow-hidden border-2 transition-all duration-150 ${
                     activeView === i ? "border-slate-900 shadow-sm" : "border-slate-200 hover:border-slate-400"
                   }`}
                 >
-                  <Image src={viewImages[i]!} alt={`${label} view`} fill unoptimized className="object-contain p-2" sizes="10vw"/>
-                  <span className={`absolute bottom-1 left-0 right-0 text-center text-[9px] font-bold uppercase tracking-wider ${activeView === i ? "text-slate-900" : "text-slate-400"}`}>
-                    {label}
-                  </span>
+                  <Image src={viewImages[i]!} alt={`${label} view`} fill unoptimized className="object-cover" sizes="10vw"/>
                 </button>
               );
             })}
           </div>
         )}
-
-        {/* Info tiles */}
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Team</p>
-            <p className="mt-2 text-base font-semibold text-slate-900">{product.team || "Official Jersey"}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Base Price</p>
-            <p className="mt-2 text-base font-semibold text-slate-900">KES {product.price.toLocaleString()}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Availability</p>
-            <p className={`mt-2 text-base font-semibold ${selectedVariant && !inStock ? "text-red-600" : "text-slate-900"}`}>
-              {selectedVariant ? (inStock ? "In Stock" : "Out of Stock") : "Select a size"}
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* ── Right: purchase panel ── */}
-      <div className="rounded-[1.75rem] border border-slate-100 bg-white p-8 shadow-sm space-y-6">
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm space-y-4">
 
         {/* Header */}
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500">Official Jersey</p>
-          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">{product.name}</h1>
-          {product.team && <p className="mt-1.5 text-base text-slate-500">{product.team}</p>}
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">{product.name}</h1>
+          {product.team && <p className="mt-1 text-sm text-slate-500">{product.team}</p>}
+          <p className="mt-2 text-xl font-bold text-slate-900">KES {product.price.toLocaleString()}</p>
         </div>
 
         {/* Size */}
         {variants.length > 0 && (
-          <div className="border-t border-slate-100 pt-5">
+          <div className="border-t border-slate-100 pt-3">
             <div className="flex items-center justify-between mb-3">
               <label className="text-sm font-bold text-slate-700">Size</label>
               <button type="button" onClick={() => setSizeGuideOpen(true)}
@@ -260,13 +240,13 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
         {/* ── Customization (football only) ── */}
         {isFootball && (
-          <div className="border-t border-slate-100 pt-5 space-y-6">
+          <div className="border-t border-slate-100 pt-3 space-y-3">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500">Customize Your Jersey</p>
 
             {/* Name & Number */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-3">Name &amp; Number</label>
-              <div className="flex flex-wrap gap-2 mb-4">
+              <label className="block text-sm font-bold text-slate-700 mb-2">Name &amp; Number</label>
+              <div className="flex flex-wrap gap-2 mb-2">
                 {([
                   { value: "none",        label: "None" },
                   { value: "personalize", label: "Personalize" },
@@ -332,7 +312,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             {/* Font type — shows when name/number is active */}
             {(activeName || activeNumber) && (
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-3">Font Style</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Font Style</label>
                 <div className="grid grid-cols-2 gap-2">
                   {([
                     { value: "league", label: "League Font", sub: "+KES 0" },
@@ -358,7 +338,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
             {/* Badge */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-3">Badge / Patch</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Badge / Patch</label>
               <div className="flex flex-wrap gap-2">
                 {badgeOptions.map((b) => (
                   <button key={b.value} type="button" onClick={() => setBadge(b.value)}
@@ -377,13 +357,13 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
         {/* ── Rugby customization ── */}
         {isRugby && (
-          <div className="border-t border-slate-100 pt-5 space-y-6">
+          <div className="border-t border-slate-100 pt-3 space-y-3">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500">Customize Your Kit</p>
 
             {/* Name & Number */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-3">Name &amp; Number</label>
-              <div className="flex flex-wrap gap-2 mb-4">
+              <label className="block text-sm font-bold text-slate-700 mb-2">Name &amp; Number</label>
+              <div className="flex flex-wrap gap-2 mb-2">
                 {([
                   { value: "none",        label: "None" },
                   { value: "personalize", label: "Personalize" },
@@ -448,7 +428,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             {/* Font — shown when name/number active */}
             {(activeName || activeNumber) && (
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-3">Font Style</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Font Style</label>
                 <div className="grid grid-cols-2 gap-2">
                   {([
                     { value: "league", label: "League Font", sub: "+KES 0" },
@@ -475,8 +455,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
         )}
 
         {/* Quantity */}
-        <div className="border-t border-slate-100 pt-5">
-          <label className="block text-sm font-bold text-slate-700 mb-3">Quantity</label>
+        <div className="border-t border-slate-100 pt-3">
+          <label className="block text-sm font-bold text-slate-700 mb-2">Quantity</label>
           <div className="flex items-center gap-3">
             <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))}
               className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-slate-300">
@@ -538,23 +518,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${descOpen ? "rotate-180" : ""}`} />
           </button>
           {descOpen && (
-            <div className="pb-4 space-y-4">
-              <div className="space-y-3">
-                {getProductDescription(product).split("\n\n").map((para, i) => (
-                  <p key={i} className="text-sm text-slate-600 leading-relaxed">{para}</p>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-800 mb-3">Details:</p>
-                <ul className="space-y-2">
-                  {getProductDetailPoints(product).map((point, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
-                      <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-slate-300 flex-none" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="pb-4 space-y-3">
+              {getProductDescription(product).split("\n\n").map((para, i) => (
+                <p key={i} className="text-sm text-slate-600 leading-relaxed">{para}</p>
+              ))}
             </div>
           )}
         </div>
