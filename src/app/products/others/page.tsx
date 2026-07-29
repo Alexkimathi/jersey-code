@@ -29,13 +29,12 @@ export default async function OthersPage() {
   ]);
 
   const tabs = [
-    { label: "Club Jerseys",         products: allFootball.filter(p => p.sub_category === "world_club") },
-    { label: "Kids Jerseys",         products: allFootball.filter(p => p.sub_category === "world_kids") },
-    { label: "Vintage Jerseys",      products: allFootball.filter(p => p.sub_category === "world_vintage") },
-    { label: "Special Edition Kits", products: allFootball.filter(p => p.sub_category === "world_special") },
-    { label: "Tracksuits",           products: allFootball.filter(p => p.sub_category === "world_tracksuit") },
-    { label: "National Teams Kits",  products: allFootball.filter(p => p.sub_category === "national") },
-    { label: "Clearance Sale",       products: allFootball.filter(p => p.sub_category === "world_clearance") },
+    { label: "Club Jerseys",             products: allFootball.filter(p => p.sub_category === "world_club") },
+    { label: "National Teams Jerseys",   products: allFootball.filter(p => p.sub_category === "national") },
+    { label: "Kids Jerseys",             products: allFootball.filter(p => p.sub_category === "world_kids") },
+    { label: "Retro Jerseys",            products: allFootball.filter(p => p.sub_category === "world_vintage") },
+    { label: "Special Edition Jerseys",  products: allFootball.filter(p => p.sub_category === "world_special") },
+    { label: "Tracksuits",               products: allFootball.filter(p => p.sub_category === "world_tracksuit") },
   ];
 
   return (

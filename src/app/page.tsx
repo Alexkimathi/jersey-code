@@ -131,10 +131,8 @@ export default async function HomePage() {
   ]);
 
   // EPL tabs — routed by sub_category
-  const eplLeague    = allFootball.filter(p => p.sub_category === "epl_club");
-  const eplKids      = allFootball.filter(p => p.sub_category === "epl_kids");
-  const eplVintage   = allFootball.filter(p => p.sub_category === "epl_vintage");
-  const eplSpecial   = allFootball.filter(p => p.sub_category === "epl_special");
+  const eplLeague    = allFootball.filter(p => p.sub_category === "epl_club" && !p.is_clearance);
+  const eplClearance = allFootball.filter(p => p.sub_category?.startsWith("epl_") && p.is_clearance);
   const nationalAll  = allFootball.filter(p => p.sub_category === "national");
 
   // World Football tabs
@@ -143,7 +141,6 @@ export default async function HomePage() {
   const clubVintage    = allFootball.filter(p => p.sub_category === "world_vintage");
   const clubSpecial    = allFootball.filter(p => p.sub_category === "world_special");
   const clubTracksuits = allFootball.filter(p => p.sub_category === "world_tracksuit");
-  const clubClearance  = allFootball.filter(p => p.sub_category === "world_clearance");
 
   // Accessories — sub_category takes priority, team field as legacy fallback
   const balls = accessoriesAll.filter(p => p.sub_category === "Balls" || (!p.sub_category && p.team === "Balls"));
@@ -196,7 +193,7 @@ export default async function HomePage() {
         <section className="space-y-14">
 
           {/* EPL */}
-          {(eplLeague.length > 0 || eplKids.length > 0 || eplVintage.length > 0 || eplSpecial.length > 0 || nationalAll.length > 0) && (
+          {(eplLeague.length > 0 || eplClearance.length > 0) && (
             <div>
               <div className="flex items-end justify-between mb-4">
                 <div>
@@ -209,11 +206,8 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "Club Jerseys",           products: eplLeague },
-                  { label: "Kids Jerseys",           products: eplKids },
-                  { label: "Vintage Jerseys",        products: eplVintage },
-                  { label: "Special Edition Kits",   products: eplSpecial },
-                  { label: "National Teams Kits",    products: nationalAll },
+                  { label: "Club Jerseys",   products: eplLeague },
+                  { label: "Clearance Sale", products: eplClearance },
                 ]}
                 defaultTab="Club Jerseys"
                 variants={variants}
@@ -222,7 +216,7 @@ export default async function HomePage() {
           )}
 
           {/* Others */}
-          {(clubLeague.length > 0 || clubKids.length > 0 || clubVintage.length > 0 || clubSpecial.length > 0 || clubTracksuits.length > 0 || clubClearance.length > 0 || nationalAll.length > 0) && (
+          {(clubLeague.length > 0 || nationalAll.length > 0 || clubKids.length > 0 || clubVintage.length > 0 || clubSpecial.length > 0 || clubTracksuits.length > 0) && (
             <div>
               <div className="flex items-end justify-between mb-4">
                 <div>
@@ -235,13 +229,12 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "Club Jerseys",           products: clubLeague },
-                  { label: "Kids Jerseys",           products: clubKids },
-                  { label: "Vintage Jerseys",        products: clubVintage },
-                  { label: "Special Edition Kits",   products: clubSpecial },
-                  { label: "Tracksuits",             products: clubTracksuits },
-                  { label: "National Teams Kits",    products: nationalAll },
-                  { label: "Clearance Sale",         products: clubClearance },
+                  { label: "Club Jerseys",            products: clubLeague },
+                  { label: "National Teams Jerseys",  products: nationalAll },
+                  { label: "Kids Jerseys",            products: clubKids },
+                  { label: "Retro Jerseys",           products: clubVintage },
+                  { label: "Special Edition Jerseys", products: clubSpecial },
+                  { label: "Tracksuits",              products: clubTracksuits },
                 ]}
                 defaultTab="Club Jerseys"
                 variants={variants}

@@ -29,11 +29,8 @@ export default async function EplPage() {
   ]);
 
   const tabs = [
-    { label: "Club Jerseys",         products: allFootball.filter(p => p.sub_category === "epl_club") },
-    { label: "Kids Jerseys",         products: allFootball.filter(p => p.sub_category === "epl_kids") },
-    { label: "Vintage Jerseys",      products: allFootball.filter(p => p.sub_category === "epl_vintage") },
-    { label: "Special Edition Kits", products: allFootball.filter(p => p.sub_category === "epl_special") },
-    { label: "National Teams Kits",  products: allFootball.filter(p => p.sub_category === "national") },
+    { label: "Club Jerseys",   products: allFootball.filter(p => p.sub_category === "epl_club" && !p.is_clearance) },
+    { label: "Clearance Sale", products: allFootball.filter(p => p.sub_category?.startsWith("epl_") && p.is_clearance) },
   ];
 
   return (
