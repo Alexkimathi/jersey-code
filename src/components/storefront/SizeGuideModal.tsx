@@ -16,24 +16,24 @@ type Preference = "men" | "women" | "unisex";
 
 // ── Size data ─────────────────────────────────────────────────────────────────
 
-const MEN_SIZES   = ["S", "M", "L", "XL", "XXL"];
+const MEN_SIZES   = ["S", "M", "L", "XL", "2XL"];
 const WOMEN_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-const KIDS_SIZES  = ["XS", "S", "M", "L", "XL", "XXL"];
+const KIDS_SIZES  = ["16", "18", "20", "22", "24", "26", "28"];
 
 type Rows = Record<Unit, { label: string; values: string[] }[]>;
 
 const MEN_JERSEY_ROWS: Rows = {
   cm: [
-    { label: "Height", values: ["165–172", "170–177", "175–182", "180–187", "185–192"] },
-    { label: "Chest",  values: ["86–91",   "96–101",  "106–111", "116–121", "126–131"] },
-    { label: "Waist",  values: ["71–76",   "81–86",   "91–96",   "101–106", "111–116"] },
-    { label: "Hip",    values: ["86–91",   "96–101",  "106–111", "116–121", "126–131"] },
+    { label: "Chest",        values: ["82–90",   "90–98",   "98–106",  "106–114", "114–120"] },
+    { label: "½ Length",     values: ["50",      "52",      "54",      "56",      "58"     ] },
+    { label: "Shirt Length", values: ["69",      "71",      "73",      "75",      "77"     ] },
+    { label: "Height",       values: ["160–170", "170–185", "178–192", "182–195", "190–210"] },
   ],
   in: [
-    { label: "Height", values: ['65–68"', '67–70"', '69–72"', '71–74"', '73–76"'] },
-    { label: "Chest",  values: ['34–36"', '38–40"', '42–44"', '46–48"', '50–52"'] },
-    { label: "Waist",  values: ['28–30"', '32–34"', '36–38"', '40–42"', '44–46"'] },
-    { label: "Hip",    values: ['34–36"', '38–40"', '42–44"', '46–48"', '50–52"'] },
+    { label: "Chest",        values: ['32–35"', '35–39"', '39–42"', '42–45"', '45–47"'] },
+    { label: "½ Length",     values: ['20"',   '20.5"',  '21"',    '22"',    '23"'   ] },
+    { label: "Shirt Length", values: ['27"',   '28"',    '29"',    '29.5"',  '30"'   ] },
+    { label: "Height",       values: ['63–67"', '67–73"', '70–76"', '72–77"', '75–83"'] },
   ],
 };
 
@@ -80,16 +80,16 @@ const WOMEN_SHORTS_ROWS: Rows = {
 
 const KIDS_ROWS: Rows = {
   cm: [
-    { label: "Age",    values: ["3–4 yrs", "5–6 yrs", "7–8 yrs", "9–10 yrs", "11–12 yrs", "13–14 yrs"] },
-    { label: "Height", values: ["98–104",  "110–116", "122–128", "134–140",  "146–152",   "158–164"  ] },
-    { label: "Chest",  values: ["53–55",   "56–59",   "60–64",   "65–69",    "70–75",     "76–82"    ] },
-    { label: "Waist",  values: ["52–54",   "54–57",   "57–60",   "60–63",    "63–66",     "66–70"    ] },
+    { label: "½ Chest",       values: ["32",     "34",     "36",      "38",      "40",      "42",      "44"     ] },
+    { label: "Shirt Length",  values: ["43",     "47",     "50",      "53",      "56",      "59",      "62"     ] },
+    { label: "Shorts Length", values: ["32",     "34",     "36",      "38",      "39",      "40",      "43"     ] },
+    { label: "Height",        values: ["95–105", "105–115","115–125", "125–135", "135–145", "145–155", "—"      ] },
   ],
   in: [
-    { label: "Age",    values: ["3–4 yrs", "5–6 yrs", "7–8 yrs", "9–10 yrs", "11–12 yrs", "13–14 yrs"] },
-    { label: "Height", values: ['39–41"',  '43–46"',  '48–50"',  '53–55"',   '57–60"',    '62–65"'   ] },
-    { label: "Chest",  values: ['21–22"',  '22–23"',  '24–25"',  '26–27"',   '28–30"',    '30–32"'   ] },
-    { label: "Waist",  values: ['20–21"',  '21–22"',  '22–24"',  '24–25"',   '25–26"',    '26–28"'   ] },
+    { label: "½ Chest",       values: ['12.5"', '13.5"', '14"',   '15"',   '15.5"', '16.5"', '17"'  ] },
+    { label: "Shirt Length",  values: ['17"',   '18.5"', '19.5"', '21"',   '22"',   '23"',   '24.5"'] },
+    { label: "Shorts Length", values: ['12.5"', '13.5"', '14"',   '15"',   '15.5"', '16"',   '17"'  ] },
+    { label: "Height",        values: ['37–41"','41–45"','45–49"','49–53"','53–57"','57–61"','—'     ] },
   ],
 };
 
@@ -289,7 +289,7 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
             {/* Kids */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 mb-1">Kids / Youth</p>
-              <p className="text-xs text-slate-400 mb-3">Applies to both jerseys and shorts.</p>
+              <p className="text-xs text-slate-400 mb-3">All measurements in cm. ½ Chest is garment width laid flat.</p>
               <SizeTable rows={KIDS_ROWS[unit]} sizes={KIDS_SIZES} />
             </div>
 
@@ -297,7 +297,7 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
             <div className="rounded-2xl bg-sky-50 border border-sky-100 px-5 py-4 space-y-2 text-sm text-slate-600">
               <p className="font-bold text-slate-900 text-sm mb-1">Fit tips</p>
               <p>If you are between sizes, order the <strong className="text-slate-800">smaller size</strong> for a tighter, athletic fit or the <strong className="text-slate-800">larger size</strong> for a looser, relaxed fit.</p>
-              <p>All measurements are body measurements, not garment dimensions.</p>
+              <p>Chest is your body measurement. ½ Length and Shirt Length are garment dimensions.</p>
             </div>
 
             {/* How to measure */}
