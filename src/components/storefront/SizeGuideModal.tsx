@@ -8,17 +8,15 @@ interface SizeGuideModalProps {
 }
 
 type Unit      = "cm" | "in";
-type Gender    = "men" | "women";
 type View      = "guide" | "profile" | "result";
 type HeightUnit = "ft" | "cm";
 type WeightUnit = "kg" | "lb";
-type Preference = "men" | "women" | "unisex";
+type Preference = "men" | "unisex";
 
 // ── Size data ─────────────────────────────────────────────────────────────────
 
-const MEN_SIZES   = ["S", "M", "L", "XL", "2XL"];
-const WOMEN_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-const KIDS_SIZES  = ["16", "18", "20", "22", "24", "26", "28"];
+const MEN_SIZES  = ["S", "M", "L", "XL", "2XL"];
+const KIDS_SIZES = ["16", "18", "20", "22", "24", "26", "28"];
 
 type Rows = Record<Unit, { label: string; values: string[] }[]>;
 
@@ -37,89 +35,39 @@ const MEN_JERSEY_ROWS: Rows = {
   ],
 };
 
-const WOMEN_JERSEY_ROWS: Rows = {
-  cm: [
-    { label: "Height", values: ["155–160", "160–165", "165–170", "170–175", "175–180", "180–185"] },
-    { label: "Chest",  values: ["76–81",   "81–86",   "86–91",   "96–101",  "106–111", "116–121"] },
-    { label: "Waist",  values: ["60–65",   "65–70",   "70–75",   "80–85",   "90–95",   "100–105"] },
-    { label: "Hip",    values: ["83–88",   "88–93",   "93–98",   "103–108", "113–118", "123–128"] },
-  ],
-  in: [
-    { label: "Height", values: ['61–63"', '63–65"', '65–67"', '67–69"', '69–71"', '71–73"'] },
-    { label: "Chest",  values: ['30–32"', '32–34"', '34–36"', '38–40"', '42–44"', '46–48"'] },
-    { label: "Waist",  values: ['24–26"', '26–28"', '28–30"', '32–34"', '36–38"', '40–42"'] },
-    { label: "Hip",    values: ['33–35"', '35–37"', '37–39"', '41–43"', '45–47"', '49–51"'] },
-  ],
-};
-
-const MEN_SHORTS_ROWS: Rows = {
-  cm: [
-    { label: "Waist",  values: ["71–76",   "81–86",   "91–96",   "101–106", "111–116"] },
-    { label: "Hip",    values: ["86–91",   "96–101",  "106–111", "116–121", "126–131"] },
-    { label: "Length", values: ["46",      "48",      "50",      "52",      "54"     ] },
-  ],
-  in: [
-    { label: "Waist",  values: ['28–30"', '32–34"', '36–38"', '40–42"', '44–46"'] },
-    { label: "Hip",    values: ['34–36"', '38–40"', '42–44"', '46–48"', '50–52"'] },
-    { label: "Length", values: ['18"',    '19"',    '20"',    '20.5"',  '21"'   ] },
-  ],
-};
-
-const WOMEN_SHORTS_ROWS: Rows = {
-  cm: [
-    { label: "Waist",  values: ["60–65",   "65–70",   "70–75",   "80–85",   "90–95",   "100–105"] },
-    { label: "Hip",    values: ["83–88",   "88–93",   "93–98",   "103–108", "113–118", "123–128"] },
-    { label: "Length", values: ["36",      "38",      "40",      "42",      "44",      "46"     ] },
-  ],
-  in: [
-    { label: "Waist",  values: ['24–26"', '26–28"', '28–30"', '32–34"', '36–38"', '40–42"'] },
-    { label: "Hip",    values: ['33–35"', '35–37"', '37–39"', '41–43"', '45–47"', '49–51"'] },
-    { label: "Length", values: ['14"',    '15"',    '16"',    '17"',    '17.5"',  '18"'   ] },
-  ],
-};
-
 const KIDS_ROWS: Rows = {
   cm: [
     { label: "½ Chest",       values: ["32",     "34",     "36",      "38",      "40",      "42",      "44"     ] },
-    { label: "Shirt Length",  values: ["43",     "47",     "50",      "53",      "56",      "59",      "62"     ] },
+    { label: "Shirt Length",  values: ["43",     "47",     "50",      "53",      "56",      "58",      "61"     ] },
     { label: "Shorts Length", values: ["32",     "34",     "36",      "38",      "39",      "40",      "43"     ] },
-    { label: "Height",        values: ["95–105", "105–115","115–125", "125–135", "135–145", "145–155", "—"      ] },
+    { label: "½ Waist",       values: ["20–37",  "21–39",  "22–41",   "23–42",   "24–44",   "25–47",   "26–50"  ] },
+    { label: "Rec. Age",      values: ["2–3",    "3–4",    "4–5",     "6–7",     "8–9",     "10–11",   "12–13"  ] },
+    { label: "Rec. Height",   values: ["95–105", "105–115","115–125", "125–135", "135–145", "145–155", "155–166"] },
   ],
   in: [
-    { label: "½ Chest",       values: ['12.5"', '13.5"', '14"',   '15"',   '15.5"', '16.5"', '17"'  ] },
-    { label: "Shirt Length",  values: ['17"',   '18.5"', '19.5"', '21"',   '22"',   '23"',   '24.5"'] },
-    { label: "Shorts Length", values: ['12.5"', '13.5"', '14"',   '15"',   '15.5"', '16"',   '17"'  ] },
-    { label: "Height",        values: ['37–41"','41–45"','45–49"','49–53"','53–57"','57–61"','—'     ] },
+    { label: "½ Chest",       values: ['12.5"', '13.5"', '14"',    '15"',    '15.5"',  '16.5"',  '17"'    ] },
+    { label: "Shirt Length",  values: ['17"',   '18.5"', '19.5"',  '21"',    '22"',    '23"',    '24"'    ] },
+    { label: "Shorts Length", values: ['12.5"', '13.5"', '14"',    '15"',    '15.5"',  '16"',    '17"'    ] },
+    { label: "½ Waist",       values: ['8–14.5"','8.5–15"','8.5–16"','9–16.5"','9.5–17"','10–18.5"','10–20"'] },
+    { label: "Rec. Age",      values: ["2–3",   "3–4",   "4–5",    "6–7",    "8–9",    "10–11",  "12–13"  ] },
+    { label: "Rec. Height",   values: ['37–41"','41–45"','45–49"', '49–53"', '53–57"', '57–61"', '61–65"' ] },
   ],
 };
 
 // ── Size recommendation ───────────────────────────────────────────────────────
 
-function recommendSize(heightCm: number, weightKg: number, pref: Preference) {
+function recommendSize(heightCm: number, weightKg: number) {
   const bmi = weightKg / Math.pow(heightCm / 100, 2);
-  const isMen = pref !== "women";
 
   let idx: number;
-  if (isMen) {
-    if      (heightCm < 168.5) idx = 0; // S
-    else if (heightCm < 173.5) idx = 1; // M
-    else if (heightCm < 178.5) idx = 2; // L
-    else if (heightCm < 183.5) idx = 3; // XL
-    else                        idx = 4; // XXL
-    if (bmi > 27 && idx < 4) idx++;
-    else if (bmi < 18.5 && idx > 0) idx--;
-    return { size: MEN_SIZES[idx], gender: "men" as Gender };
-  } else {
-    if      (heightCm < 157.5) idx = 0; // XS
-    else if (heightCm < 162.5) idx = 1; // S
-    else if (heightCm < 167.5) idx = 2; // M
-    else if (heightCm < 172.5) idx = 3; // L
-    else if (heightCm < 177.5) idx = 4; // XL
-    else                        idx = 5; // XXL
-    if (bmi > 27 && idx < 5) idx++;
-    else if (bmi < 18 && idx > 0) idx--;
-    return { size: WOMEN_SIZES[idx], gender: "women" as Gender };
-  }
+  if      (heightCm < 168.5) idx = 0; // S
+  else if (heightCm < 173.5) idx = 1; // M
+  else if (heightCm < 178.5) idx = 2; // L
+  else if (heightCm < 183.5) idx = 3; // XL
+  else                        idx = 4; // 2XL
+  if (bmi > 27 && idx < 4) idx++;
+  else if (bmi < 18.5 && idx > 0) idx--;
+  return MEN_SIZES[idx];
 }
 
 // ── Table component ───────────────────────────────────────────────────────────
@@ -154,9 +102,8 @@ function SizeTable({ rows, sizes }: { rows: { label: string; values: string[] }[
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
-  const [view,    setView]    = useState<View>("guide");
-  const [unit,    setUnit]    = useState<Unit>("cm");
-  const [gender,  setGender]  = useState<Gender>("men");
+  const [view, setView] = useState<View>("guide");
+  const [unit, setUnit] = useState<Unit>("cm");
 
   // Profile form state
   const [heightUnit, setHeightUnit] = useState<HeightUnit>("cm");
@@ -169,11 +116,7 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
   const [pref,       setPref]       = useState<Preference>("men");
 
   // Result
-  const [result, setResult] = useState<{ size: string; gender: Gender } | null>(null);
-
-  const jerseyRows  = gender === "men" ? MEN_JERSEY_ROWS[unit]  : WOMEN_JERSEY_ROWS[unit];
-  const shortsRows  = gender === "men" ? MEN_SHORTS_ROWS[unit]  : WOMEN_SHORTS_ROWS[unit];
-  const genderSizes = gender === "men" ? MEN_SIZES              : WOMEN_SIZES;
+  const [result, setResult] = useState<string | null>(null);
 
   function handleFindSize() {
     const hCm = heightUnit === "cm"
@@ -186,7 +129,7 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
     if (!hCm || !wKg || hCm < 50 || hCm > 250 || wKg < 20 || wKg > 300) {
       setResult(null);
     } else {
-      setResult(recommendSize(hCm, wKg, pref));
+      setResult(recommendSize(hCm, wKg));
     }
     setView("result");
   }
@@ -195,7 +138,6 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
     ? !!heightCm
     : !!(heightFt || heightIn);
 
-  // Header title & back button
   const headerTitle =
     view === "guide"   ? "Size Guide" :
     view === "profile" ? "Size Profile" :
@@ -254,16 +196,8 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
               </div>
             </div>
 
-            {/* Gender + unit toggles */}
+            {/* Unit toggle */}
             <div className="flex flex-wrap gap-3">
-              <div className="inline-flex items-center bg-slate-100 rounded-full p-1">
-                {(["men", "women"] as Gender[]).map((g) => (
-                  <button key={g} type="button" onClick={() => setGender(g)}
-                    className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-all ${gender === g ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
-                    {g === "men" ? "Men's" : "Women's"}
-                  </button>
-                ))}
-              </div>
               <div className="inline-flex items-center bg-slate-100 rounded-full p-1">
                 {(["cm", "in"] as Unit[]).map((u) => (
                   <button key={u} type="button" onClick={() => setUnit(u)}
@@ -274,22 +208,16 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
               </div>
             </div>
 
-            {/* Jersey */}
+            {/* Men's Jersey */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 mb-3">Jersey</p>
-              <SizeTable rows={jerseyRows} sizes={genderSizes} />
-            </div>
-
-            {/* Shorts */}
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 mb-3">Shorts</p>
-              <SizeTable rows={shortsRows} sizes={genderSizes} />
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 mb-3">Men&apos;s Jersey</p>
+              <SizeTable rows={MEN_JERSEY_ROWS[unit]} sizes={MEN_SIZES} />
             </div>
 
             {/* Kids */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-900 mb-1">Kids / Youth</p>
-              <p className="text-xs text-slate-400 mb-3">All measurements in cm. ½ Chest is garment width laid flat.</p>
+              <p className="text-xs text-slate-400 mb-3">Includes jersey &amp; shorts. Allow for a slight variation of 1–3 cm.</p>
               <SizeTable rows={KIDS_ROWS[unit]} sizes={KIDS_SIZES} />
             </div>
 
@@ -429,10 +357,10 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
                   Shopping preference <span className="font-normal text-slate-400">(optional)</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {(["unisex", "men", "women"] as Preference[]).map((p) => (
+                  {(["men", "unisex"] as Preference[]).map((p) => (
                     <button key={p} type="button" onClick={() => setPref(p)}
                       className={`px-4 py-2 rounded-xl border text-sm font-semibold transition-all ${pref === p ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 text-slate-600 hover:border-slate-300"}`}>
-                      {p.charAt(0).toUpperCase() + p.slice(1)}{p !== "unisex" ? "'s" : ""}
+                      {p === "men" ? "Men's" : "Unisex"}
                     </button>
                   ))}
                 </div>
@@ -462,8 +390,8 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
                 <>
                   <div className="rounded-2xl border-2 border-slate-900 bg-slate-50 p-6 text-center">
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Your recommended size</p>
-                    <p className="text-6xl font-extrabold tracking-tight text-slate-900">{result.size}</p>
-                    <p className="text-sm text-slate-500 mt-2">{result.gender === "men" ? "Men's" : "Women's"} jersey &amp; shorts</p>
+                    <p className="text-6xl font-extrabold tracking-tight text-slate-900">{result}</p>
+                    <p className="text-sm text-slate-500 mt-2">Men&apos;s jersey</p>
                   </div>
                   <p className="text-sm text-slate-500 leading-relaxed">
                     Your size recommendation is based on the height and weight you shared. If you prefer a looser fit, consider sizing up.
@@ -473,7 +401,7 @@ export function SizeGuideModal({ onClose }: SizeGuideModalProps) {
                 <>
                   <div className="rounded-2xl border border-dashed border-slate-400 p-6 bg-[repeating-linear-gradient(-45deg,transparent,transparent_6px,rgba(0,0,0,0.03)_6px,rgba(0,0,0,0.03)_12px)]">
                     <p className="text-sm font-bold uppercase tracking-wide text-slate-900 mb-2">No recommended size found</p>
-                    <p className="text-sm text-slate-600">We couldn't find a size match. Please check your measurements and try again.</p>
+                    <p className="text-sm text-slate-600">We couldn&apos;t find a size match. Please check your measurements and try again.</p>
                   </div>
                   <p className="text-sm text-slate-500 leading-relaxed">
                     Your size recommendation is calculated using the information you have shared and how true to size this item is.

@@ -45,6 +45,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const isFootball     = product.sport === "football" && !isTracksuit;
   const isRugby        = product.sport === "rugby"    && !isTracksuit;
   const isNationalTeam = product.sub_category === "national";
+  const isKids         = product.sub_category === "world_kids";
+  const hideExtraCustomization = isNationalTeam || isKids;
 
   // ── Customization state ──────────────────────────────────────
 
@@ -231,10 +233,12 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
           <div className="border-t border-slate-100 pt-3">
             <div className="flex items-center justify-between mb-3">
               <label className="text-sm font-bold text-slate-700">Size</label>
-              <button type="button" onClick={() => setSizeGuideOpen(true)}
-                className="text-xs font-semibold text-sky-500 hover:text-sky-600 transition-colors underline underline-offset-2">
-                Size Guide
-              </button>
+              {product.sport !== "accessories" && (
+                <button type="button" onClick={() => setSizeGuideOpen(true)}
+                  className="text-xs font-semibold text-sky-500 hover:text-sky-600 transition-colors underline underline-offset-2">
+                  Size Guide
+                </button>
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
               {variants.map((variant) => (
@@ -338,7 +342,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             </div>
 
             {/* Font type — shows when name/number is active (not for national team jerseys) */}
-            {(activeName || activeNumber) && !isNationalTeam && (
+            {(activeName || activeNumber) && !hideExtraCustomization && (
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Font Style</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -365,7 +369,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             )}
 
             {/* Badge — hidden for national team jerseys */}
-            {!isNationalTeam && <div>
+            {!hideExtraCustomization && <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">Badge / Patch</label>
               <div className="flex flex-wrap gap-2">
                 {badgeOptions.map((b) => (
@@ -566,6 +570,25 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               ))}
             </div>
           )}
+        </div>
+
+        {/* Washing guide */}
+        <div className="border-t border-slate-100 pt-4 pb-2">
+          <p className="text-sm font-bold text-slate-900 mb-3">Washing &amp; care guide</p>
+          <ul className="space-y-2.5">
+            {[
+              "Do not wash in a washing machine.",
+              "Do not iron the shirt, shorts, or any other apparel.",
+              "Avoid squeezing the clothes while washing.",
+              "Do not use a brush on stickers.",
+              "Always dry inside out.",
+            ].map((tip) => (
+              <li key={tip} className="flex items-start gap-2.5 text-sm text-slate-600">
+                <span className="mt-1.5 flex-none w-1.5 h-1.5 rounded-full bg-sky-400"/>
+                {tip}
+              </li>
+            ))}
+          </ul>
         </div>
 
 
