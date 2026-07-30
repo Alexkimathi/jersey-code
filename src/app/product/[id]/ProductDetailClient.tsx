@@ -140,7 +140,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               src={activeImageUrl}
               alt={`${product.name} — ${JERSEY_VIEWS[activeView]} view`}
               fill unoptimized
-              className="object-cover"
+              className="object-contain"
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
@@ -189,11 +189,11 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               if (!viewImages[i]) return null;
               return (
                 <button key={label} type="button" onClick={() => setActiveView(i)}
-                  className={`relative flex-1 aspect-square rounded-lg overflow-hidden border-2 transition-all duration-150 ${
+                  className={`relative w-20 h-20 flex-none rounded-lg overflow-hidden border-2 transition-all duration-150 ${
                     activeView === i ? "border-slate-900 shadow-sm" : "border-slate-200 hover:border-slate-400"
                   }`}
                 >
-                  <Image src={viewImages[i]!} alt={`${label} view`} fill unoptimized className="object-cover" sizes="10vw"/>
+                  <Image src={viewImages[i]!} alt={`${label} view`} fill unoptimized className="object-contain" sizes="10vw"/>
                 </button>
               );
             })}
