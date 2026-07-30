@@ -79,6 +79,14 @@ export default function CartPage() {
                 const key = item.cartKey ?? item.variantId;
                 const unitPrice = item.price + (item.customization?.addOnPrice ?? 0);
                 const c = item.customization;
+                const activeAddOnCount = c ? [
+                  !!c.printName,
+                  !!c.printNumber,
+                  !!(c.badge && c.badge !== "none"),
+                ].filter(Boolean).length : 0;
+                const perAddOnPrice = activeAddOnCount > 0
+                  ? Math.round((c?.addOnPrice ?? 0) / activeAddOnCount)
+                  : 0;
                 return (
                   <motion.div
                     key={key}
@@ -139,7 +147,7 @@ export default function CartPage() {
                                   <span className="text-xs text-slate-500">Print Name</span>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-900 tracking-wide">{c.printName}</span>
-                                    <span className="text-[11px] font-semibold text-sky-600">+KES {c.printNumber ? "350" : "700"}</span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES {perAddOnPrice.toLocaleString()}</span>
                                   </div>
                                 </div>
                               )}
@@ -148,7 +156,7 @@ export default function CartPage() {
                                   <span className="text-xs text-slate-500">Print Number</span>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-900">#{c.printNumber}</span>
-                                    <span className="text-[11px] font-semibold text-sky-600">+KES {c.printName ? "350" : "700"}</span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES {perAddOnPrice.toLocaleString()}</span>
                                   </div>
                                 </div>
                               )}
@@ -167,7 +175,7 @@ export default function CartPage() {
                                     <span className="text-xs font-bold text-slate-900">
                                       {c.badge === "league" ? "League Badge" : "Club Crest"}
                                     </span>
-                                    <span className="text-[11px] font-semibold text-sky-600">+KES 200</span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES {perAddOnPrice.toLocaleString()}</span>
                                   </div>
                                 </div>
                               )}
