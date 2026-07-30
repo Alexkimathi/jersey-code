@@ -60,7 +60,7 @@ export function ProductCard({ product, variants, index = 0 }: ProductCardProps) 
       variantId:  variant.id,
       name:       product.name,
       size:       variant.size,
-      price:      product.price + addOnPrice,
+      price:      product.price,
       quantity:   qty,
       image_url:  product.image_url,
       ...(hasCustomization && (name || number) ? {

@@ -63,6 +63,9 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   // Font (shown when name/number active)
   const [fontType, setFontType] = useState<"league" | "team">("league");
 
+  // Validation errors shown after a failed add-to-cart attempt
+  const [showErrors, setShowErrors] = useState(false);
+
   // ── Derived values ───────────────────────────────────────────
   const selectedVariant = variants.find((v) => v.size === selectedSize);
   const inStock = selectedVariant && selectedVariant.stock_quantity > 0;
@@ -81,17 +84,27 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
     let total = 0;
     if (badge !== "none") total += 200;
     if (nameMode === "personalize") {
-      if (nameEnabled)   total += 200;
-      if (numberEnabled) total += 200;
+      if (nameEnabled && printName.trim())   total += 200;
+      if (numberEnabled && printNumber.trim()) total += 200;
     }
     return total;
-  }, [badge, nameMode, nameEnabled, numberEnabled]);
+  }, [badge, nameMode, nameEnabled, numberEnabled, printName, printNumber]);
 
   const totalPerItem = product.price + addOnPrice;
 
   // ── Add to cart ──────────────────────────────────────────────
   const handleAddToCart = () => {
     if (!selectedVariant || !inStock) return;
+    if (nameMode === "personalize") {
+      const hasError =
+        (nameEnabled && !printName.trim()) ||
+        (numberEnabled && !printNumber.trim());
+      if (hasError) {
+        setShowErrors(true);
+        return;
+      }
+    }
+    setShowErrors(false);
 
     const cartKey = [
       selectedVariant.id,
@@ -252,7 +265,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                   { value: "personalize", label: "Personalize" },
                 ] as const).map((m) => (
                   <button key={m.value} type="button"
-                    onClick={() => setNameMode(m.value)}
+                    onClick={() => { setNameMode(m.value); setShowErrors(false); }}
                     className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
                       nameMode === m.value
                         ? "border-slate-900 bg-slate-900 text-white"
@@ -280,9 +293,16 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                         <span className="text-xs text-slate-400">max 15 chars</span>
                       </div>
                       <input type="text" disabled={!nameEnabled} value={printName}
-                        onChange={e => setPrintName(e.target.value.toUpperCase().slice(0, 15))}
+                        onChange={e => { setPrintName(e.target.value.toUpperCase().slice(0, 15)); setShowErrors(false); }}
                         placeholder="e.g. OCHIENG"
-                        className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 uppercase tracking-wide placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
+                        className={`w-full rounded-xl bg-white border px-3 py-2.5 text-sm font-bold text-slate-900 uppercase tracking-wide placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+                          showErrors && nameEnabled && !printName.trim()
+                            ? "border-red-400 focus:ring-red-400/40"
+                            : "border-slate-200 focus:ring-sky-400/40"
+                        }`}/>
+                      {showErrors && nameEnabled && !printName.trim() && (
+                        <p className="mt-1.5 text-xs font-semibold text-red-500">Please enter the name you want printed on the jersey.</p>
+                      )}
                     </div>
                   </div>
 
@@ -300,9 +320,16 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                         <span className="text-xs text-slate-400">0–99</span>
                       </div>
                       <input type="text" inputMode="numeric" disabled={!numberEnabled} value={printNumber}
-                        onChange={e => setPrintNumber(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                        onChange={e => { setPrintNumber(e.target.value.replace(/\D/g, "").slice(0, 2)); setShowErrors(false); }}
                         placeholder="10"
-                        className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
+                        className={`w-full rounded-xl bg-white border px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+                          showErrors && numberEnabled && !printNumber.trim()
+                            ? "border-red-400 focus:ring-red-400/40"
+                            : "border-slate-200 focus:ring-sky-400/40"
+                        }`}/>
+                      {showErrors && numberEnabled && !printNumber.trim() && (
+                        <p className="mt-1.5 text-xs font-semibold text-red-500">Please enter the number you want printed on the jersey.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -369,7 +396,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                   { value: "personalize", label: "Personalize" },
                 ] as const).map((m) => (
                   <button key={m.value} type="button"
-                    onClick={() => { setNameMode(m.value as "none" | "personalize"); setNameEnabled(false); setNumberEnabled(false); }}
+                    onClick={() => { setNameMode(m.value as "none" | "personalize"); setNameEnabled(false); setNumberEnabled(false); setShowErrors(false); }}
                     className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
                       nameMode === m.value
                         ? "border-slate-900 bg-slate-900 text-white"
@@ -396,9 +423,16 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                         <span className="text-xs text-slate-400">max 15 chars</span>
                       </div>
                       <input type="text" disabled={!nameEnabled} value={printName}
-                        onChange={e => setPrintName(e.target.value.toUpperCase().slice(0, 15))}
+                        onChange={e => { setPrintName(e.target.value.toUpperCase().slice(0, 15)); setShowErrors(false); }}
                         placeholder="e.g. LOMU"
-                        className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 uppercase tracking-wide placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
+                        className={`w-full rounded-xl bg-white border px-3 py-2.5 text-sm font-bold text-slate-900 uppercase tracking-wide placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+                          showErrors && nameEnabled && !printName.trim()
+                            ? "border-red-400 focus:ring-red-400/40"
+                            : "border-slate-200 focus:ring-sky-400/40"
+                        }`}/>
+                      {showErrors && nameEnabled && !printName.trim() && (
+                        <p className="mt-1.5 text-xs font-semibold text-red-500">Please enter the name you want printed on the kit.</p>
+                      )}
                     </div>
                   </div>
 
@@ -416,9 +450,16 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                         <span className="text-xs text-slate-400">1–99</span>
                       </div>
                       <input type="text" inputMode="numeric" disabled={!numberEnabled} value={printNumber}
-                        onChange={e => setPrintNumber(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                        onChange={e => { setPrintNumber(e.target.value.replace(/\D/g, "").slice(0, 2)); setShowErrors(false); }}
                         placeholder="7"
-                        className="w-full rounded-xl bg-white border border-slate-200 px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-40 disabled:cursor-not-allowed"/>
+                        className={`w-full rounded-xl bg-white border px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+                          showErrors && numberEnabled && !printNumber.trim()
+                            ? "border-red-400 focus:ring-red-400/40"
+                            : "border-slate-200 focus:ring-sky-400/40"
+                        }`}/>
+                      {showErrors && numberEnabled && !printNumber.trim() && (
+                        <p className="mt-1.5 text-xs font-semibold text-red-500">Please enter the number you want printed on the kit.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -484,12 +525,12 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                 <span>{getBadgeLabel(badge, product.team)} badge</span><span>+KES 200</span>
               </div>
             )}
-            {nameMode === "personalize" && nameEnabled && (
+            {nameMode === "personalize" && nameEnabled && printName.trim() && (
               <div className="flex justify-between text-slate-500">
                 <span>Name printing</span><span>+KES 200</span>
               </div>
             )}
-            {nameMode === "personalize" && numberEnabled && (
+            {nameMode === "personalize" && numberEnabled && printNumber.trim() && (
               <div className="flex justify-between text-slate-500">
                 <span>Number printing</span><span>+KES 200</span>
               </div>
