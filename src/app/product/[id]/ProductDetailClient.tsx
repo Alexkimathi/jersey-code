@@ -41,9 +41,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const activeImageUrl = viewImages[activeView] ?? null;
 
   // ── Which customizations apply ───────────────────────────────
-  const isTracksuit = product.name.toLowerCase().includes("tracksuit");
-  const isFootball  = product.sport === "football" && !isTracksuit;
-  const isRugby     = product.sport === "rugby"    && !isTracksuit;
+  const isTracksuit    = product.name.toLowerCase().includes("tracksuit");
+  const isFootball     = product.sport === "football" && !isTracksuit;
+  const isRugby        = product.sport === "rugby"    && !isTracksuit;
+  const isNationalTeam = product.sub_category === "national";
 
   // ── Customization state ──────────────────────────────────────
 
@@ -336,8 +337,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               )}
             </div>
 
-            {/* Font type — shows when name/number is active */}
-            {(activeName || activeNumber) && (
+            {/* Font type — shows when name/number is active (not for national team jerseys) */}
+            {(activeName || activeNumber) && !isNationalTeam && (
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Font Style</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -363,8 +364,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               </div>
             )}
 
-            {/* Badge */}
-            <div>
+            {/* Badge — hidden for national team jerseys */}
+            {!isNationalTeam && <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">Badge / Patch</label>
               <div className="flex flex-wrap gap-2">
                 {badgeOptions.map((b) => (
@@ -378,7 +379,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                   </button>
                 ))}
               </div>
-            </div>
+            </div>}
           </div>
         )}
 
