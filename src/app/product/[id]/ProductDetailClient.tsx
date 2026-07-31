@@ -42,12 +42,12 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   // ── Which customizations apply ───────────────────────────────
   const isTracksuit    = product.name.toLowerCase().includes("tracksuit");
-  const isHoodie       = product.name.toLowerCase().includes("hoodie");
   const isFootball     = product.sport === "football" && !isTracksuit;
   const isRugby        = product.sport === "rugby"    && !isTracksuit;
   const isNationalTeam = product.sub_category === "national";
   const isKids         = product.sub_category === "world_kids";
-  const hideExtraCustomization = isNationalTeam || isKids || isHoodie;
+  const isTracksuitHoodie = product.sub_category === "world_tracksuit";
+  const hideExtraCustomization = isNationalTeam || isKids || isTracksuitHoodie;
 
   // ── Customization state ──────────────────────────────────────
 
