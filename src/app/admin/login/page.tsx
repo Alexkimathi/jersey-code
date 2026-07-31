@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import { useSupabase } from "@/app/providers";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-export const dynamic = "force-dynamic";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -13,40 +10,21 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { supabase } = useSupabase();
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Login failed");
-        return;
-      }
-
-      // Hydrate the Supabase client with the tokens returned by the server
-      await supabase.auth.setSession({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-      });
-
-      router.push("/admin");
-      router.refresh();
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
+    if (error) {
+      setError(error.message);
       setIsLoading(false);
+      return;
     }
+
+    window.location.href = "/admin";
   };
 
   return (

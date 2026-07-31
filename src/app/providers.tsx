@@ -2,7 +2,6 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { Session, User, SupabaseClient } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type SupabaseContextType = {
@@ -24,10 +23,18 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
+
+    // Read the session from localStorage immediately so pages don't
+    // wait for the async onAuthStateChange INITIAL_SESSION event.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
 
     const {
       data: { subscription },
@@ -36,14 +43,13 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
-      router.refresh();
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase, router]);
+  }, [supabase]);
 
   return (
     <SupabaseContext.Provider value={{ supabase, user, session, isLoading }}>
