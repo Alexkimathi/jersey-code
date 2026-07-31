@@ -42,11 +42,12 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   // ── Which customizations apply ───────────────────────────────
   const isTracksuit    = product.name.toLowerCase().includes("tracksuit");
+  const isHoodie       = product.name.toLowerCase().includes("hoodie");
   const isFootball     = product.sport === "football" && !isTracksuit;
   const isRugby        = product.sport === "rugby"    && !isTracksuit;
   const isNationalTeam = product.sub_category === "national";
   const isKids         = product.sub_category === "world_kids";
-  const hideExtraCustomization = isNationalTeam || isKids;
+  const hideExtraCustomization = isNationalTeam || isKids || isHoodie;
 
   // ── Customization state ──────────────────────────────────────
 
@@ -472,7 +473,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             </div>
 
             {/* Font — shown when name/number active */}
-            {(activeName || activeNumber) && (
+            {(activeName || activeNumber) && !hideExtraCustomization && (
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Font Style</label>
                 <div className="grid grid-cols-2 gap-2">
