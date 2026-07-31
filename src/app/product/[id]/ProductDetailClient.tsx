@@ -19,8 +19,8 @@ interface ProductDetailClientProps {
 const JERSEY_VIEWS = ["Front", "Back", "Side", "Badge"] as const;
 
 const FONT_STYLES: Record<"league" | "team", React.CSSProperties> = {
-  league:  { fontFamily: '"Impact","Arial Narrow",sans-serif', fontWeight: 900, letterSpacing: "0.06em" },
-  team:    { fontFamily: '"Georgia","Times New Roman",serif',  fontWeight: 700, letterSpacing: "0.02em" },
+  league:  { fontFamily: '"Impact","Arial Narrow",sans-serif', fontWeight: 900, letterSpacing: "0.08em" },
+  team:    { fontFamily: '"Impact","Arial Narrow",sans-serif', fontWeight: 700, letterSpacing: "0.03em" },
 };
 
 export function ProductDetailClient({ product, variants }: ProductDetailClientProps) {
