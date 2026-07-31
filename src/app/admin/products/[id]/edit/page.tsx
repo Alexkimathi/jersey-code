@@ -347,6 +347,38 @@ function VariantsManager({
   );
 }
 
+// ── Category / sub-category helpers ─────────────────────────────────────────
+
+const CATEGORY_TO_SPORT: Record<string, Sport> = {
+  featured:    "football",
+  epl:         "football",
+  others:      "football",
+  rugby:       "rugby",
+  formula_one: "formula_one",
+  accessories: "accessories",
+};
+
+const CATEGORY_DEFAULT_SUB: Record<string, string> = {
+  featured:    "new_arrivals",
+  epl:         "epl_club",
+  others:      "world_club",
+  rugby:       "",
+  formula_one: "",
+  accessories: "Balls",
+};
+
+function deriveCategory(sport: string, sub_category: string): string {
+  if (sport === "football") {
+    return sub_category?.startsWith("epl_") ? "epl" : "others";
+  }
+  return sport;
+}
+
+function deriveEplSubUi(sub_category: string, is_clearance: boolean): string {
+  if (sub_category === "epl_club" && is_clearance) return "epl_clearance";
+  return sub_category;
+}
+
 // ── Main product edit form ───────────────────────────────────────────────────
 
 export default function ProductForm({ params }: ProductFormProps) {
@@ -356,6 +388,7 @@ export default function ProductForm({ params }: ProductFormProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [productId, setProductId] = useState<string | null>(null);
+  const [uiCategory, setUiCategory] = useState<string>("epl");
 
   useEffect(() => {
     params.then((p) => setProductId(p.id || null));
@@ -408,6 +441,8 @@ export default function ProductForm({ params }: ProductFormProps) {
         .single();
 
       if (data) {
+        const sub_category = (data as any).sub_category ?? "";
+        setUiCategory(deriveCategory(data.sport, sub_category));
         setFormData({
           name: data.name,
           sport: data.sport,
@@ -421,7 +456,7 @@ export default function ProductForm({ params }: ProductFormProps) {
           is_hidden: data.is_hidden,
           is_featured: data.is_featured,
           is_clearance: (data as any).is_clearance ?? false,
-          sub_category: (data as any).sub_category ?? "",
+          sub_category,
         });
         setPreviews({
           front: data.image_url || "",
@@ -635,13 +670,25 @@ export default function ProductForm({ params }: ProductFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sport *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
               <select
-                value={formData.sport}
-                onChange={(e) => setFormData({ ...formData, sport: e.target.value as Sport, sub_category: "" })}
+                value={uiCategory}
+                onChange={(e) => {
+                  const cat = e.target.value;
+                  setUiCategory(cat);
+                  setFormData({
+                    ...formData,
+                    sport: CATEGORY_TO_SPORT[cat],
+                    sub_category: CATEGORY_DEFAULT_SUB[cat],
+                    is_clearance: false,
+                    is_featured: cat === "featured" ? formData.is_featured : false,
+                  });
+                }}
                 className={fieldClass}
               >
-                <option value="football">Football (EPL / World Football)</option>
+                <option value="featured">Featured</option>
+                <option value="epl">EPL (English Premier League)</option>
+                <option value="others">Others (World Football)</option>
                 <option value="rugby">Rugby</option>
                 <option value="formula_one">Formula One</option>
                 <option value="accessories">Accessories</option>
@@ -650,53 +697,58 @@ export default function ProductForm({ params }: ProductFormProps) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sub-category</label>
               <select
-                value={formData.sub_category}
+                value={
+                  uiCategory === "featured"
+                    ? (formData.is_featured ? "best_sellers" : "new_arrivals")
+                    : uiCategory === "epl"
+                    ? deriveEplSubUi(formData.sub_category, formData.is_clearance)
+                    : formData.sub_category
+                }
                 onChange={(e) => {
                   const val = e.target.value;
-                  setFormData({
-                    ...formData,
-                    sub_category: val,
-                    is_clearance: val === "world_clearance",
-                  });
+                  if (val === "best_sellers") {
+                    setFormData({ ...formData, is_featured: true });
+                  } else if (val === "new_arrivals") {
+                    setFormData({ ...formData, is_featured: false });
+                  } else if (val === "epl_clearance") {
+                    setFormData({ ...formData, sub_category: "epl_club", is_clearance: true });
+                  } else {
+                    setFormData({ ...formData, sub_category: val, is_clearance: false });
+                  }
                 }}
                 className={fieldClass}
               >
-                {formData.sport === "football" && <>
-                  <option value="">— Select sub-category —</option>
-                  <optgroup label="Premier League (EPL page)">
-                    <option value="epl_club">Club Jersey</option>
-                    <option value="epl_kids">Kids Jersey</option>
-                    <option value="epl_vintage">Vintage Jersey</option>
-                    <option value="epl_special">Special Edition Kit</option>
-                  </optgroup>
-                  <optgroup label="World Football page">
-                    <option value="world_club">Club Jersey</option>
-                    <option value="world_kids">Kids Jersey</option>
-                    <option value="world_vintage">Vintage Jersey</option>
-                    <option value="world_special">Special Edition Kit</option>
-                    <option value="world_tracksuit">Tracksuit</option>
-                    <option value="world_clearance">Clearance Sale</option>
-                  </optgroup>
-                  <optgroup label="Both pages">
-                    <option value="national">National Team Kit</option>
-                  </optgroup>
+                {uiCategory === "featured" && <>
+                  <option value="new_arrivals">New Arrivals</option>
+                  <option value="best_sellers">Best Sellers</option>
                 </>}
-                {formData.sport === "rugby" && <>
-                  <option value="">Jersey</option>
+                {uiCategory === "epl" && <>
+                  <option value="epl_club">Club Jerseys</option>
+                  <option value="epl_clearance">Clearance Sale</option>
                 </>}
-                {formData.sport === "formula_one" && <>
-                  <option value="">Jersey</option>
-                  <option value="hoodie_polo">Hoodie &amp; Polo</option>
+                {uiCategory === "others" && <>
+                  <option value="world_club">Club Jerseys</option>
+                  <option value="national">National Teams Jerseys</option>
+                  <option value="world_kids">Kids Jerseys</option>
+                  <option value="world_vintage">Retro Jerseys</option>
+                  <option value="world_special">Special Edition Jerseys</option>
+                  <option value="world_tracksuit">Tracksuits</option>
                 </>}
-                {formData.sport === "accessories" && <>
-                  <option value="">— Select type —</option>
+                {uiCategory === "rugby" && <>
+                  <option value="">Jerseys</option>
+                </>}
+                {uiCategory === "formula_one" && <>
+                  <option value="">Jerseys</option>
+                  <option value="hoodie_polo">Hoodies &amp; Polos</option>
+                </>}
+                {uiCategory === "accessories" && <>
                   <option value="Balls">Balls</option>
                   <option value="Flags">Flags</option>
                   <option value="Socks">Socks</option>
                 </>}
               </select>
               <p className="mt-1 text-xs text-gray-400">
-                Determines which page and tab this product appears under on the storefront.
+                Controls which tab this product appears under on the storefront.
               </p>
             </div>
           </div>
