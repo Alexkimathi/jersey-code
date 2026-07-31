@@ -34,7 +34,7 @@ export default async function OthersPage() {
     { label: "Kids Jerseys",             products: allFootball.filter(p => p.sub_category === "world_kids") },
     { label: "Retro Jerseys",            products: allFootball.filter(p => p.sub_category === "world_vintage") },
     { label: "Special Edition Jerseys",  products: allFootball.filter(p => p.sub_category === "world_special") },
-    { label: "Tracksuits",               products: allFootball.filter(p => p.sub_category === "world_tracksuit") },
+    { label: "Tracksuits & Hoodies",      products: allFootball.filter(p => p.sub_category === "world_tracksuit") },
   ];
 
   return (

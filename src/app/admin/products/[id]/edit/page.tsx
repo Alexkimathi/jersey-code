@@ -732,14 +732,13 @@ export default function ProductForm({ params }: ProductFormProps) {
                   <option value="world_kids">Kids Jerseys</option>
                   <option value="world_vintage">Retro Jerseys</option>
                   <option value="world_special">Special Edition Jerseys</option>
-                  <option value="world_tracksuit">Tracksuits</option>
+                  <option value="world_tracksuit">Tracksuits & Hoodies</option>
                 </>}
                 {uiCategory === "rugby" && <>
                   <option value="">Jerseys</option>
                 </>}
                 {uiCategory === "formula_one" && <>
                   <option value="">Jerseys</option>
-                  <option value="hoodie_polo">Hoodies &amp; Polos</option>
                 </>}
                 {uiCategory === "accessories" && <>
                   <option value="Balls">Balls</option>

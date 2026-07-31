@@ -91,18 +91,6 @@ async function getProductsBySport(sport: string): Promise<Product[]> {
   return data || [];
 }
 
-async function getF1Hoodies(): Promise<Product[]> {
-  const supabase = createServerClient();
-  const { data } = await supabase
-    .from("products")
-    .select("*")
-    .eq("sport", "formula_one")
-    .eq("is_hidden", false)
-    .not("image_url", "is", null)
-    .order("created_at", { ascending: false });
-  const all = (data ?? []) as Product[];
-  return all.filter(p => p.sub_category === "hoodie_polo" || p.name.toLowerCase().includes("hoodie"));
-}
 
 
 // ── page ───────────────────────────────────────────────────────
@@ -116,7 +104,6 @@ export default async function HomePage() {
     allFootball,
     rugbyProducts,
     f1Products,
-    f1Hoodies,
     accessoriesAll,
   ] = await Promise.all([
     getBanners(),
@@ -126,7 +113,6 @@ export default async function HomePage() {
     getAllFootballProducts(),
     getProductsBySport("rugby"),
     getProductsBySport("formula_one"),
-    getF1Hoodies(),
     getProductsBySport("accessories"),
   ]);
 
@@ -234,7 +220,7 @@ export default async function HomePage() {
                   { label: "Kids Jerseys",            products: clubKids },
                   { label: "Retro Jerseys",           products: clubVintage },
                   { label: "Special Edition Jerseys", products: clubSpecial },
-                  { label: "Tracksuits",              products: clubTracksuits },
+                  { label: "Tracksuits & Hoodies",    products: clubTracksuits },
                 ]}
                 defaultTab="Club Jerseys"
                 variants={variants}
@@ -278,8 +264,7 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "Jerseys", products: f1Products.filter(p => p.sub_category !== "hoodie_polo" && !p.name.toLowerCase().includes("hoodie")) },
-                  { label: "Hoodies & Polos", products: f1Hoodies },
+                  { label: "Jerseys", products: f1Products },
                 ]}
                 defaultTab="Jerseys"
                 variants={variants}

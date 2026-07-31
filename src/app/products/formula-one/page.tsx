@@ -13,26 +13,7 @@ async function getF1Products(): Promise<Product[]> {
     .eq("is_hidden", false)
     .not("image_url", "is", null)
     .order("created_at", { ascending: false });
-  const all = (data ?? []) as Product[];
-  return all.filter(
-    (p) => p.sub_category !== "hoodie_polo" && !p.name.toLowerCase().includes("hoodie")
-  );
-}
-
-async function getF1Hoodies(): Promise<Product[]> {
-  const supabase = createServerClient();
-  const { data } = await supabase
-    .from("products")
-    .select("*")
-    .eq("sport", "formula_one")
-    .eq("is_hidden", false)
-    .not("image_url", "is", null)
-    .order("is_featured", { ascending: false })
-    .order("name", { ascending: true });
-  const all = (data ?? []) as Product[];
-  return all.filter(
-    (p) => p.sub_category === "hoodie_polo" || p.name.toLowerCase().includes("hoodie")
-  );
+  return (data ?? []) as Product[];
 }
 
 async function getProductVariants(): Promise<ProductVariant[]> {
@@ -42,15 +23,13 @@ async function getProductVariants(): Promise<ProductVariant[]> {
 }
 
 export default async function FormulaOnePage() {
-  const [jerseys, hoodies, variants] = await Promise.all([
+  const [jerseys, variants] = await Promise.all([
     getF1Products(),
-    getF1Hoodies(),
     getProductVariants(),
   ]);
 
   const tabs = [
     { label: "Jerseys", products: jerseys },
-    { label: "Hoodies & Polos", products: hoodies },
   ];
 
   return (
