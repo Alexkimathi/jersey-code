@@ -1,6 +1,7 @@
 "use client";
 
 import { useCartStore } from "@/hooks/useCartStore";
+import { BADGE_OPTIONS } from "@/lib/football-customization";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
@@ -79,10 +80,11 @@ export default function CartPage() {
                 const key = item.cartKey ?? item.variantId;
                 const unitPrice = item.price + (item.customization?.addOnPrice ?? 0);
                 const c = item.customization;
+                const activeBadges = c?.badges ?? (c?.badge && c.badge !== "none" ? [c.badge] : []);
                 const activeAddOnCount = c ? [
                   !!c.printName,
                   !!c.printNumber,
-                  !!(c.badge && c.badge !== "none"),
+                  ...activeBadges.map(() => true),
                 ].filter(Boolean).length : 0;
                 const perAddOnPrice = activeAddOnCount > 0
                   ? Math.round((c?.addOnPrice ?? 0) / activeAddOnCount)
@@ -136,7 +138,7 @@ export default function CartPage() {
                         </div>
 
                         {/* Customization summary */}
-                        {c && (c.printName || c.printNumber || (c.badge && c.badge !== "none")) && (
+                        {c && (c.printName || c.printNumber || activeBadges.length > 0) && (
                           <div className="rounded-2xl border border-slate-100 bg-slate-50 overflow-hidden">
                             <p className="px-3 pt-2.5 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                               Customization
@@ -168,17 +170,17 @@ export default function CartPage() {
                                   </span>
                                 </div>
                               )}
-                              {c.badge && c.badge !== "none" && (
-                                <div className="flex items-center justify-between px-3 py-2">
+                              {activeBadges.map((b) => (
+                                <div key={b} className="flex items-center justify-between px-3 py-2">
                                   <span className="text-xs text-slate-500">Badge</span>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-900">
-                                      {c.badge === "league" ? "League Badge" : "Club Crest"}
+                                      {BADGE_OPTIONS.find((o) => o.value === b)?.label ?? b}
                                     </span>
-                                    <span className="text-[11px] font-semibold text-sky-600">+KES {perAddOnPrice.toLocaleString()}</span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES {(b === "no_to_racism" ? 200 : 100).toLocaleString()}</span>
                                   </div>
                                 </div>
-                              )}
+                              ))}
                             </div>
                           </div>
                         )}

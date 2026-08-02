@@ -364,20 +364,27 @@ export const TEAM_SQUADS: Partial<Record<string, TeamSquad>> = {
   },
 };
 
-export function getLeagueBadges(team: string | null): Array<{ value: string; label: string }> {
-  const badges: Array<{ value: string; label: string }> = [
-    { value: "none", label: "None" },
-    { value: "champions_league", label: "Champions League  +KES 200" },
-  ];
-  if (team) {
-    const league = TEAM_LEAGUE[team];
-    if (league) badges.push({ value: "league", label: `${league}  +KES 200` });
-  }
-  return badges;
+export const BADGE_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "premier_league",              label: "Premier League Badge" },
+  { value: "la_liga",                     label: "La Liga Badge" },
+  { value: "bundesliga",                  label: "Bundesliga Badge" },
+  { value: "serie_a",                     label: "Serie A Badge" },
+  { value: "club_world_cup",              label: "Club World Cup Badge" },
+  { value: "uefa_champions_league",       label: "UEFA Champions League Badge" },
+  { value: "uefa_europa_league",          label: "UEFA Europa League Badge" },
+  { value: "no_to_racism",               label: "No to Racism Badge" },
+  { value: "foundation",                  label: "Foundation Badge" },
+  { value: "intercontinental_2024",       label: "Intercontinental Champions Badge 2024" },
+  { value: "fifa_world_champions_2025",   label: "FIFA World Champions Badge 2025" },
+  { value: "world_cup",                   label: "World Cup Badge" },
+  { value: "fa",                          label: "FA Badge" },
+];
+
+/** @deprecated kept for backwards compat with existing cart items */
+export function getLeagueBadges(_team: string | null): Array<{ value: string; label: string }> {
+  return [{ value: "none", label: "None" }, ...BADGE_OPTIONS];
 }
 
-export function getBadgeLabel(badgeValue: string, team: string | null): string {
-  if (badgeValue === "champions_league") return "Champions League";
-  if (badgeValue === "league" && team) return TEAM_LEAGUE[team] ?? "League";
-  return "";
+export function getBadgeLabel(badgeValue: string, _team: string | null): string {
+  return BADGE_OPTIONS.find((b) => b.value === badgeValue)?.label ?? "";
 }

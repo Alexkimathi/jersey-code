@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Product, ProductVariant } from "@/lib/supabase/types";
 import { useCartStore } from "@/hooks/useCartStore";
 import { TEAM_IMAGES } from "@/lib/teamImages";
-import { getLeagueBadges, getBadgeLabel } from "@/lib/football-customization";
+import { BADGE_OPTIONS, getBadgeLabel } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import { SizeGuideModal } from "@/components/storefront/SizeGuideModal";
 import { getProductDescription } from "@/lib/product-descriptions";
@@ -51,9 +51,15 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   // ── Customization state ──────────────────────────────────────
 
-  // Badge (football only)
-  const [badge, setBadge] = useState<string>("none");
-  const badgeOptions = useMemo(() => getLeagueBadges(product.team), [product.team]);
+  // Badge (football only) — multi-select
+  const [badges, setBadges] = useState<string[]>([]);
+  const [badgeOpen, setBadgeOpen] = useState(false);
+
+  function toggleBadge(value: string) {
+    setBadges((prev) =>
+      prev.includes(value) ? prev.filter((b) => b !== value) : [...prev, value]
+    );
+  }
 
   // Name & Number mode: none | personalize
   const [nameMode, setNameMode] = useState<"none" | "personalize">("none");
@@ -86,13 +92,15 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
   const addOnPrice = useMemo(() => {
     let total = 0;
-    if (badge !== "none") total += 200;
+    for (const b of badges) {
+      total += b === "no_to_racism" ? 200 : 100;
+    }
     if (nameMode === "personalize") {
-      if (nameEnabled && printName.trim())   total += 200;
+      if (nameEnabled && printName.trim())     total += 200;
       if (numberEnabled && printNumber.trim()) total += 200;
     }
     return total;
-  }, [badge, nameMode, nameEnabled, numberEnabled, printName, printNumber]);
+  }, [badges, nameMode, nameEnabled, numberEnabled, printName, printNumber]);
 
   const totalPerItem = product.price + addOnPrice;
 
@@ -112,7 +120,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
 
     const cartKey = [
       selectedVariant.id,
-      badge,
+      badges.join(","),
       nameMode,
       activeName,
       activeNumber,
@@ -130,7 +138,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
       image_url:  product.image_url,
       customization: {
         edition: "fan",
-        badge,
+        badge:   badges[0] ?? "none",
+        badges:  badges.length > 0 ? badges : undefined,
         printName:   activeName   || undefined,
         printNumber: activeNumber || undefined,
         font:        (activeName || activeNumber) ? fontType : undefined,
@@ -141,7 +150,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   };
 
   // ── Badge overlay label ──────────────────────────────────────
-  const badgeOverlayLabel = badge !== "none" ? getBadgeLabel(badge, product.team) : "";
+  const badgeOverlayLabel = badges.length > 0 ? badges.map((b) => getBadgeLabel(b, product.team)).join(", ") : "";
 
   return (
     <>
@@ -358,10 +367,15 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                           : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                       }`}>
                       <p className="text-sm font-bold leading-tight" style={FONT_STYLES[f.value]}>
-                        {activeName || "NAME"}
+                        {f.label.toUpperCase()}
                       </p>
+                      {(activeName || activeNumber) && (
+                        <p className="text-[11px] font-semibold leading-tight mt-0.5" style={FONT_STYLES[f.value]}>
+                          {[activeName, activeNumber].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
                       <p className={`text-[11px] mt-1 ${fontType === f.value ? "text-slate-300" : "text-slate-400"}`}>
-                        {f.label} · {f.sub}
+                        {f.label}
                       </p>
                     </button>
                   ))}
@@ -370,21 +384,68 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             )}
 
             {/* Badge — hidden for national team jerseys */}
-            {!hideExtraCustomization && <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Badge / Patch</label>
-              <div className="flex flex-wrap gap-2">
-                {badgeOptions.map((b) => (
-                  <button key={b.value} type="button" onClick={() => setBadge(b.value)}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                      badge === b.value
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                    }`}>
-                    {b.label}
-                  </button>
-                ))}
+            {!hideExtraCustomization && (
+              <div>
+                {/* Toggle row */}
+                <button type="button" onClick={() => { setBadgeOpen((o) => !o); if (badgeOpen) setBadges([]); }}
+                  className="flex items-center gap-3 w-full group">
+                  {/* Checkbox */}
+                  <span className={`flex h-5 w-5 flex-none items-center justify-center rounded border-2 transition ${
+                    badgeOpen ? "border-blue-500 bg-blue-500" : "border-slate-300 bg-white group-hover:border-blue-400"
+                  }`}>
+                    {badgeOpen && (
+                      <svg className="h-3 w-3 text-white" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </span>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-blue-600">Badges</p>
+                    {badgeOpen && <p className="text-[11px] text-slate-400">Add a little flair to your wear</p>}
+                  </div>
+                </button>
+
+                {/* Badge list */}
+                {badgeOpen && (
+                  <div className="mt-3">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-blue-500 mb-2">Choose your badge/s</p>
+                    <div className="rounded-xl border border-blue-100 overflow-hidden divide-y divide-blue-50">
+                      {BADGE_OPTIONS.map((b) => {
+                        const isNoRacism = b.value === "no_to_racism";
+                        const isChecked  = badges.includes(b.value);
+                        return (
+                          <button key={b.value} type="button" onClick={() => toggleBadge(b.value)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs transition ${
+                              isNoRacism
+                                ? isChecked ? "bg-green-50" : "bg-white hover:bg-green-50"
+                                : isChecked ? "bg-blue-50" : "bg-white hover:bg-blue-50"
+                            }`}>
+                            {/* Checkbox */}
+                            <span className={`flex h-4 w-4 flex-none items-center justify-center rounded border-2 transition ${
+                              isChecked
+                                ? isNoRacism ? "border-green-500 bg-green-500" : "border-blue-500 bg-blue-500"
+                                : isNoRacism ? "border-green-300" : "border-slate-300"
+                            }`}>
+                              {isChecked && (
+                                <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 12 12" fill="none">
+                                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </span>
+                            <span className={`flex-1 font-medium ${isNoRacism ? "text-green-700" : "text-blue-700"}`}>
+                              {b.label}
+                            </span>
+                            <span className={isNoRacism ? "text-green-500" : "text-blue-400"}>
+                              +KSh {isNoRacism ? 200 : 100}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>}
+            )}
           </div>
         )}
 
@@ -488,10 +549,15 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                           : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                       }`}>
                       <p className="text-sm font-bold leading-tight" style={FONT_STYLES[f.value]}>
-                        {activeName || "NAME"}
+                        {f.label.toUpperCase()}
                       </p>
+                      {(activeName || activeNumber) && (
+                        <p className="text-[11px] font-semibold leading-tight mt-0.5" style={FONT_STYLES[f.value]}>
+                          {[activeName, activeNumber].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
                       <p className={`text-[11px] mt-1 ${fontType === f.value ? "text-slate-300" : "text-slate-400"}`}>
-                        {f.label} · {f.sub}
+                        {f.label}
                       </p>
                     </button>
                   ))}
@@ -526,11 +592,12 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             <div className="flex justify-between text-slate-600">
               <span>Base price</span><span>KES {product.price.toLocaleString()}</span>
             </div>
-            {badge !== "none" && (
-              <div className="flex justify-between text-slate-500">
-                <span>{getBadgeLabel(badge, product.team)} badge</span><span>+KES 200</span>
+            {badges.map((b) => (
+              <div key={b} className="flex justify-between text-slate-500">
+                <span>{getBadgeLabel(b, product.team)}</span>
+                <span>+KES {b === "no_to_racism" ? 200 : 100}</span>
               </div>
-            )}
+            ))}
             {nameMode === "personalize" && nameEnabled && printName.trim() && (
               <div className="flex justify-between text-slate-500">
                 <span>Name printing</span><span>+KES 200</span>

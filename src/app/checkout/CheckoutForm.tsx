@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/hooks/useCartStore";
+import { BADGE_OPTIONS } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import {
   FulfillmentMethod,
@@ -395,9 +396,11 @@ export function CheckoutForm() {
                         {c.font && ` · ${c.font}`}
                       </p>
                     )}
-                    {c?.badge && c.badge !== "none" && (
-                      <p className="text-xs text-slate-400">{c.badge === "league" ? "League Badge" : "Club Crest"}</p>
-                    )}
+                    {(c?.badges ?? (c?.badge && c.badge !== "none" ? [c.badge] : [])).map((b: string) => (
+                      <p key={b} className="text-xs text-slate-400">
+                        {BADGE_OPTIONS.find((o) => o.value === b)?.label ?? b}
+                      </p>
+                    ))}
                   </div>
                   <p className="text-sm font-bold text-slate-900 whitespace-nowrap">
                     KES {(unitPrice * item.quantity).toLocaleString()}

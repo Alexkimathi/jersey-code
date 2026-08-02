@@ -127,7 +127,8 @@ export interface JerseyCustomization {
   printNumber?: string;
   font?: string;
   printColor?: string;
-  badge: JerseyBadge;
+  badge: JerseyBadge;       // kept for backward compat (first badge or "none")
+  badges?: string[];         // multi-select badge array
   addOnPrice: number;
 }
 
