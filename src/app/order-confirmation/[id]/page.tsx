@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { OrderConfirmationClient } from "./OrderConfirmationClient";
 
@@ -7,7 +7,7 @@ interface OrderConfirmationPageProps {
 }
 
 async function getOrder(id: string) {
-  const supabase = createServerClient() as any;
+  const supabase = createServiceClient() as any;
   const { data, error } = await supabase
     .from("orders")
     .select("*")

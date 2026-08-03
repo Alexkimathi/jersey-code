@@ -33,9 +33,11 @@ const menuItemVariants = {
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
 
   useEffect(() => {
+    setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -111,7 +113,7 @@ export function Header() {
             >
               <ShoppingBag className="w-4 h-4" />
               <AnimatePresence mode="popLayout">
-                {itemCount > 0 && (
+                {mounted && itemCount > 0 && (
                   <motion.span
                     key={itemCount}
                     initial={{ scale: 0, rotate: -30 }}

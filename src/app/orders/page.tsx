@@ -1,15 +1,20 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import Link from 'next/link';
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Search, Package, ChevronLeft } from "lucide-react";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+interface OrderItem {
+  id: string;
+  quantity: number;
+  unit_price: number;
+  custom_name?: string;
+  custom_number?: string;
+  products?: { name: string; image_url: string | null };
+}
 
-interface OrderWithItems {
+interface Order {
   id: string;
   customer_phone: string;
   customer_name: string;
@@ -17,243 +22,212 @@ interface OrderWithItems {
   total_amount: number;
   order_status: string;
   payment_status: string;
+  fulfillment_method: string;
   created_at: string;
-  order_items: any[];
+  order_items: OrderItem[];
 }
 
-const statusColors: Record<string, string> = {
-  processing: 'bg-yellow-100 text-yellow-800',
-  ready: 'bg-blue-100 text-blue-800',
-  out_for_delivery: 'bg-purple-100 text-purple-800',
-  completed: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
+const orderStatusLabel: Record<string, { label: string; className: string }> = {
+  processing:       { label: "Processing",       className: "bg-amber-100 text-amber-800" },
+  ready:            { label: "Ready",            className: "bg-blue-100 text-blue-800" },
+  out_for_delivery: { label: "Out for Delivery", className: "bg-purple-100 text-purple-800" },
+  completed:        { label: "Completed",        className: "bg-emerald-100 text-emerald-800" },
+  cancelled:        { label: "Cancelled",        className: "bg-red-100 text-red-800" },
 };
 
-const paymentStatusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  paid: 'bg-green-100 text-green-800',
-  failed: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-800',
+const paymentStatusLabel: Record<string, { label: string; className: string }> = {
+  pending:   { label: "Payment Pending", className: "bg-amber-100 text-amber-800" },
+  paid:      { label: "Paid",            className: "bg-emerald-100 text-emerald-800" },
+  failed:    { label: "Payment Failed",  className: "bg-red-100 text-red-800" },
+  cancelled: { label: "Cancelled",       className: "bg-slate-100 text-slate-600" },
 };
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<OrderWithItems[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [showForm, setShowForm] = useState(true);
-  const [error, setError] = useState('');
+  const [phone, setPhone]       = useState("");
+  const [orders, setOrders]     = useState<Order[] | null>(null);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState("");
 
-  const fetchOrders = async (phone: string) => {
-    if (!phone.trim()) {
-      setError('Please enter a phone number');
-      return;
-    }
-
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone.trim()) return;
     setLoading(true);
-    setError('');
+    setError("");
+    setOrders(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('orders')
-        .select(
-          `
-          id,
-          customer_phone,
-          customer_name,
-          customer_email,
-          total_amount,
-          order_status,
-          payment_status,
-          created_at,
-          order_items (
-            id,
-            product_id,
-            quantity,
-            unit_price,
-            custom_name,
-            custom_number,
-            products (
-              name,
-              image_url
-            )
-          )
-        `
-        )
-        .eq('customer_phone', phone)
-        .order('created_at', { ascending: false });
-
-      if (fetchError) {
-        setError('Failed to fetch orders');
-        setOrders([]);
-      } else if (!data || data.length === 0) {
-        setError('No orders found for this phone number');
-        setOrders([]);
-      } else {
-        setOrders(data as OrderWithItems[]);
-        setShowForm(false);
-      }
+      const res = await fetch(`/api/orders?phone=${encodeURIComponent(phone.trim())}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to fetch orders");
+      setOrders(json.orders);
     } catch (err) {
-      setError('Error fetching orders');
-      setOrders([]);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchOrders(phoneNumber);
-  };
+  const hasResults = orders !== null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8">Order Tracking</h1>
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-3xl mx-auto px-4 py-10 sm:px-6">
 
-        {showForm ? (
-          <div className="bg-white p-8 rounded-lg shadow max-w-md">
-            <p className="text-gray-600 mb-6">
-              Enter your phone number to track your orders
-            </p>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="Phone number (e.g., +254712345678)"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? 'Searching...' : 'Find Orders'}
-              </button>
-            </form>
-            {error && <p className="text-red-600 mt-4 text-sm">{error}</p>}
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-extrabold text-slate-900">Track Your Order</h1>
+          <p className="text-sm text-slate-500 mt-1">Enter the phone number you used at checkout</p>
+        </div>
+
+        {/* Search form */}
+        <form onSubmit={handleSearch} className="flex gap-2 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="e.g. 0712 345 678 or +254712345678"
+              className="w-full rounded-xl bg-white border border-slate-200 pl-10 pr-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/50 shadow-sm"
+            />
           </div>
-        ) : (
-          <>
-            <button
-              onClick={() => {
-                setShowForm(true);
-                setPhoneNumber('');
-                setOrders([]);
-              }}
-              className="mb-6 text-blue-600 hover:underline text-sm"
-            >
-              ← Search Different Number
-            </button>
+          <button
+            type="submit"
+            disabled={loading || !phone.trim()}
+            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-sky-600 transition-colors disabled:opacity-50 shadow-sm"
+          >
+            {loading ? "Searching…" : "Search"}
+          </button>
+        </form>
 
-            {loading ? (
-              <div className="text-center py-12">Loading...</div>
-            ) : error ? (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-lg text-red-700">
-                {error}
-              </div>
-            ) : orders.length === 0 ? (
-              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg text-yellow-700">
-                No orders found
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {orders.map((order) => (
-                  <div key={order.id} className="bg-white p-6 rounded-lg shadow">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        {/* Error */}
+        {error && (
+          <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700 mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* No results */}
+        {hasResults && orders!.length === 0 && !error && (
+          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <Package className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p className="font-semibold text-slate-700">No orders found</p>
+            <p className="text-sm text-slate-400 mt-1">
+              No orders were found for <span className="font-medium text-slate-600">{phone}</span>.
+              Try a different format (e.g. 0712… or +254712…).
+            </p>
+          </div>
+        )}
+
+        {/* Results */}
+        {hasResults && orders!.length > 0 && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-slate-500">
+                {orders!.length} order{orders!.length !== 1 ? "s" : ""} found
+              </p>
+              <button
+                onClick={() => { setOrders(null); setPhone(""); setError(""); }}
+                className="flex items-center gap-1 text-xs font-semibold text-sky-600 hover:text-sky-700"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" /> Search again
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {orders!.map((order) => {
+                const os = orderStatusLabel[order.order_status] ?? { label: order.order_status, className: "bg-slate-100 text-slate-600" };
+                const ps = paymentStatusLabel[order.payment_status] ?? { label: order.payment_status, className: "bg-slate-100 text-slate-600" };
+
+                return (
+                  <div key={order.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+
+                    {/* Order header */}
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                       <div>
-                        <h3 className="text-lg font-semibold">Order #{order.id.slice(0, 8)}</h3>
-                        <p className="text-sm text-gray-600">
-                          {new Date(order.created_at).toLocaleDateString()}
+                        <p className="text-xs text-slate-400 font-medium">Order</p>
+                        <p className="font-mono font-bold text-slate-900 text-sm tracking-wide">
+                          #{order.id.slice(0, 8).toUpperCase()}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {new Date(order.created_at).toLocaleDateString("en-KE", {
+                            day: "numeric", month: "short", year: "numeric",
+                          })}
                         </p>
                       </div>
-                      <div className="flex gap-2 mt-4 sm:mt-0">
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            statusColors[order.order_status] || 'bg-gray-100'
-                          }`}
-                        >
-                          {order.order_status.replace(/_/g, ' ').toUpperCase()}
+                      <div className="flex flex-col items-end gap-1.5">
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${os.className}`}>
+                          {os.label}
                         </span>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            paymentStatusColors[order.payment_status] || 'bg-gray-100'
-                          }`}
-                        >
-                          {order.payment_status.toUpperCase()}
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${ps.className}`}>
+                          {ps.label}
                         </span>
                       </div>
                     </div>
 
-                    {/* Order Items */}
-                    <div className="mb-6 border-t border-gray-200 pt-4">
-                      {order.order_items.map((item: any) => (
-                        <div key={item.id} className="flex gap-4 py-3">
-                          {item.products?.image_url && (
-                            <img
-                              src={item.products.image_url}
-                              alt={item.products.name}
-                              className="w-20 h-20 object-cover rounded"
-                            />
+                    {/* Items */}
+                    <div className="divide-y divide-slate-50 px-5">
+                      {order.order_items.map((item) => (
+                        <div key={item.id} className="flex items-center gap-3 py-3">
+                          {item.products?.image_url ? (
+                            <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 flex-none">
+                              <Image
+                                src={item.products.image_url}
+                                alt={item.products.name ?? ""}
+                                fill
+                                unoptimized
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-14 h-14 rounded-xl bg-slate-100 flex-none" />
                           )}
-                          <div className="flex-1">
-                            <h4 className="font-semibold">{item.products?.name}</h4>
-                            <p className="text-sm text-gray-600">
-                              Qty: {item.quantity} × KES {item.unit_price}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-800 truncate">
+                              {item.products?.name ?? "Product"}
                             </p>
-                            {item.custom_name && (
-                              <p className="text-sm text-gray-600">
-                                Custom: {item.custom_name}
-                                {item.custom_number && ` #${item.custom_number}`}
+                            <p className="text-xs text-slate-400">Qty: {item.quantity}</p>
+                            {(item.custom_name || item.custom_number) && (
+                              <p className="text-xs text-sky-600 font-medium mt-0.5">
+                                {[item.custom_name, item.custom_number && `#${item.custom_number}`]
+                                  .filter(Boolean)
+                                  .join(" · ")}
                               </p>
                             )}
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold">KES {(item.quantity * item.unit_price).toFixed(2)}</p>
-                          </div>
+                          <p className="text-sm font-bold text-slate-900 flex-none">
+                            KES {(item.quantity * item.unit_price).toLocaleString()}
+                          </p>
                         </div>
                       ))}
                     </div>
 
-                    {/* Customer Info */}
-                    <div className="bg-gray-50 p-4 rounded mb-4 text-sm">
-                      <p>
-                        <strong>Name:</strong> {order.customer_name}
+                    {/* Footer */}
+                    <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-t border-slate-100">
+                      <p className="text-xs text-slate-500 capitalize">
+                        {order.fulfillment_method === "pickup" ? "Store Pickup" : "Home Delivery"}
                       </p>
-                      <p>
-                        <strong>Phone:</strong> {order.customer_phone}
-                      </p>
-                      {order.customer_email && (
-                        <p>
-                          <strong>Email:</strong> {order.customer_email}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Total */}
-                    <div className="flex justify-end pt-4 border-t border-gray-200">
                       <div className="text-right">
-                        <p className="text-gray-600">Total</p>
-                        <p className="text-2xl font-bold">KES {order.total_amount.toFixed(2)}</p>
+                        <p className="text-xs text-slate-400">Total</p>
+                        <p className="text-base font-extrabold text-slate-900">
+                          KES {order.total_amount.toLocaleString()}
+                        </p>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
           </>
         )}
 
-        {/* Help Link */}
-        <div className="mt-12 bg-blue-50 p-6 rounded-lg">
-          <h3 className="font-semibold mb-2">Need Help?</h3>
-          <p className="text-sm text-gray-700 mb-4">
-            Can't find your order? Contact us at{' '}
-            <Link href="/contact" className="text-blue-600 hover:underline">
-              support page
-            </Link>
-            .
-          </p>
+        {/* Help */}
+        <div className="mt-10 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-500 shadow-sm">
+          Can&apos;t find your order?{" "}
+          <Link href="/contact" className="font-semibold text-sky-600 hover:text-sky-700">
+            Contact us
+          </Link>{" "}
+          and we&apos;ll help you track it down.
         </div>
       </div>
     </div>

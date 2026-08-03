@@ -64,7 +64,6 @@ async function postCheckoutSideEffects(
       console.error("Error sending email:", err);
     }
   }
-
 }
 
 export async function POST(request: Request) {
@@ -72,45 +71,7 @@ export async function POST(request: Request) {
     const body: RequestBody = await request.json();
     const supabase = createServiceClient() as any;
 
-    // ── M-Pesa: initiate STK push before creating the order ──
-    if (body.paymentMethod === "mpesa") {
-      const mpesaResult = await initiateStkPush({
-        phoneNumber: body.customerPhone,
-        amount: body.total,
-        orderId: `temp-${Date.now()}`,
-      });
-
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          customer_name: body.customerName,
-          customer_phone: body.customerPhone,
-          customer_email: body.customerEmail || null,
-          fulfillment_method: body.fulfillmentMethod,
-          payment_method: body.paymentMethod,
-          payment_status: "pending",
-          order_status: "processing",
-          total_amount: body.total,
-          delivery_address: body.deliveryAddress,
-          mpesa_checkout_request_id: mpesaResult.checkoutRequestId,
-        })
-        .select("id")
-        .single();
-
-      if (orderError || !order) {
-        console.error("Error creating order:", orderError);
-        return NextResponse.json(
-          { error: "Failed to create order after payment initiation" },
-          { status: 500 }
-        );
-      }
-
-      await createOrderItems(supabase, order.id, body.items);
-      await postCheckoutSideEffects(request.url, order.id, body);
-      return NextResponse.json({ orderId: order.id });
-    }
-
-    // ── Pay at pickup / Cash on delivery: order first, collect later ──
+    // ── 1. Create the order first (always) ──────────────────────
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -133,6 +94,28 @@ export async function POST(request: Request) {
     }
 
     await createOrderItems(supabase, order.id, body.items);
+
+    // ── 2. M-Pesa: initiate STK push after order exists ─────────
+    if (body.paymentMethod === "mpesa") {
+      try {
+        const mpesaResult = await initiateStkPush({
+          phoneNumber: body.customerPhone,
+          amount: body.total,
+          orderId: order.id,
+        });
+
+        // Store the checkout request ID so the callback can find this order
+        await supabase
+          .from("orders")
+          .update({ mpesa_checkout_request_id: mpesaResult.checkoutRequestId })
+          .eq("id", order.id);
+      } catch (mpesaError) {
+        // Order exists — log the M-Pesa failure but don't block the response.
+        // The customer will see the order confirmation; payment can be retried.
+        console.error("M-Pesa STK push failed:", mpesaError);
+      }
+    }
+
     await postCheckoutSideEffects(request.url, order.id, body);
     return NextResponse.json({ orderId: order.id });
   } catch (error) {
