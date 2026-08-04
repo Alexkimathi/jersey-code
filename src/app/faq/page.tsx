@@ -61,23 +61,6 @@ export default function FAQPage() {
         },
       ],
     },
-    {
-      category: 'Returns & Refunds',
-      items: [
-        {
-          q: 'What\'s your return policy?',
-          a: 'We offer 30-day returns for unworn, unwashed items with tags attached. Visit our Returns page for details.',
-        },
-        {
-          q: 'How do I return an item?',
-          a: 'Contact our support team with your order number. We\'ll provide return instructions and arrange pickup.',
-        },
-        {
-          q: 'How long do refunds take?',
-          a: 'Refunds are processed within 5-7 business days after we receive and inspect your return.',
-        },
-      ],
-    },
   ];
 
   return (

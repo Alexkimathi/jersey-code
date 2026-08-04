@@ -25,7 +25,6 @@ const stats = [
   { value: "10,000+", label: "Jerseys sold" },
   { value: "4", label: "Sports covered" },
   { value: "1–3 days", label: "Delivery time" },
-  { value: "30-day", label: "Returns policy" },
 ];
 
 const products = [
@@ -40,7 +39,6 @@ const services = [
   "Fast Delivery (1–3 days)",
   "Pickup Points Nationwide",
   "Size Guides & Fit Advice",
-  "30-Day Returns",
   "Customer Reviews & Ratings",
 ];
 

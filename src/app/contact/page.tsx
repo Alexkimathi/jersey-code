@@ -44,7 +44,6 @@ const quickLinks = [
   { label: "Track Orders", href: "/orders", detail: "Check your order status" },
   { label: "FAQ", href: "/faq", detail: "Answers to common questions" },
   { label: "Shipping Info", href: "/shipping", detail: "Delivery times & costs" },
-  { label: "Returns Policy", href: "/returns", detail: "30-day hassle-free returns" },
 ];
 
 const inputClass =

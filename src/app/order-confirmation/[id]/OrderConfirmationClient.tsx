@@ -204,11 +204,6 @@ export function OrderConfirmationClient({ order }: Props) {
                     ? "You'll be notified when your order is ready to collect"
                     : "Delivered in 1–3 business days across Kenya",
                 },
-                {
-                  icon: ShieldCheck,
-                  title: "30-day returns",
-                  desc: "Not happy? We make it right, no questions asked",
-                },
               ].map(({ icon: Icon, title, desc }, i) => (
                 <motion.li
                   key={title}

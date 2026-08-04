@@ -46,16 +46,6 @@ export default function TermsPage() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold mb-4">5. Returns & Refunds</h2>
-            <ul className="text-gray-700 space-y-2">
-              <li>• 30-day return policy for unworn, unwashed items with tags</li>
-              <li>• Return shipping costs are the customer's responsibility</li>
-              <li>• Refunds are processed within 5-7 business days of inspection</li>
-              <li>• See our Returns page for complete return policy</li>
-            </ul>
-          </div>
-
-          <div>
             <h2 className="text-2xl font-semibold mb-4">6. Intellectual Property</h2>
             <ul className="text-gray-700 space-y-2">
               <li>• All website content is proprietary to Jersey Code</li>
