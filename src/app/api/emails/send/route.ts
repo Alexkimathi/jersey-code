@@ -271,6 +271,72 @@ const emailTemplates: Record<
       text: `Hi ${data.customerName},\n\nYour order #${data.orderId.slice(0, 8).toUpperCase()} is ready for pickup at our store.\n\nView order: ${trackUrl}\n\n${STORE_NAME}`,
     };
   },
+
+  new_order_alert: (data) => {
+    const adminUrl = `${SITE_URL}/admin/orders/${data.orderId}`;
+    const itemsHtml = buildItemsHtml(data.itemsRich ?? []);
+    const itemsText = buildItemsText(data.itemsRich ?? []);
+    const html = baseLayout(
+      `New Order – #${data.orderId.slice(0, 8).toUpperCase()}`,
+      `
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#0f172a;">New order received 🛒</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:#64748b;">A new order has just been placed on ${STORE_NAME}.</p>
+
+      <!-- Customer info -->
+      <table width="100%" style="background:#f8fafc;border-radius:10px;padding:16px 20px;margin-bottom:16px;" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="font-size:12px;color:#94a3b8;">Order ID</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0f172a;font-family:monospace;">#${data.orderId.slice(0, 8).toUpperCase()}</td>
+        </tr>
+        <tr>
+          <td style="font-size:12px;color:#94a3b8;padding-top:10px;">Customer</td>
+          <td align="right" style="font-size:13px;font-weight:600;color:#334155;padding-top:10px;">${data.customerName}</td>
+        </tr>
+        <tr>
+          <td style="font-size:12px;color:#94a3b8;padding-top:10px;">Phone</td>
+          <td align="right" style="font-size:13px;font-weight:600;color:#334155;padding-top:10px;">${data.customerPhone}</td>
+        </tr>
+        ${data.customerEmail ? `
+        <tr>
+          <td style="font-size:12px;color:#94a3b8;padding-top:10px;">Email</td>
+          <td align="right" style="font-size:13px;color:#334155;padding-top:10px;">${data.customerEmail}</td>
+        </tr>` : ""}
+        <tr>
+          <td style="font-size:12px;color:#94a3b8;padding-top:10px;">Fulfillment</td>
+          <td align="right" style="font-size:13px;color:#334155;padding-top:10px;">${data.fulfillmentMethod === "pickup" ? "Store Pickup" : "Home Delivery"}</td>
+        </tr>
+        ${data.deliveryAddress ? `
+        <tr>
+          <td style="font-size:12px;color:#94a3b8;padding-top:10px;">Address</td>
+          <td align="right" style="font-size:13px;color:#334155;padding-top:10px;">${data.deliveryAddress}</td>
+        </tr>` : ""}
+      </table>
+
+      <!-- Items -->
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;">Items Ordered</p>
+      <div style="border:1px solid #e2e8f0;border-radius:10px;padding:4px 16px;margin-bottom:16px;">
+        ${itemsHtml}
+      </div>
+
+      <!-- Total -->
+      <table width="100%" style="margin-bottom:24px;" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="font-size:15px;font-weight:700;color:#0f172a;">Order Total</td>
+          <td align="right" style="font-size:18px;font-weight:800;color:#0f172a;">KES ${Number(data.total).toLocaleString()}</td>
+        </tr>
+      </table>
+
+      <a href="${adminUrl}" style="display:block;background:#0f172a;color:#ffffff;text-align:center;padding:14px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">
+        View in Admin Panel
+      </a>
+      `
+    );
+    return {
+      subject: `New Order – #${data.orderId.slice(0, 8).toUpperCase()} · KES ${Number(data.total).toLocaleString()}`,
+      html,
+      text: `New order received!\n\nOrder: #${data.orderId.slice(0, 8).toUpperCase()}\nCustomer: ${data.customerName}\nPhone: ${data.customerPhone}${data.customerEmail ? `\nEmail: ${data.customerEmail}` : ""}\nFulfillment: ${data.fulfillmentMethod === "pickup" ? "Store Pickup" : "Home Delivery"}${data.deliveryAddress ? `\nAddress: ${data.deliveryAddress}` : ""}\n\n${itemsText}\n\nTotal: KES ${Number(data.total).toLocaleString()}\n\nAdmin: ${adminUrl}`,
+    };
+  },
 };
 
 // ─── Route handler ──────────────────────────────────────────────────────────

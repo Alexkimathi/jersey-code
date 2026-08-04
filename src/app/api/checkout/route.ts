@@ -44,10 +44,54 @@ async function postCheckoutSideEffects(
     console.error("Error reserving stock:", err);
   }
 
-  // Send confirmation email
+  const itemsRich = body.items.map((i: any) => ({
+    name: i.name,
+    size: i.size ?? null,
+    quantity: i.quantity,
+    unitPrice: i.price,
+    customName: i.customization?.printName ?? null,
+    customNumber: i.customization?.printNumber ?? null,
+    font: i.customization?.font ?? null,
+    printColor: i.customization?.printColor ?? null,
+    badges: i.customization?.badges ?? [],
+    edition: i.customization?.edition ?? null,
+    addOnPrice: i.customization?.addOnPrice ?? 0,
+  }));
+
+  const emailUrl = new URL("/api/emails/send", requestUrl).toString();
+
+  // Always notify the business
+  const businessEmail = process.env.BUSINESS_NOTIFICATION_EMAIL;
+  if (businessEmail) {
+    try {
+      await fetch(emailUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          emailType: "new_order_alert",
+          customerEmail: businessEmail,
+          customerName: "Jersey Code",
+          data: {
+            total: body.total,
+            fulfillmentMethod: body.fulfillmentMethod,
+            customerName: body.customerName,
+            customerPhone: body.customerPhone,
+            customerEmail: body.customerEmail ?? null,
+            deliveryAddress: body.deliveryAddress ?? null,
+            itemsRich,
+          },
+        }),
+      });
+    } catch (err) {
+      console.error("Error sending business notification:", err);
+    }
+  }
+
+  // Send confirmation to customer only if they provided an email
   if (body.customerEmail) {
     try {
-      await fetch(new URL("/api/emails/send", requestUrl).toString(), {
+      await fetch(emailUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -62,24 +106,12 @@ async function postCheckoutSideEffects(
               body.fulfillmentMethod === "delivery"
                 ? "1–3 business days"
                 : "Ready next business day",
-            itemsRich: body.items.map((i: any) => ({
-              name: i.name,
-              size: i.size ?? null,
-              quantity: i.quantity,
-              unitPrice: i.price,
-              customName: i.customization?.printName ?? null,
-              customNumber: i.customization?.printNumber ?? null,
-              font: i.customization?.font ?? null,
-              printColor: i.customization?.printColor ?? null,
-              badges: i.customization?.badges ?? [],
-              edition: i.customization?.edition ?? null,
-              addOnPrice: i.customization?.addOnPrice ?? 0,
-            })),
+            itemsRich,
           },
         }),
       });
     } catch (err) {
-      console.error("Error sending email:", err);
+      console.error("Error sending customer confirmation:", err);
     }
   }
 }
