@@ -11,7 +11,6 @@ async function getAccessoriesByType(type: string): Promise<Product[]> {
     .select("*")
     .eq("sport", "accessories")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .order("created_at", { ascending: false });
   const all = (data ?? []) as Product[];
   // sub_category takes priority (set by admin form); fall back to team field for legacy products

@@ -28,7 +28,6 @@ async function getNewArrivals(): Promise<Product[]> {
     .from("products")
     .select("*")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .neq("sport", "accessories")
     .order("created_at", { ascending: false });
   return data || [];
@@ -41,7 +40,6 @@ async function getBestSellers(): Promise<Product[]> {
     .select("*")
     .eq("is_featured", true)
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .neq("sport", "accessories")
     .order("created_at", { ascending: false });
   return data || [];

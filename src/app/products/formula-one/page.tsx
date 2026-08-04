@@ -11,7 +11,6 @@ async function getF1Products(): Promise<Product[]> {
     .select("*")
     .eq("sport", "formula_one")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .order("created_at", { ascending: false });
   return (data ?? []) as Product[];
 }

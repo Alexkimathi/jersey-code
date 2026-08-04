@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useSupabase } from "@/app/providers";
 import { Sport, ProductVariant } from "@/lib/supabase/types";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -46,7 +46,8 @@ function VariantsManager({
   supabase,
 }: {
   productId: string;
-  supabase: ReturnType<typeof createClient>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any;
 }) {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -308,9 +309,11 @@ function deriveEplSubUi(sub_category: string, is_clearance: boolean): string {
 export function ProductFormClient({ productId }: ProductFormClientProps) {
   const router = useRouter();
   const { adminUser, permissions, isLoading } = useAdminAuth();
+  const { supabase } = useSupabase();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [uiCategory, setUiCategory] = useState<string>("epl");
 
   const [formData, setFormData] = useState({
@@ -331,14 +334,6 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
   const [selectedFiles, setSelectedFiles] = useState<Record<ImageSlot, File | null>>({ front: null, back: null, side: null, badge: null });
   const [previews, setPreviews] = useState<Record<ImageSlot, string>>({ front: "", back: "", side: "", badge: "" });
   const [uploading, setUploading] = useState(false);
-
-  const supabase = useMemo(
-    () => createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost",
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "fake-key"
-    ),
-    []
-  );
 
   useEffect(() => {
     async function loadProduct() {
@@ -444,10 +439,18 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
       const result = await supabase.from("products").update(payload).eq("id", productId);
       saveError = result.error;
     } else {
-      const result = await supabase.from("products").insert(payload).select().single();
+      const result = await (supabase as any).from("products").insert(payload).select().single();
       saveError = result.error;
       if (!saveError && result.data) {
-        router.push(`/admin/products/${result.data.id}/edit`);
+        router.push(`/admin/products/${result.data.id}/edit?created=1`);
+        return;
+      }
+      if (!saveError && !result.data) {
+        // Insert succeeded but row not returned (RLS SELECT restriction).
+        // Fall back: redirect to product list so admin can find and edit the new product.
+        setIsSubmitting(false);
+        router.push("/admin/products?created=1");
+        router.refresh();
         return;
       }
     }
@@ -456,8 +459,12 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
       setError(saveError.message);
       setIsSubmitting(false);
     } else if (productId) {
-      router.push("/admin/products");
-      router.refresh();
+      setSuccess("Product updated successfully.");
+      setIsSubmitting(false);
+      setTimeout(() => {
+        router.push("/admin/products");
+        router.refresh();
+      }, 800);
     }
   };
 
@@ -494,6 +501,9 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">{error}</div>
+        )}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">{success}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">

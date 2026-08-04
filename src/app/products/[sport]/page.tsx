@@ -13,7 +13,6 @@ async function getProducts(sport: string): Promise<Product[]> {
     .select("*")
     .eq("sport", sport)
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .order("image_url", { ascending: false, nullsFirst: false });
 
   if (error) {

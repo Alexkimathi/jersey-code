@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useSupabase } from "@/app/providers";
 import { Sport, ProductVariant } from "@/lib/supabase/types";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -57,7 +57,8 @@ function VariantsManager({
   supabase,
 }: {
   productId: string;
-  supabase: ReturnType<typeof createClient>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any;
 }) {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -383,10 +384,15 @@ function deriveEplSubUi(sub_category: string, is_clearance: boolean): string {
 
 export default function ProductForm({ params }: ProductFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { adminUser, permissions, isLoading } = useAdminAuth();
+  const { supabase } = useSupabase();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(
+    searchParams.get("created") === "1" ? "Product created successfully. Add sizes below, then upload an image so it appears on the storefront." : null
+  );
   const [productId, setProductId] = useState<string | null>(null);
   const [uiCategory, setUiCategory] = useState<string>("epl");
 
@@ -421,20 +427,11 @@ export default function ProductForm({ params }: ProductFormProps) {
   const [previews, setPreviews] = useState<Record<ImageSlot, string>>({ front: "", back: "", side: "", badge: "" });
   const [uploading, setUploading] = useState(false);
 
-  const supabase = useMemo(
-    () =>
-      createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost",
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "fake-key"
-      ),
-    []
-  );
-
   useEffect(() => {
     async function loadProduct() {
       if (!productId) return;
 
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("products")
         .select("*")
         .eq("id", productId)
@@ -485,7 +482,7 @@ export default function ProductForm({ params }: ProductFormProps) {
     setIsDeleting(true);
     setError(null);
 
-    const { error: variantsError } = await supabase
+    const { error: variantsError } = await (supabase as any)
       .from("product_variants")
       .delete()
       .eq("product_id", productId);
@@ -496,7 +493,7 @@ export default function ProductForm({ params }: ProductFormProps) {
       return;
     }
 
-    const { error: productError } = await supabase
+    const { error: productError } = await (supabase as any)
       .from("products")
       .delete()
       .eq("id", productId);
@@ -541,7 +538,7 @@ export default function ProductForm({ params }: ProductFormProps) {
           const compressed = await compressImage(file);
           const ext = file.name.split(".").pop() ?? "jpg";
           const filePath = `products/${productId || "draft"}/${slot}-${Date.now()}.${ext}`;
-          const { data, error: uploadError } = await supabase.storage
+          const { data, error: uploadError } = await (supabase as any).storage
             .from("product-images")
             .upload(filePath, compressed, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
           if (uploadError || !data) {
@@ -550,7 +547,7 @@ export default function ProductForm({ params }: ProductFormProps) {
             setUploading(false);
             return;
           }
-          const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(data.path);
+          const { data: urlData } = (supabase as any).storage.from("product-images").getPublicUrl(data.path);
           updatedUrls[field] = urlData.publicUrl;
           setPreviews((prev) => ({ ...prev, [slot]: urlData.publicUrl }));
         } catch {
@@ -570,32 +567,36 @@ export default function ProductForm({ params }: ProductFormProps) {
       price: priceValue,
     };
 
-    let error;
+    let saveError;
     if (productId) {
-      const result = await supabase
-        .from("products")
-        .update(payload)
-        .eq("id", productId);
-      error = result.error;
+      const result = await (supabase as any).from("products").update(payload).eq("id", productId);
+      saveError = result.error;
     } else {
-      const result = await supabase
-        .from("products")
-        .insert(payload)
-        .select()
-        .single();
-      error = result.error;
-      if (!error && result.data) {
-        router.push(`/admin/products/${result.data.id}/edit`);
+      const result = await (supabase as any).from("products").insert(payload).select().single();
+      saveError = result.error;
+      if (!saveError && result.data) {
+        router.push(`/admin/products/${result.data.id}/edit?created=1`);
+        return;
+      }
+      if (!saveError && !result.data) {
+        // Insert succeeded but SELECT blocked by RLS — navigate to list.
+        setIsSubmitting(false);
+        router.push("/admin/products");
+        router.refresh();
         return;
       }
     }
 
-    if (error) {
-      setError(error.message);
+    if (saveError) {
+      setError(saveError.message);
       setIsSubmitting(false);
     } else if (productId) {
-      router.push("/admin/products");
-      router.refresh();
+      setSuccess("Product updated successfully.");
+      setIsSubmitting(false);
+      setTimeout(() => {
+        router.push("/admin/products");
+        router.refresh();
+      }, 800);
     }
   };
 
@@ -651,6 +652,11 @@ export default function ProductForm({ params }: ProductFormProps) {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+            {success}
           </div>
         )}
 
@@ -752,17 +758,29 @@ export default function ProductForm({ params }: ProductFormProps) {
             </div>
           </div>
 
-          <div className="max-w-xs">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price (KES) *</label>
-            <input
-              type="number"
-              required
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              className={fieldClass}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price (KES) *</label>
+              <input
+                type="number"
+                required
+                min="0"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className={fieldClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Team / Club</label>
+              <input
+                type="text"
+                value={formData.team}
+                onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                placeholder="e.g. Manchester United"
+                className={fieldClass}
+              />
+            </div>
           </div>
 
           <div>

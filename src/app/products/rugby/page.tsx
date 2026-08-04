@@ -11,7 +11,6 @@ async function getRugbyJerseys(): Promise<Product[]> {
     .select("*")
     .eq("sport", "rugby")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .order("created_at", { ascending: false });
   return data || [];
 }
@@ -23,7 +22,6 @@ async function getAccessories(): Promise<Product[]> {
     .select("*")
     .eq("sport", "accessories")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .order("created_at", { ascending: false });
   return data || [];
 }

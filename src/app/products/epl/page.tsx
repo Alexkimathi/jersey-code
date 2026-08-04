@@ -11,7 +11,6 @@ async function getAllFootballProducts(): Promise<Product[]> {
     .select("*")
     .eq("sport", "football")
     .eq("is_hidden", false)
-    .not("image_url", "is", null)
     .order("created_at", { ascending: false });
   return data || [];
 }
