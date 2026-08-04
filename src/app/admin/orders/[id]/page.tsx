@@ -6,7 +6,8 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useSupabase } from "@/app/providers";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import Link from "next/link";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2, Tag, Shirt, Palette } from "lucide-react";
+import { BADGE_OPTIONS, NATIONAL_BADGE_OPTIONS } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 
 const ORDER_STATUS_OPTIONS = [
@@ -39,13 +40,24 @@ const PAYMENT_STATUS_CLASSES: Record<string, string> = {
   cancelled: "bg-gray-100 text-gray-800",
 };
 
+interface CustomizationData {
+  edition?: string | null;
+  font?: string | null;
+  printColor?: string | null;
+  badges?: string[];
+  addOnPrice?: number;
+  size?: string | null;
+}
+
 interface OrderItem {
   id: string;
   quantity: number;
   unit_price: number;
   custom_name: string | null;
   custom_number: string | null;
+  customization_data?: CustomizationData | null;
   products: { name: string; image_url: string | null } | null;
+  product_variants: { size: string } | null;
 }
 
 interface OrderDetail {
@@ -80,28 +92,22 @@ export default function AdminOrderDetailPage() {
   useEffect(() => {
     async function fetchOrder() {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from("orders")
-        .select(
-          `*,
-          order_items (
-            id,
-            quantity,
-            unit_price,
-            custom_name,
-            custom_number,
-            products (name, image_url)
-          )`
-        )
-        .eq("id", orderId)
-        .single();
-
-      if (fetchError) {
-        setError("Failed to load order. You may not have permission to view it.");
-      } else if (data) {
-        setOrder(data as OrderDetail);
-        setOrderStatus(data.order_status);
-        setPaymentStatus(data.payment_status);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`/api/admin/orders/${orderId}`, {
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (!res.ok) {
+          const result = await res.json();
+          setError(result.error || "Failed to load order.");
+        } else {
+          const data = await res.json();
+          setOrder(data as OrderDetail);
+          setOrderStatus(data.order_status);
+          setPaymentStatus(data.payment_status);
+        }
+      } catch {
+        setError("Failed to load order.");
       }
       setLoading(false);
     }
@@ -283,34 +289,100 @@ export default function AdminOrderDetailPage() {
             Items
           </h2>
           <div className="divide-y divide-gray-100">
-            {order.order_items.map((item) => (
-              <div key={item.id} className="flex gap-4 py-4">
-                {item.products?.image_url && (
-                  <img
-                    src={item.products.image_url}
-                    alt={item.products.name}
-                    className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 text-sm">
-                    {item.products?.name ?? "Deleted product"}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Qty: {item.quantity} × KES {item.unit_price.toLocaleString()}
-                  </p>
-                  {item.custom_name && (
-                    <p className="text-xs text-blue-600 mt-0.5">
-                      Custom: {item.custom_name}
-                      {item.custom_number ? ` #${item.custom_number}` : ""}
-                    </p>
+            {order.order_items.map((item) => {
+              const cd = item.customization_data;
+              const size = cd?.size ?? item.product_variants?.size ?? null;
+              const badges = cd?.badges?.length
+                ? cd.badges.map(
+                    (b) =>
+                      (BADGE_OPTIONS.find((o) => o.value === b) ??
+                       NATIONAL_BADGE_OPTIONS.find((o) => o.value === b))?.label ?? b
+                  )
+                : [];
+              const hasCustomization =
+                item.custom_name || item.custom_number || badges.length > 0 || cd?.font || cd?.edition;
+
+              return (
+                <div key={item.id} className="py-4 flex gap-4">
+                  {item.products?.image_url && (
+                    <img
+                      src={item.products.image_url}
+                      alt={item.products.name}
+                      className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                    />
                   )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-semibold text-gray-900 text-sm">
+                        {item.products?.name ?? "Deleted product"}
+                      </p>
+                      <p className="text-sm font-semibold text-gray-900 flex-shrink-0">
+                        KES {(item.quantity * item.unit_price).toLocaleString()}
+                      </p>
+                    </div>
+
+                    {/* Size + qty + price */}
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      {size && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-semibold">
+                          <Shirt className="w-3 h-3" /> Size {size}
+                        </span>
+                      )}
+                      <span className="text-xs text-gray-500">
+                        Qty: {item.quantity} × KES {item.unit_price.toLocaleString()}
+                      </span>
+                      {cd?.edition && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-medium capitalize">
+                          {cd.edition} edition
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Customization details */}
+                    {hasCustomization && (
+                      <div className="mt-2 rounded-lg border border-gray-100 bg-gray-50 divide-y divide-gray-100 text-xs">
+                        {item.custom_name && (
+                          <div className="flex items-center justify-between px-3 py-1.5">
+                            <span className="text-gray-500">Print Name</span>
+                            <span className="font-semibold text-gray-800 tracking-wide">{item.custom_name}</span>
+                          </div>
+                        )}
+                        {item.custom_number && (
+                          <div className="flex items-center justify-between px-3 py-1.5">
+                            <span className="text-gray-500">Print Number</span>
+                            <span className="font-semibold text-gray-800">#{item.custom_number}</span>
+                          </div>
+                        )}
+                        {cd?.font && (
+                          <div className="flex items-center justify-between px-3 py-1.5">
+                            <span className="text-gray-500 flex items-center gap-1"><Palette className="w-3 h-3" />Font</span>
+                            <span className="font-semibold text-gray-800">{cd.font}</span>
+                          </div>
+                        )}
+                        {cd?.printColor && (
+                          <div className="flex items-center justify-between px-3 py-1.5">
+                            <span className="text-gray-500">Print Color</span>
+                            <span className="font-semibold text-gray-800">{cd.printColor}</span>
+                          </div>
+                        )}
+                        {badges.map((label) => (
+                          <div key={label} className="flex items-center justify-between px-3 py-1.5">
+                            <span className="text-gray-500 flex items-center gap-1"><Tag className="w-3 h-3" />Badge</span>
+                            <span className="font-semibold text-gray-800">{label}</span>
+                          </div>
+                        ))}
+                        {cd?.addOnPrice != null && cd.addOnPrice > 0 && (
+                          <div className="flex items-center justify-between px-3 py-1.5 bg-blue-50 rounded-b-lg">
+                            <span className="text-blue-600">Customization add-on</span>
+                            <span className="font-semibold text-blue-700">+KES {cd.addOnPrice.toLocaleString()}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="text-sm font-semibold text-gray-900 flex-shrink-0">
-                  KES {(item.quantity * item.unit_price).toLocaleString()}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="flex justify-end pt-4 border-t border-gray-100 mt-2">
             <div className="text-right">

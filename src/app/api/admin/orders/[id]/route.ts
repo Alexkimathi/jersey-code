@@ -19,6 +19,49 @@ async function getCallerAdminUser(token: string) {
   return adminUser;
 }
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.split(" ")[1];
+
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const adminUser = await getCallerAdminUser(token);
+  if (!adminUser) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const supabase = createServiceClient() as any;
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `*,
+      order_items (
+        id,
+        quantity,
+        unit_price,
+        custom_name,
+        custom_number,
+        products (name, image_url),
+        product_variants (size)
+      )`
+    )
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    console.error("Error fetching order:", error);
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(data);
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
