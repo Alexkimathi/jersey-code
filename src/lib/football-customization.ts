@@ -366,17 +366,13 @@ export const TEAM_SQUADS: Partial<Record<string, TeamSquad>> = {
 
 /** Club badges — EPL + World Football (Club, Retro, Special Edition) */
 export const BADGE_OPTIONS: Array<{ value: string; label: string; price: number }> = [
-  { value: "premier_league",          label: "Premier League Badge",                  price: 100 },
-  { value: "la_liga",                 label: "La Liga Badge",                         price: 100 },
-  { value: "bundesliga",              label: "Bundesliga Badge",                      price: 100 },
-  { value: "serie_a",                 label: "Serie A Badge",                         price: 100 },
-  { value: "club_world_cup",          label: "Club World Cup Badge",                  price: 100 },
-  { value: "uefa_champions_league",   label: "UEFA Champions League Badge",           price: 200 },
-  { value: "uefa_europa_league",      label: "UEFA Europa League Badge",              price: 200 },
-  { value: "no_to_racism",           label: "No to Racism Badge",                    price: 200 },
-  { value: "foundation",              label: "Foundation Badge",                      price: 100 },
-  { value: "intercontinental_2024",   label: "Intercontinental Champions Badge 2024", price: 100 },
-  { value: "fa",                      label: "FA Badge",                              price: 100 },
+  { value: "premier_league",          label: "Premier League Badge",        price: 100 },
+  { value: "la_liga",                 label: "La Liga Badge",               price: 100 },
+  { value: "bundesliga",              label: "Bundesliga Badge",            price: 100 },
+  { value: "serie_a",                 label: "Serie A Badge",               price: 100 },
+  { value: "club_world_cup",          label: "Club World Cup Badge",        price: 100 },
+  { value: "uefa_champions_league",   label: "UEFA Champions League Badge", price: 200 },
+  { value: "uefa_europa_league",      label: "UEFA Europa League Badge",    price: 200 },
 ];
 
 /** National team badges — only shown for national team jerseys */
