@@ -421,7 +421,7 @@ export default function ProductForm({ params }: ProductFormProps) {
     is_hidden: false,
     is_featured: false,
     is_clearance: false,
-    sub_category: "",
+    sub_category: "epl_club",
   });
   const [selectedFiles, setSelectedFiles] = useState<Record<ImageSlot, File | null>>({ front: null, back: null, side: null, badge: null });
   const [previews, setPreviews] = useState<Record<ImageSlot, string>>({ front: "", back: "", side: "", badge: "" });
