@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/hooks/useCartStore";
-import { BADGE_OPTIONS } from "@/lib/football-customization";
+import { BADGE_OPTIONS, NATIONAL_BADGE_OPTIONS } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import {
   FulfillmentMethod,
@@ -398,7 +398,7 @@ export function CheckoutForm() {
                     )}
                     {(c?.badges ?? (c?.badge && c.badge !== "none" ? [c.badge] : [])).map((b: string) => (
                       <p key={b} className="text-xs text-slate-400">
-                        {BADGE_OPTIONS.find((o) => o.value === b)?.label ?? b}
+                        {(BADGE_OPTIONS.find((o) => o.value === b) ?? NATIONAL_BADGE_OPTIONS.find((o) => o.value === b))?.label ?? b}
                       </p>
                     ))}
                   </div>

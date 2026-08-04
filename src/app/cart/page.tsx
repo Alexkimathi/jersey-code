@@ -1,7 +1,7 @@
 "use client";
 
 import { useCartStore } from "@/hooks/useCartStore";
-import { BADGE_OPTIONS } from "@/lib/football-customization";
+import { BADGE_OPTIONS, NATIONAL_BADGE_OPTIONS, getBadgePrice } from "@/lib/football-customization";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
@@ -175,9 +175,9 @@ export default function CartPage() {
                                   <span className="text-xs text-slate-500">Badge</span>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-900">
-                                      {BADGE_OPTIONS.find((o) => o.value === b)?.label ?? b}
+                                      {(BADGE_OPTIONS.find((o) => o.value === b) ?? NATIONAL_BADGE_OPTIONS.find((o) => o.value === b))?.label ?? b}
                                     </span>
-                                    <span className="text-[11px] font-semibold text-sky-600">+KES {(b === "no_to_racism" ? 200 : 100).toLocaleString()}</span>
+                                    <span className="text-[11px] font-semibold text-sky-600">+KES {getBadgePrice(b).toLocaleString()}</span>
                                   </div>
                                 </div>
                               ))}

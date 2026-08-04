@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Product, ProductVariant } from "@/lib/supabase/types";
 import { useCartStore } from "@/hooks/useCartStore";
 import { TEAM_IMAGES } from "@/lib/teamImages";
-import { BADGE_OPTIONS, getBadgeLabel } from "@/lib/football-customization";
+import { BADGE_OPTIONS, NATIONAL_BADGE_OPTIONS, getBadgeLabel, getBadgePrice } from "@/lib/football-customization";
 import { Button } from "@/components/ui/Button";
 import { SizeGuideModal } from "@/components/storefront/SizeGuideModal";
 import { getProductDescription } from "@/lib/product-descriptions";
@@ -47,7 +47,12 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const isNationalTeam = product.sub_category === "national";
   const isKids         = product.sub_category === "world_kids";
   const isTracksuitHoodie = product.sub_category === "world_tracksuit";
+  // Kids and tracksuits have no badge option; national teams have a limited set
+  const hideBadges = isKids || isTracksuitHoodie;
+  // Font style hidden for national/kids/tracksuits (name-number still allowed but no font choice)
   const hideExtraCustomization = isNationalTeam || isKids || isTracksuitHoodie;
+  // Which badge list to display
+  const activeBadgeList = isNationalTeam ? NATIONAL_BADGE_OPTIONS : BADGE_OPTIONS;
 
   // ── Customization state ──────────────────────────────────────
 
@@ -93,7 +98,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const addOnPrice = useMemo(() => {
     let total = 0;
     for (const b of badges) {
-      total += b === "no_to_racism" ? 200 : 100;
+      total += getBadgePrice(b);
     }
     if (nameMode === "personalize") {
       if (nameEnabled && printName.trim())     total += 200;
@@ -383,8 +388,8 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               </div>
             )}
 
-            {/* Badge — hidden for national team jerseys */}
-            {!hideExtraCustomization && (
+            {/* Badge — hidden for kids and tracksuits; national teams get a limited set */}
+            {!hideBadges && (
               <div>
                 {/* Toggle row */}
                 <button type="button" onClick={() => { setBadgeOpen((o) => !o); if (badgeOpen) setBadges([]); }}
@@ -410,21 +415,21 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                   <div className="mt-3">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-blue-500 mb-2">Choose your badge/s</p>
                     <div className="rounded-xl border border-blue-100 overflow-hidden divide-y divide-blue-50">
-                      {BADGE_OPTIONS.map((b) => {
-                        const isNoRacism = b.value === "no_to_racism";
-                        const isChecked  = badges.includes(b.value);
+                      {activeBadgeList.map((b) => {
+                        const isPremium = b.price === 200;
+                        const isChecked = badges.includes(b.value);
                         return (
                           <button key={b.value} type="button" onClick={() => toggleBadge(b.value)}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs transition ${
-                              isNoRacism
+                              isPremium
                                 ? isChecked ? "bg-green-50" : "bg-white hover:bg-green-50"
                                 : isChecked ? "bg-blue-50" : "bg-white hover:bg-blue-50"
                             }`}>
                             {/* Checkbox */}
                             <span className={`flex h-4 w-4 flex-none items-center justify-center rounded border-2 transition ${
                               isChecked
-                                ? isNoRacism ? "border-green-500 bg-green-500" : "border-blue-500 bg-blue-500"
-                                : isNoRacism ? "border-green-300" : "border-slate-300"
+                                ? isPremium ? "border-green-500 bg-green-500" : "border-blue-500 bg-blue-500"
+                                : isPremium ? "border-green-300" : "border-slate-300"
                             }`}>
                               {isChecked && (
                                 <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 12 12" fill="none">
@@ -432,11 +437,11 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                                 </svg>
                               )}
                             </span>
-                            <span className={`flex-1 font-medium ${isNoRacism ? "text-green-700" : "text-blue-700"}`}>
+                            <span className={`flex-1 font-medium ${isPremium ? "text-green-700" : "text-blue-700"}`}>
                               {b.label}
                             </span>
-                            <span className={isNoRacism ? "text-green-500" : "text-blue-400"}>
-                              +KSh {isNoRacism ? 200 : 100}
+                            <span className={isPremium ? "text-green-500" : "text-blue-400"}>
+                              +KSh {b.price}
                             </span>
                           </button>
                         );
@@ -595,7 +600,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             {badges.map((b) => (
               <div key={b} className="flex justify-between text-slate-500">
                 <span>{getBadgeLabel(b, product.team)}</span>
-                <span>+KES {b === "no_to_racism" ? 200 : 100}</span>
+                <span>+KES {getBadgePrice(b)}</span>
               </div>
             ))}
             {nameMode === "personalize" && nameEnabled && printName.trim() && (

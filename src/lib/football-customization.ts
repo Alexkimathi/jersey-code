@@ -364,21 +364,34 @@ export const TEAM_SQUADS: Partial<Record<string, TeamSquad>> = {
   },
 };
 
-export const BADGE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "premier_league",              label: "Premier League Badge" },
-  { value: "la_liga",                     label: "La Liga Badge" },
-  { value: "bundesliga",                  label: "Bundesliga Badge" },
-  { value: "serie_a",                     label: "Serie A Badge" },
-  { value: "club_world_cup",              label: "Club World Cup Badge" },
-  { value: "uefa_champions_league",       label: "UEFA Champions League Badge" },
-  { value: "uefa_europa_league",          label: "UEFA Europa League Badge" },
-  { value: "no_to_racism",               label: "No to Racism Badge" },
-  { value: "foundation",                  label: "Foundation Badge" },
-  { value: "intercontinental_2024",       label: "Intercontinental Champions Badge 2024" },
-  { value: "fifa_world_champions_2025",   label: "FIFA World Champions Badge 2025" },
-  { value: "world_cup",                   label: "World Cup Badge" },
-  { value: "fa",                          label: "FA Badge" },
+/** Club badges — EPL + World Football (Club, Retro, Special Edition) */
+export const BADGE_OPTIONS: Array<{ value: string; label: string; price: number }> = [
+  { value: "premier_league",          label: "Premier League Badge",                  price: 100 },
+  { value: "la_liga",                 label: "La Liga Badge",                         price: 100 },
+  { value: "bundesliga",              label: "Bundesliga Badge",                      price: 100 },
+  { value: "serie_a",                 label: "Serie A Badge",                         price: 100 },
+  { value: "club_world_cup",          label: "Club World Cup Badge",                  price: 100 },
+  { value: "uefa_champions_league",   label: "UEFA Champions League Badge",           price: 200 },
+  { value: "uefa_europa_league",      label: "UEFA Europa League Badge",              price: 200 },
+  { value: "no_to_racism",           label: "No to Racism Badge",                    price: 200 },
+  { value: "foundation",              label: "Foundation Badge",                      price: 100 },
+  { value: "intercontinental_2024",   label: "Intercontinental Champions Badge 2024", price: 100 },
+  { value: "fa",                      label: "FA Badge",                              price: 100 },
 ];
+
+/** National team badges — only shown for national team jerseys */
+export const NATIONAL_BADGE_OPTIONS: Array<{ value: string; label: string; price: number }> = [
+  { value: "fifa_world_champions_2025", label: "FIFA World Champions Badge 2025",    price: 100 },
+  { value: "world_cup",                 label: "World Cup Badge",                    price: 100 },
+];
+
+export function getBadgePrice(value: string): number {
+  return (
+    BADGE_OPTIONS.find((b) => b.value === value)?.price ??
+    NATIONAL_BADGE_OPTIONS.find((b) => b.value === value)?.price ??
+    100
+  );
+}
 
 /** @deprecated kept for backwards compat with existing cart items */
 export function getLeagueBadges(_team: string | null): Array<{ value: string; label: string }> {
@@ -386,5 +399,9 @@ export function getLeagueBadges(_team: string | null): Array<{ value: string; la
 }
 
 export function getBadgeLabel(badgeValue: string, _team: string | null): string {
-  return BADGE_OPTIONS.find((b) => b.value === badgeValue)?.label ?? "";
+  return (
+    BADGE_OPTIONS.find((b) => b.value === badgeValue)?.label ??
+    NATIONAL_BADGE_OPTIONS.find((b) => b.value === badgeValue)?.label ??
+    ""
+  );
 }
