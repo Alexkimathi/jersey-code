@@ -59,11 +59,18 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   // Badge (football only) — multi-select
   const [badges, setBadges] = useState<string[]>([]);
   const [badgeOpen, setBadgeOpen] = useState(false);
+  const [badgeLimitMsg, setBadgeLimitMsg] = useState(false);
 
   function toggleBadge(value: string) {
-    setBadges((prev) =>
-      prev.includes(value) ? prev.filter((b) => b !== value) : [...prev, value]
-    );
+    setBadges((prev) => {
+      if (prev.includes(value)) return prev.filter((b) => b !== value);
+      if (prev.length >= 3) {
+        setBadgeLimitMsg(true);
+        setTimeout(() => setBadgeLimitMsg(false), 2500);
+        return prev;
+      }
+      return [...prev, value];
+    });
   }
 
   // Name & Number mode: none | personalize
@@ -405,7 +412,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                     )}
                   </span>
                   <div className="text-left">
-                    <p className="text-sm font-bold text-blue-600">Badges</p>
+                    <p className="text-sm font-bold text-blue-600">Add Sleeve Badge</p>
                     {badgeOpen && <p className="text-[11px] text-slate-400">Add a little flair to your wear</p>}
                   </div>
                 </button>
@@ -413,23 +420,29 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                 {/* Badge list */}
                 {badgeOpen && (
                   <div className="mt-3">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-blue-500 mb-2">Choose your badge/s</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-blue-500">Choose your badge/s</p>
+                      <p className={`text-[11px] font-semibold ${badges.length >= 3 ? "text-red-400" : "text-slate-400"}`}>
+                        {badges.length}/3 max
+                      </p>
+                    </div>
+                    {badgeLimitMsg && (
+                      <p className="text-[11px] font-semibold text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-2">
+                        You can only select a maximum of 3 sleeve badges.
+                      </p>
+                    )}
                     <div className="rounded-xl border border-blue-100 overflow-hidden divide-y divide-blue-50">
                       {activeBadgeList.map((b) => {
-                        const isPremium = b.price === 200;
                         const isChecked = badges.includes(b.value);
+                        const isAtLimit = !isChecked && badges.length >= 3;
                         return (
                           <button key={b.value} type="button" onClick={() => toggleBadge(b.value)}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-xs transition ${
-                              isPremium
-                                ? isChecked ? "bg-green-50" : "bg-white hover:bg-green-50"
-                                : isChecked ? "bg-blue-50" : "bg-white hover:bg-blue-50"
+                              isAtLimit ? "bg-white opacity-40 cursor-not-allowed" : isChecked ? "bg-blue-50" : "bg-white hover:bg-blue-50"
                             }`}>
                             {/* Checkbox */}
                             <span className={`flex h-4 w-4 flex-none items-center justify-center rounded border-2 transition ${
-                              isChecked
-                                ? isPremium ? "border-green-500 bg-green-500" : "border-blue-500 bg-blue-500"
-                                : isPremium ? "border-green-300" : "border-slate-300"
+                              isChecked ? "border-blue-500 bg-blue-500" : "border-slate-300"
                             }`}>
                               {isChecked && (
                                 <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 12 12" fill="none">
@@ -437,10 +450,10 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                                 </svg>
                               )}
                             </span>
-                            <span className={`flex-1 font-medium ${isPremium ? "text-green-700" : "text-blue-700"}`}>
+                            <span className="flex-1 font-medium text-blue-700">
                               {b.label}
                             </span>
-                            <span className={isPremium ? "text-green-500" : "text-blue-400"}>
+                            <span className="text-blue-400">
                               +KSh {b.price}
                             </span>
                           </button>
