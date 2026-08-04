@@ -57,7 +57,9 @@ export async function GET(request: NextRequest) {
         unit_price,
         custom_name,
         custom_number,
-        products ( name, image_url )
+        customization_data,
+        products ( name, image_url ),
+        product_variants ( size )
       )
     `)
     .in("customer_phone", variants)

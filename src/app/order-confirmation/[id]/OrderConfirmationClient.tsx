@@ -240,10 +240,10 @@ export function OrderConfirmationClient({ order }: Props) {
             Continue Shopping
           </Link>
           <Link
-            href="/orders"
+            href={`/orders/${order.id}`}
             className="flex-1 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
           >
-            View My Orders
+            Track This Order
           </Link>
         </motion.div>
 

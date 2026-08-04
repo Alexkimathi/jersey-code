@@ -17,6 +17,7 @@ import {
   X,
   Lock,
   RefreshCw,
+  Info,
 } from "lucide-react";
 
 import CustomerAddressBook from "@/components/storefront/CustomerAddressBook";
@@ -308,6 +309,17 @@ export function CheckoutForm() {
                     }
                     className={inputClass}
                   />
+                </div>
+              </div>
+
+              {/* Delivery fee disclaimer */}
+              <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
+                <Info className="w-4 h-4 text-amber-500 flex-none mt-0.5" />
+                <div className="text-sm text-amber-800 leading-relaxed">
+                  <p className="font-semibold mb-1">Heads up about delivery fees</p>
+                  <p className="text-amber-700">
+                    Deliveries within <span className="font-medium">Nairobi CBD</span> are handled directly by our team at no extra charge. If your location is <span className="font-medium">outside Nairobi CBD</span>, a delivery fee will apply your order will be shipped via your preferred courier service. Our delivery team will reach out to you directly to confirm the details and coordinate dispatch.
+                  </p>
                 </div>
               </div>
             </div>

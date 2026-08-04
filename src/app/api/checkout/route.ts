@@ -14,6 +14,14 @@ async function createOrderItems(supabase: any, orderId: string, items: any[]) {
     unit_price: item.price + (item.customization?.addOnPrice ?? 0),
     custom_name: item.customization?.printName ?? null,
     custom_number: item.customization?.printNumber ?? null,
+    customization_data: {
+      size: item.size ?? null,
+      edition: item.customization?.edition ?? null,
+      font: item.customization?.font ?? null,
+      printColor: item.customization?.printColor ?? null,
+      badges: item.customization?.badges ?? [],
+      addOnPrice: item.customization?.addOnPrice ?? 0,
+    },
   }));
 
   const { error } = await supabase.from("order_items").insert(orderItems);
@@ -49,14 +57,24 @@ async function postCheckoutSideEffects(
           customerName: body.customerName,
           data: {
             total: body.total,
-            items: body.items
-              .map((i: any) => `${i.name} (Size: ${i.size}) x${i.quantity}`)
-              .join(", "),
             fulfillmentMethod: body.fulfillmentMethod,
             estimatedDelivery:
               body.fulfillmentMethod === "delivery"
                 ? "1–3 business days"
                 : "Ready next business day",
+            itemsRich: body.items.map((i: any) => ({
+              name: i.name,
+              size: i.size ?? null,
+              quantity: i.quantity,
+              unitPrice: i.price,
+              customName: i.customization?.printName ?? null,
+              customNumber: i.customization?.printNumber ?? null,
+              font: i.customization?.font ?? null,
+              printColor: i.customization?.printColor ?? null,
+              badges: i.customization?.badges ?? [],
+              edition: i.customization?.edition ?? null,
+              addOnPrice: i.customization?.addOnPrice ?? 0,
+            })),
           },
         }),
       });

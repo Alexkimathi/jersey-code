@@ -4,6 +4,16 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, Package, ChevronLeft } from "lucide-react";
+import { BADGE_OPTIONS, NATIONAL_BADGE_OPTIONS } from "@/lib/football-customization";
+
+interface CustomizationData {
+  size?: string | null;
+  edition?: string | null;
+  font?: string | null;
+  printColor?: string | null;
+  badges?: string[];
+  addOnPrice?: number;
+}
 
 interface OrderItem {
   id: string;
@@ -11,7 +21,17 @@ interface OrderItem {
   unit_price: number;
   custom_name?: string;
   custom_number?: string;
+  customization_data?: CustomizationData | null;
   products?: { name: string; image_url: string | null };
+  product_variants?: { size: string } | null;
+}
+
+function resolveBadgeLabel(value: string) {
+  return (
+    BADGE_OPTIONS.find((o) => o.value === value)?.label ??
+    NATIONAL_BADGE_OPTIONS.find((o) => o.value === value)?.label ??
+    value
+  );
 }
 
 interface Order {
@@ -167,8 +187,15 @@ export default function OrdersPage() {
 
                     {/* Items */}
                     <div className="divide-y divide-slate-50 px-5">
-                      {order.order_items.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3 py-3">
+                      {order.order_items.map((item) => {
+                        const cd = item.customization_data;
+                        const size = cd?.size ?? item.product_variants?.size ?? null;
+                        const badges = cd?.badges?.length ? cd.badges.map(resolveBadgeLabel) : [];
+                        const hasCustomization = item.custom_name || item.custom_number || size ||
+                          cd?.edition || cd?.font || cd?.printColor || badges.length > 0;
+
+                        return (
+                        <div key={item.id} className="flex items-start gap-3 py-3">
                           {item.products?.image_url ? (
                             <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 flex-none">
                               <Image
@@ -183,23 +210,71 @@ export default function OrdersPage() {
                             <div className="w-14 h-14 rounded-xl bg-slate-100 flex-none" />
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-800 truncate">
-                              {item.products?.name ?? "Product"}
-                            </p>
-                            <p className="text-xs text-slate-400">Qty: {item.quantity}</p>
-                            {(item.custom_name || item.custom_number) && (
-                              <p className="text-xs text-sky-600 font-medium mt-0.5">
-                                {[item.custom_name, item.custom_number && `#${item.custom_number}`]
-                                  .filter(Boolean)
-                                  .join(" · ")}
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm font-semibold text-slate-800 truncate">
+                                {item.products?.name ?? "Product"}
                               </p>
+                              <p className="text-sm font-bold text-slate-900 flex-none">
+                                KES {(item.quantity * item.unit_price).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                              {size && (
+                                <span className="inline-flex px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px] font-semibold">
+                                  Size {size}
+                                </span>
+                              )}
+                              {cd?.edition && (
+                                <span className="inline-flex px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] font-medium capitalize">
+                                  {cd.edition} edition
+                                </span>
+                              )}
+                              <span className="text-xs text-slate-400">Qty: {item.quantity}</span>
+                            </div>
+                            {hasCustomization && (
+                              <div className="mt-2 rounded-lg border border-slate-100 bg-slate-50 divide-y divide-slate-100 text-xs">
+                                {item.custom_name && (
+                                  <div className="flex justify-between px-3 py-1.5">
+                                    <span className="text-slate-400">Print Name</span>
+                                    <span className="font-bold text-slate-800 tracking-wide">{item.custom_name}</span>
+                                  </div>
+                                )}
+                                {item.custom_number && (
+                                  <div className="flex justify-between px-3 py-1.5">
+                                    <span className="text-slate-400">Print Number</span>
+                                    <span className="font-bold text-slate-800">#{item.custom_number}</span>
+                                  </div>
+                                )}
+                                {cd?.font && (
+                                  <div className="flex justify-between px-3 py-1.5">
+                                    <span className="text-slate-400">Font</span>
+                                    <span className="font-semibold text-slate-700">{cd.font}</span>
+                                  </div>
+                                )}
+                                {cd?.printColor && (
+                                  <div className="flex justify-between px-3 py-1.5">
+                                    <span className="text-slate-400">Print Color</span>
+                                    <span className="font-semibold text-slate-700">{cd.printColor}</span>
+                                  </div>
+                                )}
+                                {badges.map((label) => (
+                                  <div key={label} className="flex justify-between px-3 py-1.5">
+                                    <span className="text-slate-400">Badge</span>
+                                    <span className="font-semibold text-slate-700">{label}</span>
+                                  </div>
+                                ))}
+                                {(cd?.addOnPrice ?? 0) > 0 && (
+                                  <div className="flex justify-between px-3 py-1.5 bg-sky-50 rounded-b-lg">
+                                    <span className="text-sky-600">Customization add-on</span>
+                                    <span className="font-semibold text-sky-700">+KES {cd!.addOnPrice!.toLocaleString()}</span>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
-                          <p className="text-sm font-bold text-slate-900 flex-none">
-                            KES {(item.quantity * item.unit_price).toLocaleString()}
-                          </p>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {/* Footer */}

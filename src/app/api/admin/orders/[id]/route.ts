@@ -47,6 +47,7 @@ export async function GET(
         unit_price,
         custom_name,
         custom_number,
+        customization_data,
         products (name, image_url),
         product_variants (size)
       )`
