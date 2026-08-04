@@ -4,11 +4,6 @@ import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
-
 const infoCards = [
   {
     icon: (
@@ -70,6 +65,11 @@ export default function ContactPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
     try {
       const { error: dbError } = await supabase
