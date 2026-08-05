@@ -38,13 +38,13 @@ async function getBanners(): Promise<Banner[]> {
 
 async function getBackgroundVideoUrl(): Promise<string | null> {
   const supabase = createServerClient();
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from("banners")
     .select("video_url")
     .eq("position", "background")
     .eq("is_active", true)
     .single();
-  return data?.video_url ?? null;
+  return (data as { video_url: string | null } | null)?.video_url ?? null;
 }
 
 async function getVariants(): Promise<ProductVariant[]> {
