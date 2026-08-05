@@ -163,7 +163,7 @@ export default function AboutPage() {
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-sky-400 mb-3">Get in touch</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-2">Have questions?</h2>
             <p className="text-slate-400 text-sm mb-7 max-w-sm">
-              Our support team is available Mon–Fri 9AM–6PM, Sat 10AM–4PM EAT.
+              Our support team is available Mon–Sat 9AM–7PM EAT.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link

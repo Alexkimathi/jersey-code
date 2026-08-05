@@ -28,7 +28,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
 
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/254708353465"
+        href="https://wa.me/254743616717"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"

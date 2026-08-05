@@ -254,8 +254,8 @@ export function OrderConfirmationClient({ order }: Props) {
           animate="visible"
           className="text-center text-xs text-slate-400"
         >
-          Questions? Call <span className="font-medium text-slate-600">+254 700 000 000</span> or email{" "}
-          <span className="font-medium text-slate-600">support@jerseystore.co.ke</span>
+          Questions? Call <span className="font-medium text-slate-600">+254 743 616 717</span> or email{" "}
+          <span className="font-medium text-slate-600">jersey.code.ke@gmail.com</span>
         </motion.p>
       </div>
     </div>

@@ -10,9 +10,9 @@ export default function ReturnsPage() {
             Contact our support team:
           </p>
           <ul className="text-gray-700">
-            <li>Email: support@jerseystore.co.ke</li>
-            <li>Phone: +254 712 345 678</li>
-            <li>Hours: Mon-Fri 9AM-6PM EAT</li>
+            <li>Email: jersey.code.ke@gmail.com</li>
+            <li>Phone: +254 743 616 717</li>
+            <li>Hours: Mon–Sat 9AM–7PM EAT, Sun Closed</li>
           </ul>
         </div>
       </div>

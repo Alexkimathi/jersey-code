@@ -461,8 +461,8 @@ export function CheckoutForm() {
         <div className="rounded-2xl border border-slate-100 bg-white p-5">
           <p className="text-sm font-bold text-slate-800 mb-1">Need help?</p>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Call or WhatsApp <span className="font-medium text-slate-700">+254 700 000 000</span> or email{" "}
-            <span className="font-medium text-slate-700">support@jerseystore.co.ke</span>
+            Call or WhatsApp <span className="font-medium text-slate-700">+254 743 616 717</span> or email{" "}
+            <span className="font-medium text-slate-700">jersey.code.ke@gmail.com</span>
           </p>
         </div>
       </aside>

@@ -10,7 +10,7 @@
  *   3. Copy the token from your device dashboard → paste into .env.local + Vercel env vars
  */
 
-const BUSINESS_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "254708353465";
+const BUSINESS_PHONE = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "254743616717";
 
 /** Normalise any Kenyan number to digits only, e.g. 0712345678 → 254712345678 */
 function normalisePhone(phone: string): string {

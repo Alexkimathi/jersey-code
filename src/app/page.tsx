@@ -350,8 +350,8 @@ export default async function HomePage() {
                     </div>
                     <div>
                       <p className="font-bold text-slate-900 text-sm">Jersey Code</p>
-                      <p className="text-sm text-slate-500 mt-0.5">New Generation Exhibition</p>
-                      <p className="text-sm text-slate-500">Tom Mboya St, Nairobi</p>
+                      <p className="text-sm text-slate-500 mt-0.5">Tom Mboya St, next to Platinum Plaza</p>
+                      <p className="text-sm text-slate-500">1st floor, shop C13</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -362,7 +362,7 @@ export default async function HomePage() {
                     </div>
                     <div>
                       <p className="font-bold text-slate-900 text-sm">WhatsApp</p>
-                      <p className="text-sm text-slate-500 mt-0.5">+254 708 353 465</p>
+                      <p className="text-sm text-slate-500 mt-0.5">+254 743 616 717</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -373,8 +373,8 @@ export default async function HomePage() {
                     </div>
                     <div>
                       <p className="font-bold text-slate-900 text-sm">Opening Hours</p>
-                      <p className="text-sm text-slate-500 mt-0.5">Mon – Sat: 8:00 AM – 8:00 PM</p>
-                      <p className="text-sm text-slate-500">Sun: 10:00 AM – 6:00 PM</p>
+                      <p className="text-sm text-slate-500 mt-0.5">Mon – Sat: 9:00 AM – 7:00 PM</p>
+                      <p className="text-sm text-slate-500">Sun: Closed</p>
                     </div>
                   </div>
                 </div>
@@ -392,7 +392,7 @@ export default async function HomePage() {
                     Get Directions
                   </a>
                   <a
-                    href="https://wa.me/254708353465"
+                    href="https://wa.me/254743616717"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-6 py-3 text-sm font-bold text-slate-700 hover:border-[#25D366] hover:text-[#25D366] transition-colors"

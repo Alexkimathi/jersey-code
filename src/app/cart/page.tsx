@@ -272,8 +272,8 @@ export default function CartPage() {
                 Contact our support team for help with sizing, delivery, or order updates.
               </p>
               <div className="mt-6 space-y-3 text-sm text-slate-700">
-                <p>support@jerseystore.co.ke</p>
-                <p>+254 700 000 000</p>
+                <p>jersey.code.ke@gmail.com</p>
+                <p>+254 743 616 717</p>
               </div>
             </div>
           </motion.div>

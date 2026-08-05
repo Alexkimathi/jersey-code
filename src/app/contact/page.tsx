@@ -12,7 +12,7 @@ const infoCards = [
       </svg>
     ),
     title: "Email",
-    lines: ["support@jerseystore.co.ke", "Response within 24 hours"],
+    lines: ["jersey.code.ke@gmail.com", "Response within 24 hours"],
   },
   {
     icon: (
@@ -21,7 +21,7 @@ const infoCards = [
       </svg>
     ),
     title: "Phone",
-    lines: ["+254 712 345 678", "Mon–Fri 9AM–6PM EAT"],
+    lines: ["+254 743 616 717", "Mon–Sat 9AM–7PM EAT"],
   },
   {
     icon: (
@@ -31,7 +31,7 @@ const infoCards = [
       </svg>
     ),
     title: "Location",
-    lines: ["New Generation Exhibition", "Tom Mboya St, Nairobi"],
+    lines: ["Tom Mboya St, next to Platinum Plaza", "1st floor, shop C13"],
   },
 ];
 
@@ -287,7 +287,7 @@ export default function ContactPage() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500 mb-2">Find us</p>
           <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 mb-1">Our store</h2>
           <p className="text-sm text-slate-500 mb-5">
-            Jersey Code · New Generation Exhibition, Tom Mboya St, Nairobi
+            Jersey Code · Tom Mboya St, next to Platinum Plaza, 1st floor shop C13
           </p>
           <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
             <iframe

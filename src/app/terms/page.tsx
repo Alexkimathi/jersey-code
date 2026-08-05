@@ -104,7 +104,7 @@ export default function TermsPage() {
           <div className="bg-blue-50 p-6 rounded-lg">
             <h3 className="font-semibold mb-4">Questions About These Terms?</h3>
             <p className="text-gray-700">
-              Contact us at support@jerseystore.co.ke
+              Contact us at jersey.code.ke@gmail.com
             </p>
           </div>
         </div>
