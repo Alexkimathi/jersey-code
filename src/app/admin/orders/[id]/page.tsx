@@ -317,7 +317,7 @@ export default function AdminOrderDetailPage() {
                         {item.products?.name ?? "Deleted product"}
                       </p>
                       <p className="text-sm font-semibold text-gray-900 flex-shrink-0">
-                        KES {(item.quantity * item.unit_price).toLocaleString()}
+                        KES {Math.round(item.quantity * item.unit_price).toLocaleString()}
                       </p>
                     </div>
 
@@ -329,7 +329,7 @@ export default function AdminOrderDetailPage() {
                         </span>
                       )}
                       <span className="text-xs text-gray-500">
-                        Qty: {item.quantity} × KES {item.unit_price.toLocaleString()}
+                        Qty: {item.quantity} × KES {Math.round(item.unit_price).toLocaleString()}
                       </span>
                       {cd?.edition && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-medium capitalize">
@@ -374,7 +374,7 @@ export default function AdminOrderDetailPage() {
                         {cd?.addOnPrice != null && cd.addOnPrice > 0 && (
                           <div className="flex items-center justify-between px-3 py-1.5 bg-blue-50 rounded-b-lg">
                             <span className="text-blue-600">Customization add-on</span>
-                            <span className="font-semibold text-blue-700">+KES {cd.addOnPrice.toLocaleString()}</span>
+                            <span className="font-semibold text-blue-700">+KES {Math.round(cd.addOnPrice).toLocaleString()}</span>
                           </div>
                         )}
                       </div>
@@ -388,7 +388,7 @@ export default function AdminOrderDetailPage() {
             <div className="text-right">
               <p className="text-sm text-gray-500">Total</p>
               <p className="text-xl font-bold text-gray-900">
-                KES {order.total_amount.toLocaleString()}
+                KES {Math.round(order.total_amount).toLocaleString()}
               </p>
             </div>
           </div>

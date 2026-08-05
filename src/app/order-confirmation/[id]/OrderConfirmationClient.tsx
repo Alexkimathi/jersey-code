@@ -177,7 +177,7 @@ export function OrderConfirmationClient({ order }: Props) {
               </div>
               <div className="flex justify-between border-t border-slate-100 pt-3">
                 <dt className="font-bold text-slate-900">Total</dt>
-                <dd className="font-extrabold text-slate-900">KES {order.total_amount.toLocaleString()}</dd>
+                <dd className="font-extrabold text-slate-900">KES {Math.round(order.total_amount).toLocaleString()}</dd>
               </div>
             </dl>
           </motion.div>

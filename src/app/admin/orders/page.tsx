@@ -133,7 +133,7 @@ export default async function AdminOrdersPage({
                         <div className="text-xs text-gray-500">{order.customer_phone}</div>
                       </td>
                       <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                        KES {order.total_amount.toLocaleString()}
+                        KES {Math.round(order.total_amount).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
                         <span

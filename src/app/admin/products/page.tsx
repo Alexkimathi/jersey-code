@@ -78,7 +78,7 @@ export default async function AdminProductsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    KES {product.price.toLocaleString()}
+                    KES {Math.round(product.price).toLocaleString()}
                   </td>
                   <td className="px-6 py-4">
                     <span

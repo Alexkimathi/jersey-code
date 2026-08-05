@@ -143,7 +143,7 @@ export default async function OrderTrackingPage({ params }: Props) {
             </div>
             <div>
               <p className="text-xs text-slate-400 mb-0.5">Total</p>
-              <p className="font-extrabold text-slate-900">KES {order.total_amount.toLocaleString()}</p>
+              <p className="font-extrabold text-slate-900">KES {Math.round(order.total_amount).toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -184,7 +184,7 @@ export default async function OrderTrackingPage({ params }: Props) {
                       {item.products?.name ?? "Product"}
                     </p>
                     <p className="text-sm font-bold text-slate-900 flex-none">
-                      KES {(item.quantity * item.unit_price).toLocaleString()}
+                      KES {Math.round(item.quantity * item.unit_price).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap mt-0.5">
@@ -236,7 +236,7 @@ export default async function OrderTrackingPage({ params }: Props) {
                       {cd?.addOnPrice > 0 && (
                         <div className="flex justify-between px-3 py-1.5 bg-sky-50 rounded-b-lg">
                           <span className="text-sky-600">Customization add-on</span>
-                          <span className="font-semibold text-sky-700">+KES {cd.addOnPrice.toLocaleString()}</span>
+                          <span className="font-semibold text-sky-700">+KES {Math.round(cd.addOnPrice).toLocaleString()}</span>
                         </div>
                       )}
                     </div>
@@ -248,7 +248,7 @@ export default async function OrderTrackingPage({ params }: Props) {
           </div>
           <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 flex justify-between text-sm">
             <span className="font-medium text-slate-500">Order Total</span>
-            <span className="font-extrabold text-slate-900">KES {order.total_amount.toLocaleString()}</span>
+            <span className="font-extrabold text-slate-900">KES {Math.round(order.total_amount).toLocaleString()}</span>
           </div>
         </div>
 

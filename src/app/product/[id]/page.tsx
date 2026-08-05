@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   if (!product) return {};
 
   const title = `${product.name}${product.team ? ` — ${product.team}` : ""}`;
-  const description = `Official ${product.sport} jersey. KES ${product.price.toLocaleString()}. Shop now.`;
+  const description = `Official ${product.sport} jersey. KES ${Math.round(product.price).toLocaleString()}. Shop now.`;
 
   return {
     title,

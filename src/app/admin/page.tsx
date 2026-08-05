@@ -56,7 +56,7 @@ export default async function AdminDashboardPage() {
     },
     {
       title: "Revenue",
-      value: `KES ${stats.totalRevenue.toLocaleString()}`,
+      value: `KES ${Math.round(stats.totalRevenue).toLocaleString()}`,
       icon: DollarSign,
       color: "text-purple-600",
       bgColor: "bg-purple-50",

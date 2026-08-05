@@ -445,7 +445,7 @@ export default function ProductForm({ params }: ProductFormProps) {
           sport: data.sport,
           team: data.team || "",
           description: data.description || "",
-          price: data.price.toString(),
+          price: Math.round(data.price).toString(),
           image_url: data.image_url || "",
           back_image_url: data.back_image_url || "",
           side_image_url: data.side_image_url || "",
@@ -517,7 +517,7 @@ export default function ProductForm({ params }: ProductFormProps) {
       return;
     }
 
-    const priceValue = parseFloat(formData.price);
+    const priceValue = parseInt(formData.price, 10);
     if (Number.isNaN(priceValue) || priceValue < 0) {
       setError("Please enter a valid product price.");
       return;
@@ -762,13 +762,14 @@ export default function ProductForm({ params }: ProductFormProps) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Price (KES) *</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 required
-                min="0"
-                step="0.01"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value.replace(/[^0-9]/g, "") })}
                 className={fieldClass}
+                placeholder="e.g. 3000"
               />
             </div>
             <div>

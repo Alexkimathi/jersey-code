@@ -415,7 +415,7 @@ export function CheckoutForm() {
                     ))}
                   </div>
                   <p className="text-sm font-bold text-slate-900 whitespace-nowrap">
-                    KES {(unitPrice * item.quantity).toLocaleString()}
+                    KES {Math.round(unitPrice * item.quantity).toLocaleString()}
                   </p>
                 </div>
               );
@@ -426,11 +426,11 @@ export function CheckoutForm() {
           <div className="border-t border-slate-100 pt-4 space-y-2">
             <div className="flex justify-between text-sm text-slate-500">
               <span>Subtotal</span>
-              <span>KES {finalTotal.toLocaleString()}</span>
+              <span>KES {Math.round(finalTotal).toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-100">
               <span>Total</span>
-              <span>KES {finalTotal.toLocaleString()}</span>
+              <span>KES {Math.round(finalTotal).toLocaleString()}</span>
             </div>
           </div>
 
@@ -445,7 +445,7 @@ export function CheckoutForm() {
             ) : (
               <>
                 <Lock className="w-4 h-4 mr-2" />
-                Place Order — KES {finalTotal.toLocaleString()}
+                Place Order — KES {Math.round(finalTotal).toLocaleString()}
               </>
             )}
           </Button>

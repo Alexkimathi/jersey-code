@@ -216,7 +216,7 @@ export default function CartPage() {
                             </motion.button>
                           </div>
                           <p className="text-base font-extrabold text-slate-900">
-                            KES {(unitPrice * item.quantity).toLocaleString()}
+                            KES {Math.round(unitPrice * item.quantity).toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -239,7 +239,7 @@ export default function CartPage() {
               <div className="space-y-4">
                 <div className="flex justify-between text-sm text-slate-500">
                   <span>Subtotal</span>
-                  <span>KES {total.toLocaleString()}</span>
+                  <span>KES {Math.round(total).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm text-slate-500">
                   <span>Shipping</span>
@@ -254,7 +254,7 @@ export default function CartPage() {
                       animate={{ scale: 1, color: "#0f172a" }}
                       transition={{ duration: 0.35 }}
                     >
-                      KES {total.toLocaleString()}
+                      KES {Math.round(total).toLocaleString()}
                     </motion.span>
                   </div>
                 </div>

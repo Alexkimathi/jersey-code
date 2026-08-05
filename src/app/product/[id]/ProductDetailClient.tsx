@@ -247,7 +247,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-sky-500">Official Jersey</p>
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">{product.name}</h1>
           {product.team && <p className="mt-1 text-sm text-slate-500">{product.team}</p>}
-          <p className="mt-2 text-xl font-bold text-slate-900">KES {product.price.toLocaleString()}</p>
+          <p className="mt-2 text-xl font-bold text-slate-900">KES {Math.round(product.price).toLocaleString()}</p>
         </div>
 
         {/* Size */}
@@ -608,7 +608,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
         {addOnPrice > 0 && (
           <div className="rounded-2xl bg-sky-50 border border-sky-100 px-4 py-3 space-y-1.5 text-sm">
             <div className="flex justify-between text-slate-600">
-              <span>Base price</span><span>KES {product.price.toLocaleString()}</span>
+              <span>Base price</span><span>KES {Math.round(product.price).toLocaleString()}</span>
             </div>
             {badges.map((b) => (
               <div key={b} className="flex justify-between text-slate-500">
@@ -627,7 +627,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               </div>
             )}
             <div className="flex justify-between font-bold text-slate-900 border-t border-sky-200 pt-1.5">
-              <span>Total per item</span><span>KES {totalPerItem.toLocaleString()}</span>
+              <span>Total per item</span><span>KES {Math.round(totalPerItem).toLocaleString()}</span>
             </div>
           </div>
         )}
@@ -635,7 +635,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
         {/* Add to cart */}
         <Button onClick={handleAddToCart} disabled={!selectedVariant || !inStock} size="lg" className="w-full">
           <ShoppingBag className="w-5 h-5 mr-2" />
-          {!selectedVariant ? "Select a size" : !inStock ? "Out of Stock" : `Add to Cart — KES ${(totalPerItem * quantity).toLocaleString()}`}
+          {!selectedVariant ? "Select a size" : !inStock ? "Out of Stock" : `Add to Cart — KES ${Math.round(totalPerItem * quantity).toLocaleString()}`}
         </Button>
 
         {selectedVariant && !inStock && (

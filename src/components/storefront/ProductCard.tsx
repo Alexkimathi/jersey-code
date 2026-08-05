@@ -124,7 +124,7 @@ export function ProductCard({ product, variants, index = 0 }: ProductCardProps) 
           {product.team && <p className="text-sm text-slate-400 mt-0.5 line-clamp-1">{product.team}</p>}
 
           <div className="flex items-center justify-between mt-auto pt-3">
-            <span className="text-base font-bold text-slate-900">KES {product.price.toLocaleString()}</span>
+            <span className="text-base font-bold text-slate-900">KES {Math.round(product.price).toLocaleString()}</span>
 
             <motion.button
               type="button"
@@ -177,7 +177,7 @@ export function ProductCard({ product, variants, index = 0 }: ProductCardProps) 
                 {/* Header — name + price */}
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-[13px] font-extrabold text-slate-900 leading-tight line-clamp-2 flex-1">{product.name}</p>
-                  <span className="text-[13px] font-extrabold text-sky-600 whitespace-nowrap">KES {product.price.toLocaleString()}</span>
+                  <span className="text-[13px] font-extrabold text-sky-600 whitespace-nowrap">KES {Math.round(product.price).toLocaleString()}</span>
                 </div>
 
                 <div className="h-px bg-slate-200/80" />
