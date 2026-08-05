@@ -31,8 +31,20 @@ async function getBanners(): Promise<Banner[]> {
     .from("banners")
     .select("*")
     .eq("is_active", true)
+    .neq("position", "background")
     .order("sort_order", { ascending: true });
   return data || [];
+}
+
+async function getBackgroundVideoUrl(): Promise<string | null> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from("banners")
+    .select("video_url")
+    .eq("position", "background")
+    .eq("is_active", true)
+    .single();
+  return data?.video_url ?? null;
 }
 
 async function getVariants(): Promise<ProductVariant[]> {
@@ -98,6 +110,7 @@ async function getProductsBySport(sport: string): Promise<Product[]> {
 export default async function HomePage() {
   const [
     banners,
+    backgroundVideoUrl,
     variants,
     newestProducts,
     bestSellers,
@@ -107,6 +120,7 @@ export default async function HomePage() {
     accessoriesAll,
   ] = await Promise.all([
     getBanners(),
+    getBackgroundVideoUrl(),
     getVariants(),
     getNewestProducts(),
     getBestSellers(),
@@ -135,7 +149,9 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {banners.length > 0 && <BannerCarousel banners={banners} />}
+      {(banners.length > 0 || backgroundVideoUrl) && (
+        <BannerCarousel banners={banners} backgroundVideoUrl={backgroundVideoUrl} />
+      )}
       <MarqueeBanner />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-12">
