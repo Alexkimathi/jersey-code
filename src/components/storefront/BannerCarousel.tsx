@@ -1,7 +1,7 @@
 "use client";
 
 import { Banner } from "@/lib/supabase/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const textVariants = {
@@ -22,6 +22,15 @@ export function BannerCarousel({
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentBanner = banners[currentIndex];
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.play().catch(() => {
+      // Autoplay blocked — will play on first user interaction
+    });
+  }, [backgroundVideoUrl]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -39,6 +48,7 @@ export function BannerCarousel({
       {/* Background video — managed separately from banner slides */}
       {backgroundVideoUrl && (
         <video
+          ref={videoRef}
           src={backgroundVideoUrl}
           className="absolute inset-0 w-full h-full object-cover"
           autoPlay

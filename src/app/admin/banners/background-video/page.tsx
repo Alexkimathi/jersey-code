@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useSupabase } from "@/app/providers";
 
 export default function BackgroundVideoPage() {
-  const router = useRouter();
   const { adminUser, isLoading } = useAdminAuth();
+  const { supabase } = useSupabase();
   const [recordId, setRecordId] = useState<string | null>(null);
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string>("");
   const [videoUrl, setVideoUrl] = useState<string>("");
@@ -19,15 +18,6 @@ export default function BackgroundVideoPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
-  const supabase = useMemo(
-    () =>
-      createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost",
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "fake-key"
-      ),
-    []
-  );
 
   useEffect(() => {
     async function load() {
@@ -55,27 +45,34 @@ export default function BackgroundVideoPage() {
 
     if (selectedFile) {
       setUploading(true);
-      const ext = selectedFile.name.split(".").pop() ?? "mp4";
-      const path = `banners/background/${Date.now()}.${ext}`;
-      const { data, error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(path, selectedFile, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: selectedFile.type,
-        });
 
-      if (uploadError || !data) {
-        setError(uploadError?.message || "Upload failed.");
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        setError("Not authenticated. Please log in again.");
         setSaving(false);
         setUploading(false);
         return;
       }
 
-      const { data: urlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(data.path);
-      finalUrl = urlData.publicUrl;
+      const form = new FormData();
+      form.append("file", selectedFile);
+
+      const res = await fetch("/api/admin/upload-video", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error ?? "Upload failed.");
+        setSaving(false);
+        setUploading(false);
+        return;
+      }
+
+      finalUrl = json.url;
       setUploading(false);
     }
 
