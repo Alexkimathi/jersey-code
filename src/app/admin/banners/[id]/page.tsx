@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-
-const POSITION_OPTIONS = ["hero", "sidebar", "mid-page", "footer"];
+import { useSupabase } from "@/app/providers";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,6 +15,7 @@ interface PageProps {
 export default function BannerForm({ params }: PageProps) {
   const router = useRouter();
   const { adminUser, isLoading } = useAdminAuth();
+  const { supabase } = useSupabase();
   const [bannerId, setBannerId] = useState<string | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,21 +35,11 @@ export default function BannerForm({ params }: PageProps) {
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
-    position: "hero",
     sort_order: 0,
     is_active: true,
     starts_at: "",
     ends_at: "",
   });
-
-  const supabase = useMemo(
-    () =>
-      createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost",
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "fake-key"
-      ),
-    []
-  );
 
   useEffect(() => {
     if (!bannerId) return;
@@ -66,7 +55,6 @@ export default function BannerForm({ params }: PageProps) {
         setFormData({
           title: data.title,
           subtitle: data.subtitle ?? "",
-          position: data.position,
           sort_order: data.sort_order,
           is_active: data.is_active,
           starts_at: data.starts_at ? data.starts_at.slice(0, 16) : "",
@@ -92,7 +80,7 @@ export default function BannerForm({ params }: PageProps) {
     const payload = {
       title: formData.title,
       subtitle: formData.subtitle || null,
-      position: formData.position,
+      position: "hero",
       sort_order: formData.sort_order,
       is_active: formData.is_active,
       starts_at: formData.starts_at || null,
@@ -227,37 +215,20 @@ export default function BannerForm({ params }: PageProps) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Position
-              </label>
-              <select
-                value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                className={inputClass}
-              >
-                {POSITION_OPTIONS.map((p) => (
-                  <option key={p} value={p} className="capitalize">
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sort Order
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={formData.sort_order}
-                onChange={(e) =>
-                  setFormData({ ...formData, sort_order: parseInt(e.target.value, 10) || 0 })
-                }
-                className={inputClass}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sort Order
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={formData.sort_order}
+              onChange={(e) =>
+                setFormData({ ...formData, sort_order: parseInt(e.target.value, 10) || 0 })
+              }
+              className={inputClass}
+            />
+            <p className="text-xs text-gray-400 mt-1">Lower numbers appear first in the carousel.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

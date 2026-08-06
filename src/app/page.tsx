@@ -17,7 +17,7 @@ function footballFirst(products: Product[]): Product[] {
 const navCategories = [
   { name: "Featured", slug: "featured", emoji: "⭐" },
   { name: "EPL", slug: "epl", emoji: "⚽" },
-  { name: "Others", slug: "others", emoji: "🌍" },
+  { name: "All Collection", slug: "others", emoji: "🌍" },
   { name: "Rugby", slug: "rugby", emoji: "🏉" },
   { name: "Formula One", slug: "formula-one", emoji: "🏎️" },
   { name: "Accessories", slug: "accessories", emoji: "🛍️" },
@@ -150,7 +150,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {(banners.length > 0 || backgroundVideoUrl) && (
-        <BannerCarousel banners={banners} backgroundVideoUrl={backgroundVideoUrl} />
+        <BannerCarousel banners={banners} backgroundVideoUrl={backgroundVideoUrl ?? "/video/hero.mp4"} />
       )}
       <MarqueeBanner />
 
