@@ -825,7 +825,7 @@ export default function ProductForm({ params }: ProductFormProps) {
                   <option value="">Jerseys</option>
                 </>}
                 {uiCategory === "accessories" && <>
-                  <option value="Balls">Balls</option>
+                  <option value="Balls">Boots & Balls</option>
                   <option value="Flags">Flags</option>
                   <option value="Socks">Socks</option>
                 </>}

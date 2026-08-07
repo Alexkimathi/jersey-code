@@ -316,11 +316,11 @@ export default async function HomePage() {
               </div>
               <HomeSectionTabs
                 tabs={[
-                  { label: "Balls", products: balls },
+                  { label: "Boots & Balls", products: balls },
                   { label: "Flags", products: flags },
                   { label: "Socks", products: socks },
                 ]}
-                defaultTab="Balls"
+                defaultTab="Boots & Balls"
                 variants={variants}
                 layout="grid"
               />

@@ -32,7 +32,7 @@ export default async function AccessoriesPage() {
   ]);
 
   const tabs = [
-    { label: "Balls", products: balls },
+    { label: "Boots & Balls", products: balls },
     { label: "Flags", products: flags },
     { label: "Socks", products: socks },
   ];
@@ -56,7 +56,7 @@ export default async function AccessoriesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <CategoryTabs tabs={tabs} defaultTab="Balls" variants={variants} />
+        <CategoryTabs tabs={tabs} defaultTab="Boots & Balls" variants={variants} />
       </div>
     </div>
   );
