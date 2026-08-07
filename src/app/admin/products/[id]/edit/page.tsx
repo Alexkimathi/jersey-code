@@ -67,6 +67,8 @@ function VariantsManager({
   const [variantError, setVariantError] = useState<string | null>(null);
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
   const [editingStockValue, setEditingStockValue] = useState("");
+  const [adjustingId, setAdjustingId] = useState<string | null>(null);
+  const [adjustValue, setAdjustValue] = useState("");
 
   const [newVariant, setNewVariant] = useState({
     size: "M",
@@ -128,8 +130,34 @@ function VariantsManager({
   };
 
   const handleDeleteVariant = async (id: string) => {
-    if (!confirm("Delete this size? Orders with this variant will not be affected.")) return;
-    await (supabase as any).from("product_variants").delete().eq("id", id);
+    if (!confirm("Delete this size? This cannot be undone.")) return;
+    setVariantError(null);
+
+    const { error } = await (supabase as any)
+      .from("product_variants")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      setVariantError(error.message);
+      return;
+    }
+
+    await fetchVariants();
+  };
+
+  const handleAdjustStock = async (id: string, currentStock: number) => {
+    const qty = parseInt(adjustValue, 10);
+    if (isNaN(qty) || qty <= 0) {
+      setAdjustingId(null);
+      return;
+    }
+    const newStock = Math.max(0, currentStock - qty);
+    await (supabase as any)
+      .from("product_variants")
+      .update({ stock_quantity: newStock })
+      .eq("id", id);
+    setAdjustingId(null);
     await fetchVariants();
   };
 
@@ -267,14 +295,17 @@ function VariantsManager({
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">In-store sale</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Delete</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {variants.map((v) => (
                 <tr key={v.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-semibold text-gray-900">{v.size}</td>
+
+                  {/* Stock — click to set absolute value */}
                   <td className="px-4 py-3 text-sm">
                     {editingStockId === v.id ? (
                       <div className="flex items-center gap-2">
@@ -321,10 +352,57 @@ function VariantsManager({
                         }`}
                       >
                         {v.stock_quantity}
-                        <span className="ml-1 text-xs text-gray-400 font-normal">(click to edit)</span>
+                        <span className="ml-1 text-xs text-gray-400 font-normal">(click to set)</span>
                       </button>
                     )}
                   </td>
+
+                  {/* In-store sale — subtract quantity sold in shop */}
+                  <td className="px-4 py-3 text-sm">
+                    {adjustingId === v.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="1"
+                          placeholder="qty"
+                          value={adjustValue}
+                          onChange={(e) => setAdjustValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleAdjustStock(v.id, v.stock_quantity);
+                            if (e.key === "Escape") setAdjustingId(null);
+                          }}
+                          autoFocus
+                          className="w-16 px-2 py-1 border border-amber-400 rounded text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAdjustStock(v.id, v.stock_quantity)}
+                          className="text-xs text-amber-600 font-medium hover:text-amber-700"
+                        >
+                          Deduct
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAdjustingId(null)}
+                          className="text-xs text-gray-400 hover:text-gray-600"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdjustingId(v.id);
+                          setAdjustValue("");
+                        }}
+                        className="text-xs text-amber-600 hover:text-amber-700 font-medium"
+                      >
+                        − Record sale
+                      </button>
+                    )}
+                  </td>
+
                   <td className="px-4 py-3 text-sm text-gray-500 font-mono">
                     {v.sku ?? "—"}
                   </td>
@@ -694,7 +772,7 @@ export default function ProductForm({ params }: ProductFormProps) {
               >
                 <option value="featured">Featured</option>
                 <option value="epl">EPL (English Premier League)</option>
-                <option value="others">Others (World Football)</option>
+                <option value="others">All Collection (World Football)</option>
                 <option value="rugby">Rugby</option>
                 <option value="formula_one">Formula One</option>
                 <option value="accessories">Accessories</option>

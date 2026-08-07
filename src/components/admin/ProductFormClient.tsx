@@ -530,7 +530,7 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
                 className={fieldClass}>
                 <option value="featured">Featured</option>
                 <option value="epl">EPL (English Premier League)</option>
-                <option value="others">Others (World Football)</option>
+                <option value="others">All Collection (World Football)</option>
                 <option value="rugby">Rugby</option>
                 <option value="formula_one">Formula One</option>
                 <option value="accessories">Accessories</option>

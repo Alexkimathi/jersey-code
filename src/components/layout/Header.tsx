@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const categoryLinks = [
   { label: "Featured", href: "/products/featured", emoji: "⭐" },
   { label: "EPL", href: "/products/epl", emoji: "⚽" },
-  { label: "Others", href: "/products/others", emoji: "🌍" },
+  { label: "All Collection", href: "/products/others", emoji: "🌍" },
   { label: "Rugby", href: "/products/rugby", emoji: "🏉" },
   { label: "Formula One", href: "/products/formula-one", emoji: "🏎️" },
   { label: "Accessories", href: "/products/accessories", emoji: "🛍️" },
