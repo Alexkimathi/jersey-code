@@ -21,10 +21,12 @@ export function BannerCarousel({
   backgroundVideoUrl?: string | null;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [videoError, setVideoError] = useState(false);
   const currentBanner = banners[currentIndex];
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    setVideoError(false);
     const video = videoRef.current;
     if (!video) return;
     video.play().catch(() => {
@@ -46,7 +48,7 @@ export function BannerCarousel({
     <div className="relative h-80 sm:h-[500px] w-full overflow-hidden bg-slate-950">
 
       {/* Background video — managed separately from banner slides */}
-      {backgroundVideoUrl && (
+      {backgroundVideoUrl && !videoError && (
         <video
           ref={videoRef}
           src={backgroundVideoUrl}
@@ -57,6 +59,7 @@ export function BannerCarousel({
           playsInline
           preload="auto"
           disablePictureInPicture
+          onError={() => setVideoError(true)}
         />
       )}
 
