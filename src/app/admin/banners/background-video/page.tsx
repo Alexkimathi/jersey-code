@@ -190,7 +190,16 @@ export default function BackgroundVideoPage() {
               className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-slate-100 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-200"
             />
             {selectedFile && (
-              <p className="text-xs text-amber-600 mt-1">{selectedFile.name} — uploads on save</p>
+              <>
+                <p className="text-xs text-amber-600 mt-1">{selectedFile.name} — uploads on save</p>
+                <video
+                  src={URL.createObjectURL(selectedFile)}
+                  className="mt-3 w-full h-40 object-cover rounded-lg bg-black"
+                  muted
+                  controls
+                  playsInline
+                />
+              </>
             )}
           </div>
 
