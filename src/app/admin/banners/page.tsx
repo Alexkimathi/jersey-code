@@ -2,7 +2,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Banner } from "@/lib/supabase/types";
 import Link from "next/link";
-import { Plus, Edit, Video } from "lucide-react";
+import { Plus, Edit, Video, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 async function getBanners(): Promise<Banner[]> {
@@ -11,6 +11,7 @@ async function getBanners(): Promise<Banner[]> {
     .from("banners")
     .select("*")
     .neq("position", "background")
+    .neq("position", "marquee")
     .order("sort_order", { ascending: true });
 
   if (error) {
@@ -19,6 +20,15 @@ async function getBanners(): Promise<Banner[]> {
   }
 
   return (data ?? []) as Banner[];
+}
+
+async function getMarqueeCount(): Promise<number> {
+  const supabase = createServerClient();
+  const { count } = await (supabase as any)
+    .from("banners")
+    .select("id", { count: "exact", head: true })
+    .eq("position", "marquee");
+  return count ?? 0;
 }
 
 async function getBackgroundVideo(): Promise<string | null> {
@@ -34,9 +44,10 @@ async function getBackgroundVideo(): Promise<string | null> {
 export const dynamic = "force-dynamic";
 
 export default async function AdminBannersPage() {
-  const [banners, backgroundVideoUrl] = await Promise.all([
+  const [banners, backgroundVideoUrl, marqueeCount] = await Promise.all([
     getBanners(),
     getBackgroundVideo(),
+    getMarqueeCount(),
   ]);
 
   return (
@@ -69,6 +80,30 @@ export default async function AdminBannersPage() {
               <Button variant="outline" size="sm">
                 <Edit className="w-4 h-4 mr-1.5" />
                 {backgroundVideoUrl ? "Change Video" : "Add Video"}
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Marquee Text */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Marquee Text</h2>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-none">
+                <MessageSquare className="w-5 h-5 text-slate-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  {marqueeCount > 0 ? `${marqueeCount} item${marqueeCount !== 1 ? "s" : ""}` : "No items yet"}
+                </p>
+                <p className="text-xs text-gray-400">Scrolling text shown below the hero banner.</p>
+              </div>
+            </div>
+            <Link href="/admin/banners/marquee">
+              <Button variant="outline" size="sm">
+                <Edit className="w-4 h-4 mr-1.5" />
+                Manage
               </Button>
             </Link>
           </div>

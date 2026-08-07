@@ -36,6 +36,17 @@ async function getBanners(): Promise<Banner[]> {
   return data || [];
 }
 
+async function getMarqueeItems(): Promise<string[]> {
+  const supabase = createServerClient();
+  const { data } = await (supabase as any)
+    .from("banners")
+    .select("title")
+    .eq("position", "marquee")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+  return (data ?? []).map((r: { title: string }) => r.title);
+}
+
 async function getBackgroundVideoUrl(): Promise<string | null> {
   const supabase = createServerClient();
   const { data } = await (supabase as any)
@@ -111,6 +122,7 @@ export default async function HomePage() {
   const [
     banners,
     backgroundVideoUrl,
+    marqueeItems,
     variants,
     newestProducts,
     bestSellers,
@@ -121,6 +133,7 @@ export default async function HomePage() {
   ] = await Promise.all([
     getBanners(),
     getBackgroundVideoUrl(),
+    getMarqueeItems(),
     getVariants(),
     getNewestProducts(),
     getBestSellers(),
@@ -152,7 +165,7 @@ export default async function HomePage() {
       {(banners.length > 0 || backgroundVideoUrl) && (
         <BannerCarousel banners={banners} backgroundVideoUrl={backgroundVideoUrl ?? "/video/hero.mp4"} />
       )}
-      <MarqueeBanner />
+      <MarqueeBanner items={marqueeItems} />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-12">
 
