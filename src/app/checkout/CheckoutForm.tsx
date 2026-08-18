@@ -324,27 +324,39 @@ export function CheckoutForm() {
                 const unitPrice = item.price + (item.customization?.addOnPrice ?? 0);
                 const c = item.customization;
                 return (
-                  <div key={key} className="flex gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 leading-tight truncate">{item.name}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Size {item.size}{" · "}×{item.quantity}
+                  <div key={key} className="space-y-1">
+                    {/* Base jersey line */}
+                    <div className="flex gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 leading-tight truncate">{item.name}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Size {item.size}{" · "}×{item.quantity}
+                        </p>
+                        {(c?.badges ?? (c?.badge && c.badge !== "none" ? [c.badge] : [])).map((b: string) => (
+                          <p key={b} className="text-xs text-slate-400">
+                            {(BADGE_OPTIONS.find((o) => o.value === b) ?? NATIONAL_BADGE_OPTIONS.find((o) => o.value === b))?.label ?? b}
+                          </p>
+                        ))}
+                      </div>
+                      <p className="text-sm font-bold text-slate-900 whitespace-nowrap">
+                        KES {Math.round(item.price * item.quantity).toLocaleString()}
                       </p>
-                      {c && (c.printName || c.printNumber) && (
-                        <p className="text-xs text-sky-500 mt-0.5">
-                          {[c.printName, c.printNumber && `#${c.printNumber}`].filter(Boolean).join(" ")}
-                          {c.font && ` · ${c.font}`}
-                        </p>
-                      )}
-                      {(c?.badges ?? (c?.badge && c.badge !== "none" ? [c.badge] : [])).map((b: string) => (
-                        <p key={b} className="text-xs text-slate-400">
-                          {(BADGE_OPTIONS.find((o) => o.value === b) ?? NATIONAL_BADGE_OPTIONS.find((o) => o.value === b))?.label ?? b}
-                        </p>
-                      ))}
                     </div>
-                    <p className="text-sm font-bold text-slate-900 whitespace-nowrap">
-                      KES {Math.round(unitPrice * item.quantity).toLocaleString()}
-                    </p>
+                    {/* Customization add-on line */}
+                    {c && (c.printName || c.printNumber) && (c.addOnPrice ?? 0) > 0 && (
+                      <div className="flex gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-sky-600">
+                            Name &amp; Number —{" "}
+                            {[c.printName, c.printNumber && `#${c.printNumber}`].filter(Boolean).join(" ")}
+                            {c.font && ` · ${c.font}`}
+                          </p>
+                        </div>
+                        <p className="text-xs font-semibold text-sky-600 whitespace-nowrap">
+                          +KES {Math.round((c.addOnPrice ?? 0) * item.quantity).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
