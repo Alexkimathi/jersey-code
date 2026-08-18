@@ -321,7 +321,6 @@ export function CheckoutForm() {
             <div className="space-y-4 mb-5 max-h-64 overflow-y-auto pr-1 no-scrollbar">
               {items.map((item) => {
                 const key = item.cartKey ?? item.variantId;
-                const unitPrice = item.price + (item.customization?.addOnPrice ?? 0);
                 const c = item.customization;
                 return (
                   <div key={key} className="space-y-1">
