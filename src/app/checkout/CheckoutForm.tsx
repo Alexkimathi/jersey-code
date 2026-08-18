@@ -103,7 +103,7 @@ export function CheckoutForm() {
     }
   };
 
-  if (!mounted || items.length === 0) return null;
+  if (!mounted || (items.length === 0 && !completedOrder)) return null;
 
   return (
     <>
