@@ -233,10 +233,16 @@ export default async function OrderTrackingPage({ params }: Props) {
                           <span className="font-semibold text-slate-700">{label}</span>
                         </div>
                       ))}
-                      {cd?.addOnPrice > 0 && (
-                        <div className="flex justify-between px-3 py-1.5 bg-sky-50 rounded-b-lg">
-                          <span className="text-sky-600">Name &amp; Number printing</span>
-                          <span className="font-semibold text-sky-700">+KES {Math.round(cd.addOnPrice * item.quantity).toLocaleString()}</span>
+                      {item.custom_name && (
+                        <div className="flex justify-between px-3 py-1.5 bg-sky-50">
+                          <span className="text-sky-600">Name printing</span>
+                          <span className="font-semibold text-sky-700">+KES {(200 * item.quantity).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {item.custom_number && (
+                        <div className={`flex justify-between px-3 py-1.5 bg-sky-50 ${!item.custom_name ? "" : "border-t border-sky-100"} rounded-b-lg`}>
+                          <span className="text-sky-600">Number printing</span>
+                          <span className="font-semibold text-sky-700">+KES {(200 * item.quantity).toLocaleString()}</span>
                         </div>
                       )}
                     </div>
