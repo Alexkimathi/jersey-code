@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { OrderStatus, PaymentStatus } from "@/lib/supabase/types";
+import { sendTelegram, buildOrderUpdateMessage } from "@/lib/telegram";
 
 const VALID_ORDER_STATUSES = ["processing", "ready", "out_for_delivery", "completed", "cancelled"];
 const VALID_PAYMENT_STATUSES = ["pending", "paid", "failed", "cancelled"];
@@ -124,6 +125,8 @@ export async function PATCH(
     console.error("Error updating order:", error);
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
+
+  await sendTelegram(buildOrderUpdateMessage(id, updateData));
 
   return NextResponse.json({ success: true });
 }

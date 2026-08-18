@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Truck, ShieldCheck, Smartphone, Clock } from "lucide-react";
+import { Truck, ShieldCheck, Smartphone, Clock, Building2 } from "lucide-react";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 24 },
@@ -27,6 +27,7 @@ interface Props {
 
 const paymentLabel: Record<string, string> = {
   mpesa: "M-Pesa",
+  till: "Buy Goods Till",
   pay_on_pickup: "Pay at Pickup",
   cash_on_delivery: "Cash on Delivery",
 };
@@ -34,6 +35,7 @@ const paymentLabel: Record<string, string> = {
 export function OrderConfirmationClient({ order }: Props) {
   const isPaid = order.payment_status === "paid";
   const isMpesaPending = order.payment_method === "mpesa" && order.payment_status === "pending";
+  const isTillPending = order.payment_method === "till" && order.payment_status === "pending";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -142,6 +144,35 @@ export function OrderConfirmationClient({ order }: Props) {
                 An STK push has been sent to your phone. Enter your M-Pesa PIN to confirm the payment and finalise your order.
               </p>
             </div>
+          </motion.div>
+        )}
+
+        {/* Till payment instructions */}
+        {isTillPending && (
+          <motion.div
+            custom={-1}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            className="rounded-2xl border border-green-200 bg-green-50 p-5 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center flex-none">
+                <Building2 className="w-5 h-5 text-green-700" />
+              </div>
+              <p className="font-bold text-green-800 text-sm">Complete your payment now</p>
+            </div>
+            <ol className="text-sm text-green-700 space-y-2 list-decimal list-inside leading-relaxed">
+              <li>Open <span className="font-semibold">M-Pesa</span> on your phone</li>
+              <li>Select <span className="font-semibold">Lipa na M-Pesa</span></li>
+              <li>Select <span className="font-semibold">Buy Goods and Services</span></li>
+              <li>Enter till number: <span className="font-extrabold tracking-widest text-green-900">8951054</span> <span className="text-green-500 font-normal">(JERSEY CODE)</span></li>
+              <li>Enter amount: <span className="font-extrabold text-green-900">KES {Math.round(order.total_amount).toLocaleString()}</span></li>
+              <li>Enter your M-Pesa PIN and confirm</li>
+            </ol>
+            <p className="text-xs text-green-600 border-t border-green-200 pt-3">
+              Keep your M-Pesa confirmation SMS — you may be asked to show it when picking up your order.
+            </p>
           </motion.div>
         )}
 

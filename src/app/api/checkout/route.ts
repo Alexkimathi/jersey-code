@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { initiateStkPush } from "@/lib/mpesa";
 import { CheckoutFormData } from "@/lib/supabase/types";
+import { sendTelegram, buildNewOrderMessage } from "@/lib/telegram";
 
 type RequestBody = CheckoutFormData & { items: any[]; total: number };
 
@@ -27,6 +28,7 @@ async function createOrderItems(supabase: any, orderId: string, items: any[]) {
   const { error } = await supabase.from("order_items").insert(orderItems);
   if (error) console.error("Error creating order items:", error);
 }
+
 
 async function postCheckoutSideEffects(
   requestUrl: string,
@@ -114,6 +116,21 @@ async function postCheckoutSideEffects(
       console.error("Error sending customer confirmation:", err);
     }
   }
+
+  // Telegram order alert
+  await sendTelegram(
+    buildNewOrderMessage(
+      orderId,
+      body.customerName,
+      body.customerPhone,
+      body.customerEmail,
+      body.fulfillmentMethod,
+      body.paymentMethod,
+      body.total,
+      body.deliveryAddress,
+      body.items
+    )
+  );
 }
 
 export async function POST(request: Request) {

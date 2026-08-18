@@ -17,7 +17,7 @@ export interface TeamList {
 export type Sport = "football" | "rugby" | "basketball" | "cricket" | "formula_one" | "accessories";
 
 export type FulfillmentMethod = "delivery" | "pickup";
-export type PaymentMethod = "mpesa" | "pay_on_pickup" | "cash_on_delivery";
+export type PaymentMethod = "mpesa" | "till" | "pay_on_pickup" | "cash_on_delivery";
 export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled";
 export type OrderStatus = "processing" | "ready" | "out_for_delivery" | "completed" | "cancelled";
 
