@@ -184,7 +184,7 @@ export default async function OrderTrackingPage({ params }: Props) {
                       {item.products?.name ?? "Product"}
                     </p>
                     <p className="text-sm font-bold text-slate-900 flex-none">
-                      KES {Math.round(item.quantity * item.unit_price).toLocaleString()}
+                      KES {Math.round(item.quantity * (item.unit_price - (cd?.addOnPrice ?? 0))).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap mt-0.5">
@@ -235,8 +235,8 @@ export default async function OrderTrackingPage({ params }: Props) {
                       ))}
                       {cd?.addOnPrice > 0 && (
                         <div className="flex justify-between px-3 py-1.5 bg-sky-50 rounded-b-lg">
-                          <span className="text-sky-600">Customization add-on</span>
-                          <span className="font-semibold text-sky-700">+KES {Math.round(cd.addOnPrice).toLocaleString()}</span>
+                          <span className="text-sky-600">Name &amp; Number printing</span>
+                          <span className="font-semibold text-sky-700">+KES {Math.round(cd.addOnPrice * item.quantity).toLocaleString()}</span>
                         </div>
                       )}
                     </div>
@@ -246,10 +246,33 @@ export default async function OrderTrackingPage({ params }: Props) {
               );
             })}
           </div>
-          <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 flex justify-between text-sm">
-            <span className="font-medium text-slate-500">Order Total</span>
-            <span className="font-extrabold text-slate-900">KES {Math.round(order.total_amount).toLocaleString()}</span>
-          </div>
+          {(() => {
+            const itemsSubtotal = order.order_items.reduce((sum: number, item: any) => {
+              const addOn = item.customization_data?.addOnPrice ?? 0;
+              return sum + item.quantity * (item.unit_price - addOn);
+            }, 0);
+            const customizationsTotal = order.order_items.reduce((sum: number, item: any) => {
+              return sum + item.quantity * (item.customization_data?.addOnPrice ?? 0);
+            }, 0);
+            return (
+              <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 space-y-2 text-sm">
+                <div className="flex justify-between text-slate-500">
+                  <span>Jerseys subtotal</span>
+                  <span>KES {Math.round(itemsSubtotal).toLocaleString()}</span>
+                </div>
+                {customizationsTotal > 0 && (
+                  <div className="flex justify-between text-sky-600">
+                    <span>Customizations</span>
+                    <span>+KES {Math.round(customizationsTotal).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-extrabold text-slate-900 border-t border-slate-200 pt-2">
+                  <span>Order Total</span>
+                  <span>KES {Math.round(order.total_amount).toLocaleString()}</span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Help */}
