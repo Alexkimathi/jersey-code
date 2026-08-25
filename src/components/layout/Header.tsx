@@ -17,6 +17,7 @@ const categoryLinks = [
 ];
 
 const navLinks = [
+  { label: "Track Order", href: "/orders" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
