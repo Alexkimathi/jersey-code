@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Package, ChevronLeft } from "lucide-react";
+import { Search, Package, ChevronLeft, Smartphone, RefreshCw } from "lucide-react";
 import { BADGE_OPTIONS, NATIONAL_BADGE_OPTIONS } from "@/lib/football-customization";
 
 interface CustomizationData {
@@ -67,6 +67,32 @@ export default function OrdersPage() {
   const [orders, setOrders]     = useState<Order[] | null>(null);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState("");
+  const [retrying, setRetrying] = useState<string | null>(null); // orderId being retried
+  const [retried, setRetried]   = useState<Set<string>>(new Set()); // orderIds successfully retried
+
+  const handleRetryPayment = async (order: Order) => {
+    setRetrying(order.id);
+    try {
+      const res = await fetch("/api/kopokopo/stk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phoneNumber: order.customer_phone,
+          amount: order.total_amount,
+          orderId: order.id,
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error || "Failed to send payment prompt");
+      }
+      setRetried((prev) => new Set(prev).add(order.id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to send M-Pesa prompt. Please try again.");
+    } finally {
+      setRetrying(null);
+    }
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,6 +302,33 @@ export default function OrdersPage() {
                         );
                       })}
                     </div>
+
+                    {/* Retry payment banner */}
+                    {(order.payment_status === "pending" || order.payment_status === "failed") && (
+                      <div className="px-5 pb-4">
+                        {retried.has(order.id) ? (
+                          <div className="flex items-center gap-3 rounded-2xl bg-green-50 border border-green-200 px-4 py-3">
+                            <Smartphone className="w-4 h-4 text-green-700 flex-none" />
+                            <div>
+                              <p className="text-sm font-bold text-green-900">M-Pesa prompt sent!</p>
+                              <p className="text-xs text-green-600 mt-0.5">Check your phone and enter your PIN to complete payment</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleRetryPayment(order)}
+                            disabled={retrying === order.id}
+                            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white hover:bg-sky-600 transition-colors disabled:opacity-60"
+                          >
+                            {retrying === order.id ? (
+                              <><RefreshCw className="w-4 h-4 animate-spin" /> Sending prompt…</>
+                            ) : (
+                              <><Smartphone className="w-4 h-4" /> Retry M-Pesa Payment</>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    )}
 
                     {/* Footer */}
                     <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-t border-slate-100">
