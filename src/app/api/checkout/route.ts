@@ -169,6 +169,7 @@ export async function POST(request: Request) {
           phoneNumber: body.customerPhone,
           amount: body.total,
           orderId: order.id,
+          customerName: body.customerName,
         });
 
         // Store the Kopo Kopo payment resource ID for reference

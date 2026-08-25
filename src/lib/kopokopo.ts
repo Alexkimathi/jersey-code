@@ -39,9 +39,10 @@ export async function initiateSTKPush(params: {
   phoneNumber: string;
   amount: number;
   orderId: string;
+  customerName?: string;
   callbackUrl?: string;
 }): Promise<{ paymentId: string }> {
-  const { phoneNumber, amount, orderId, callbackUrl } = params;
+  const { phoneNumber, amount, orderId, customerName, callbackUrl } = params;
 
   const accessToken = await getAccessToken();
 
@@ -50,12 +51,17 @@ export async function initiateSTKPush(params: {
     process.env.KOPOKOPO_CALLBACK_URL ||
     `${process.env.NEXT_PUBLIC_SITE_URL}/api/kopokopo/callback`;
 
+  const nameParts = customerName ? customerName.trim().split(/\s+/) : [];
+  const subscriber: Record<string, string> = {
+    phone_number: formatPhone(phoneNumber),
+  };
+  if (nameParts.length > 0) subscriber.first_name = nameParts[0];
+  if (nameParts.length > 1) subscriber.last_name = nameParts.slice(1).join(" ");
+
   const payload = {
     payment_channel: "M-PESA STK Push",
     till_number: KOPOKOPO_TILL_NUMBER,
-    subscriber: {
-      phone_number: formatPhone(phoneNumber),
-    },
+    subscriber,
     amount: {
       currency: "KES",
       value: Math.round(amount),
