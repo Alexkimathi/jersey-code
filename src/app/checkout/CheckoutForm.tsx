@@ -21,7 +21,6 @@ import {
   Smartphone,
 } from "lucide-react";
 
-import CustomerAddressBook from "@/components/storefront/CustomerAddressBook";
 
 const inputClass =
   "w-full rounded-xl bg-slate-100 border-0 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/50 transition-shadow";
@@ -62,14 +61,10 @@ export function CheckoutForm() {
     customerEmail: "",
     fulfillmentMethod: "delivery",
     paymentMethod: "mpesa",
-    deliveryAddress: null,
+    deliveryAddress: "",
   });
 
   const finalTotal = getTotal();
-
-  const showAddressBook =
-    formData.fulfillmentMethod === "delivery" &&
-    formData.customerPhone.replace(/\D/g, "").length >= 10;
 
   const handleFulfillmentChange = (method: FulfillmentMethod) => {
     setFormData({ ...formData, fulfillmentMethod: method, deliveryAddress: null });
@@ -213,91 +208,19 @@ export function CheckoutForm() {
 
             {formData.fulfillmentMethod === "delivery" && (
               <div className="mt-5 space-y-4">
-                {showAddressBook && (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <CustomerAddressBook
-                      customerId={formData.customerPhone}
-                      onSelectAddress={(addr) =>
-                        setFormData({
-                          ...formData,
-                          deliveryAddress: {
-                            street: addr.street_address,
-                            city: addr.city,
-                            area: addr.postal_code ?? "",
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                )}
-
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-slate-600">
-                    Street Address <span className="text-sky-500">*</span>
+                    Delivery Location <span className="text-sky-500">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <textarea
                     required
-                    placeholder="e.g. 12 Kenyatta Ave"
-                    value={formData.deliveryAddress?.street || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        deliveryAddress: {
-                          street: e.target.value,
-                          city: formData.deliveryAddress?.city || "",
-                          area: formData.deliveryAddress?.area || "",
-                        },
-                      })
-                    }
-                    className={inputClass}
+                    rows={3}
+                    placeholder="e.g. Westlands, near Sarit Centre — gate B, red gate"
+                    value={formData.deliveryAddress || ""}
+                    onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
+                    className="w-full rounded-xl bg-slate-100 border-0 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/50 transition-shadow resize-none"
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-slate-600">
-                      City <span className="text-sky-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Nairobi"
-                      value={formData.deliveryAddress?.city || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          deliveryAddress: {
-                            street: formData.deliveryAddress?.street || "",
-                            city: e.target.value,
-                            area: formData.deliveryAddress?.area || "",
-                          },
-                        })
-                      }
-                      className={inputClass}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-slate-600">
-                      Area <span className="text-sky-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Westlands"
-                      value={formData.deliveryAddress?.area || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          deliveryAddress: {
-                            street: formData.deliveryAddress?.street || "",
-                            city: formData.deliveryAddress?.city || "",
-                            area: e.target.value,
-                          },
-                        })
-                      }
-                      className={inputClass}
-                    />
-                  </div>
+                  <p className="text-xs text-slate-400">Describe your location clearly — area, landmark, building name, etc.</p>
                 </div>
 
                 <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
@@ -305,7 +228,7 @@ export function CheckoutForm() {
                   <div className="text-sm text-amber-800 leading-relaxed">
                     <p className="font-semibold mb-1">Heads up about delivery fees</p>
                     <p className="text-amber-700">
-                      Deliveries within <span className="font-medium">Nairobi CBD</span> are handled directly by our team at no extra charge. If your location is <span className="font-medium">outside Nairobi CBD</span>, a delivery fee will apply — your order will be shipped via your preferred courier service. Our delivery team will reach out to you to confirm details.
+                      Deliveries within <span className="font-medium">Nairobi CBD</span> are handled directly by our team at no extra charge. If your location is <span className="font-medium">outside Nairobi CBD</span>, a delivery fee will apply — our team will reach out to confirm details.
                     </p>
                   </div>
                 </div>

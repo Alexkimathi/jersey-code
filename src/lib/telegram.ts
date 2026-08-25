@@ -33,7 +33,7 @@ export function buildNewOrderMessage(
   fulfillmentMethod: string,
   paymentMethod: string,
   total: number,
-  deliveryAddress: { street: string; area: string; city: string } | null | undefined,
+  deliveryAddress: string | null | undefined,
   items: Array<{
     name: string;
     size?: string | null;
@@ -63,9 +63,7 @@ export function buildNewOrderMessage(
 
   const fulfillmentLabel = fulfillmentMethod === "delivery" ? "🚚 Delivery" : "🏪 Store Pickup";
   const paymentLabel = "M-Pesa STK Push";
-  const address = deliveryAddress
-    ? `${deliveryAddress.street}, ${deliveryAddress.area}, ${deliveryAddress.city}`
-    : null;
+  const address = deliveryAddress || null;
 
   return [
     `🛒 *New Order — #${orderId.slice(0, 8).toUpperCase()}*`,

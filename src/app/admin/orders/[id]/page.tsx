@@ -264,13 +264,15 @@ export default function AdminOrderDetailPage() {
               Delivery Address
             </h2>
             <p className="text-sm text-gray-900">
-              {[
-                order.delivery_address.street,
-                order.delivery_address.area,
-                order.delivery_address.city,
-              ]
-                .filter(Boolean)
-                .join(", ")}
+              {typeof order.delivery_address === "string"
+                ? order.delivery_address
+                : [
+                    (order.delivery_address as any).street,
+                    (order.delivery_address as any).area,
+                    (order.delivery_address as any).city,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
             </p>
           </div>
         )}

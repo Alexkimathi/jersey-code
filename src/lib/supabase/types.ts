@@ -151,11 +151,7 @@ export interface CheckoutFormData {
   customerEmail: string;
   fulfillmentMethod: FulfillmentMethod;
   paymentMethod: PaymentMethod;
-  deliveryAddress: {
-    street: string;
-    city: string;
-    area: string;
-  } | null;
+  deliveryAddress: string | null;
 }
 
 export interface MpesaStkPushResponse {
