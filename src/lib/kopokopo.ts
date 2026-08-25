@@ -75,12 +75,13 @@ export async function initiateSTKPush(params: {
   };
 
   const response = await fetch(
-    `${KOPOKOPO_BASE_URL}/api/v1/incoming-payments`,
+    `${KOPOKOPO_BASE_URL}/api/v2/incoming_payments`,
     {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(payload),
     }
