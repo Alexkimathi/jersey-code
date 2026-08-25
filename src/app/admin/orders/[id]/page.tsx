@@ -18,12 +18,6 @@ const ORDER_STATUS_OPTIONS = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-const PAYMENT_STATUS_OPTIONS = [
-  { value: "pending", label: "Pending" },
-  { value: "paid", label: "Paid" },
-  { value: "failed", label: "Failed" },
-  { value: "cancelled", label: "Cancelled" },
-];
 
 const ORDER_STATUS_CLASSES: Record<string, string> = {
   processing: "bg-yellow-100 text-yellow-800",
@@ -131,7 +125,7 @@ export default function AdminOrderDetailPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ order_status: orderStatus, payment_status: paymentStatus }),
+        body: JSON.stringify({ order_status: orderStatus }),
       });
 
       const result = await res.json();
@@ -172,8 +166,6 @@ export default function AdminOrderDetailPage() {
       </AdminLayout>
     );
   }
-
-  const isSuperAdmin = adminUser?.role === "super_admin";
 
   return (
     <AdminLayout>
@@ -419,22 +411,16 @@ export default function AdminOrderDetailPage() {
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1.5">
                 Payment Status
-                {!isSuperAdmin && (
-                  <span className="ml-1 text-gray-400 font-normal">(Super Admin only)</span>
-                )}
+                <span className="ml-1 text-gray-400 font-normal">(auto-updated via M-Pesa)</span>
               </label>
-              <select
-                value={paymentStatus}
-                onChange={(e) => setPaymentStatus(e.target.value)}
-                disabled={!isSuperAdmin}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
-              >
-                {PAYMENT_STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold w-full ${
+                PAYMENT_STATUS_CLASSES[paymentStatus] ?? "bg-gray-100 text-gray-800"
+              }`}>
+                {paymentStatus === "paid" && "✓ "}
+                {paymentStatus === "failed" && "✗ "}
+                {paymentStatus === "pending" && "⏳ "}
+                {paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}
+              </div>
             </div>
           </div>
 
