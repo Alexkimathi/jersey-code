@@ -5,11 +5,10 @@ import { createHmac } from "crypto";
 const KOPOKOPO_API_KEY = process.env.KOPOKOPO_API_KEY!;
 
 function verifySignature(rawBody: string, signature: string): boolean {
-  if (!KOPOKOPO_API_KEY) return true; // skip verification if key not configured
+  if (!KOPOKOPO_API_KEY) return true;
   const expected = createHmac("sha256", KOPOKOPO_API_KEY)
     .update(rawBody)
     .digest("hex");
-  // signature header may be "sha256=<hex>" or just "<hex>"
   const received = signature.startsWith("sha256=")
     ? signature.slice(7)
     : signature;
@@ -29,14 +28,14 @@ export async function POST(request: Request) {
     const body = JSON.parse(rawBody);
     console.log("Kopo Kopo Callback:", JSON.stringify(body, null, 2));
 
-    const resource = body?.event?.resource;
-    if (!resource) {
+    // Actual payload: body.data.attributes
+    const attributes = body?.data?.attributes;
+    if (!attributes) {
       return NextResponse.json({ status: "ok" });
     }
 
-    const orderId: string | undefined = resource?.metadata?.order_id;
-    // "Success" | "Failed" | "Pending"
-    const status: string | undefined = resource?.status;
+    const status: string | undefined = attributes.status; // "Success" | "Failed"
+    const orderId: string | undefined = attributes.metadata?.order_id;
 
     if (!orderId) {
       console.error("Kopo Kopo callback: no order_id in metadata");
