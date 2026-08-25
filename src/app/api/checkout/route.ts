@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { initiateStkPush } from "@/lib/mpesa";
+import { initiateSTKPush } from "@/lib/kopokopo";
 import { CheckoutFormData } from "@/lib/supabase/types";
 import { sendTelegram, buildNewOrderMessage } from "@/lib/telegram";
 
@@ -162,24 +162,24 @@ export async function POST(request: Request) {
 
     await createOrderItems(supabase, order.id, body.items);
 
-    // ── 2. M-Pesa: initiate STK push after order exists ─────────
+    // ── 2. M-Pesa: initiate STK push via Kopo Kopo after order exists ──────
     if (body.paymentMethod === "mpesa") {
       try {
-        const mpesaResult = await initiateStkPush({
+        const kkResult = await initiateSTKPush({
           phoneNumber: body.customerPhone,
           amount: body.total,
           orderId: order.id,
         });
 
-        // Store the checkout request ID so the callback can find this order
+        // Store the Kopo Kopo payment resource ID for reference
         await supabase
           .from("orders")
-          .update({ mpesa_checkout_request_id: mpesaResult.checkoutRequestId })
+          .update({ mpesa_checkout_request_id: kkResult.paymentId })
           .eq("id", order.id);
-      } catch (mpesaError) {
-        // Order exists — log the M-Pesa failure but don't block the response.
+      } catch (kkError) {
+        // Order exists — log the failure but don't block the response.
         // The customer will see the order confirmation; payment can be retried.
-        console.error("M-Pesa STK push failed:", mpesaError);
+        console.error("Kopo Kopo STK push failed:", kkError);
       }
     }
 
