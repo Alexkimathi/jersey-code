@@ -16,7 +16,6 @@ import {
   Lock,
   RefreshCw,
   Info,
-  Building2,
   CheckCircle2,
   ArrowRight,
   Smartphone,
@@ -48,7 +47,7 @@ export function CheckoutForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [completedOrder, setCompletedOrder] = useState<{ id: string; total: number } | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<{ id: string; total: number; phone: string } | null>(null);
   const checkoutSuccess = useRef(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -62,7 +61,7 @@ export function CheckoutForm() {
     customerPhone: "",
     customerEmail: "",
     fulfillmentMethod: "delivery",
-    paymentMethod: "till",
+    paymentMethod: "mpesa",
     deliveryAddress: null,
   });
 
@@ -96,7 +95,7 @@ export function CheckoutForm() {
 
       checkoutSuccess.current = true;
       clearCart();
-      setCompletedOrder({ id: result.orderId, total: finalTotal });
+      setCompletedOrder({ id: result.orderId, total: finalTotal, phone: formData.customerPhone });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -145,7 +144,7 @@ export function CheckoutForm() {
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-600">
-                  Phone Number <span className="text-sky-500">*</span>
+                  M-Pesa Phone Number <span className="text-sky-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -155,6 +154,7 @@ export function CheckoutForm() {
                   onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
                   className={inputClass}
                 />
+                <p className="text-xs text-slate-400">Payment prompt will be sent to this number</p>
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
@@ -172,63 +172,10 @@ export function CheckoutForm() {
             </div>
           </div>
 
-          {/* Step 2 — Payment Method */}
+          {/* Step 2 — Fulfillment */}
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-5">
               <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex-none">2</span>
-              <h2 className="text-base font-bold text-slate-900">Payment Method</h2>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-3">
-              {[
-                {
-                  value: "mpesa" as const,
-                  label: "M-Pesa STK Push",
-                  sub: "Get a payment prompt on your phone",
-                  icon: <Smartphone className="w-5 h-5" />,
-                },
-                {
-                  value: "till" as const,
-                  label: "Pay via Till Manually",
-                  sub: "Buy Goods till 8951054",
-                  icon: <Building2 className="w-5 h-5" />,
-                },
-              ].map((opt) => {
-                const active = formData.paymentMethod === opt.value;
-                return (
-                  <label
-                    key={opt.value}
-                    className={`cursor-pointer flex items-start gap-3.5 rounded-2xl border p-4 transition ${
-                      active
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-200 bg-white hover:border-slate-300"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value={opt.value}
-                      checked={active}
-                      onChange={() => setFormData({ ...formData, paymentMethod: opt.value })}
-                      className="sr-only"
-                    />
-                    <span className={`mt-0.5 flex-none ${active ? "text-sky-400" : "text-slate-400"}`}>
-                      {opt.icon}
-                    </span>
-                    <div>
-                      <p className="text-sm font-bold leading-tight">{opt.label}</p>
-                      <p className={`text-xs mt-0.5 ${active ? "text-slate-300" : "text-slate-400"}`}>{opt.sub}</p>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 3 — Fulfillment */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex-none">3</span>
               <h2 className="text-base font-bold text-slate-900">Fulfillment Method</h2>
             </div>
 
@@ -378,7 +325,6 @@ export function CheckoutForm() {
                 const c = item.customization;
                 return (
                   <div key={key} className="space-y-1">
-                    {/* Base jersey line */}
                     <div className="flex gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-slate-900 leading-tight truncate">{item.name}</p>
@@ -395,7 +341,6 @@ export function CheckoutForm() {
                         KES {Math.round(item.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
-                    {/* Customization add-on line */}
                     {c && (c.printName || c.printNumber) && (c.addOnPrice ?? 0) > 0 && (
                       <div className="flex gap-3">
                         <div className="flex-1 min-w-0">
@@ -426,18 +371,24 @@ export function CheckoutForm() {
               </div>
             </div>
 
+            {/* M-Pesa badge */}
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-green-50 border border-green-200 px-3 py-2.5">
+              <Smartphone className="w-4 h-4 text-green-700 flex-none" />
+              <p className="text-xs font-semibold text-green-800">Pay via M-Pesa STK Push</p>
+            </div>
+
             <Button
               type="submit"
               size="lg"
-              className="mt-5 w-full"
+              className="mt-4 w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Processing…</>
+                <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Sending M-Pesa prompt…</>
               ) : (
                 <>
                   <Lock className="w-4 h-4 mr-2" />
-                  Proceed to Checkout — KES {Math.round(finalTotal).toLocaleString()}
+                  Pay KES {Math.round(finalTotal).toLocaleString()} via M-Pesa
                 </>
               )}
             </Button>
@@ -459,13 +410,11 @@ export function CheckoutForm() {
         </aside>
       </form>
 
-      {/* ── Payment dialog (shown after order is created) ── */}
+      {/* ── M-Pesa confirmation modal ── */}
       {completedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
 
-          {/* Modal */}
           <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
             {/* Header */}
             <div className="bg-slate-900 px-6 py-5 text-center">
@@ -473,63 +422,31 @@ export function CheckoutForm() {
                 <CheckCircle2 className="w-6 h-6 text-green-400" />
               </div>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-sky-400 mb-1">Order Placed</p>
-              <p className="text-white font-bold text-lg">
-                {formData.paymentMethod === "mpesa" ? "Check your phone" : "Now complete your payment"}
-              </p>
+              <p className="text-white font-bold text-lg">Check your phone</p>
               <p className="text-slate-400 text-xs mt-1 font-mono">#{completedOrder.id.slice(0, 8).toUpperCase()}</p>
             </div>
 
             {/* Instructions */}
             <div className="px-6 py-5 space-y-4">
-              {formData.paymentMethod === "mpesa" ? (
-                <>
-                  <div className="flex items-center gap-3 rounded-2xl bg-green-50 border border-green-200 px-4 py-3">
-                    <Smartphone className="w-5 h-5 text-green-700 flex-none" />
-                    <div>
-                      <p className="text-sm font-bold text-green-900">M-Pesa prompt sent!</p>
-                      <p className="text-xs text-green-600 mt-0.5">Enter your PIN on your phone to pay</p>
-                    </div>
-                    <div className="ml-auto text-right">
-                      <p className="text-xs text-slate-500">Amount</p>
-                      <p className="text-lg font-extrabold text-slate-900">KES {Math.round(completedOrder.total).toLocaleString()}</p>
-                    </div>
-                  </div>
-                  <ol className="text-sm text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
-                    <li>An M-Pesa payment request was sent to <span className="font-semibold text-slate-800">{formData.customerPhone}</span></li>
-                    <li>A pop-up will appear on your phone — enter your <span className="font-semibold text-slate-800">M-Pesa PIN</span> to confirm</li>
-                    <li>You will receive an SMS confirming your payment</li>
-                  </ol>
-                  <p className="text-xs text-slate-400 border-t border-slate-100 pt-3">
-                    Didn&apos;t get a prompt? The request may take a few seconds. Keep your M-Pesa confirmation SMS as proof of payment.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3 rounded-2xl bg-green-50 border border-green-200 px-4 py-3">
-                    <Building2 className="w-5 h-5 text-green-700 flex-none" />
-                    <div>
-                      <p className="text-xs text-green-600 font-semibold uppercase tracking-wide">Buy Goods Till</p>
-                      <p className="text-2xl font-extrabold text-green-900 tracking-widest">8951054</p>
-                      <p className="text-xs text-green-600">JERSEY CODE</p>
-                    </div>
-                    <div className="ml-auto text-right">
-                      <p className="text-xs text-slate-500">Amount</p>
-                      <p className="text-lg font-extrabold text-slate-900">KES {Math.round(completedOrder.total).toLocaleString()}</p>
-                    </div>
-                  </div>
-                  <ol className="text-sm text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
-                    <li>Open <span className="font-semibold text-slate-800">M-Pesa</span> on your phone</li>
-                    <li>Select <span className="font-semibold text-slate-800">Lipa na M-Pesa</span></li>
-                    <li>Select <span className="font-semibold text-slate-800">Buy Goods and Services</span></li>
-                    <li>Enter till <span className="font-extrabold text-slate-900">8951054</span></li>
-                    <li>Enter amount <span className="font-extrabold text-slate-900">KES {Math.round(completedOrder.total).toLocaleString()}</span></li>
-                    <li>Enter your M-Pesa PIN and confirm</li>
-                  </ol>
-                  <p className="text-xs text-slate-400 border-t border-slate-100 pt-3">
-                    Keep your M-Pesa confirmation SMS — you may be asked to show it when collecting your order.
-                  </p>
-                </>
-              )}
+              <div className="flex items-center gap-3 rounded-2xl bg-green-50 border border-green-200 px-4 py-3">
+                <Smartphone className="w-5 h-5 text-green-700 flex-none" />
+                <div>
+                  <p className="text-sm font-bold text-green-900">M-Pesa prompt sent!</p>
+                  <p className="text-xs text-green-600 mt-0.5">Enter your PIN on your phone to pay</p>
+                </div>
+                <div className="ml-auto text-right">
+                  <p className="text-xs text-slate-500">Amount</p>
+                  <p className="text-lg font-extrabold text-slate-900">KES {Math.round(completedOrder.total).toLocaleString()}</p>
+                </div>
+              </div>
+              <ol className="text-sm text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
+                <li>An M-Pesa payment request was sent to <span className="font-semibold text-slate-800">{completedOrder.phone}</span></li>
+                <li>A pop-up will appear on your phone — enter your <span className="font-semibold text-slate-800">M-Pesa PIN</span> to confirm</li>
+                <li>You will receive an SMS confirming your payment</li>
+              </ol>
+              <p className="text-xs text-slate-400 border-t border-slate-100 pt-3">
+                Didn&apos;t get a prompt? The request may take a few seconds. Keep your M-Pesa confirmation SMS as proof of payment.
+              </p>
             </div>
 
             {/* Footer */}

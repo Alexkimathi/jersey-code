@@ -62,7 +62,7 @@ export function buildNewOrderMessage(
     .join("\n");
 
   const fulfillmentLabel = fulfillmentMethod === "delivery" ? "🚚 Delivery" : "🏪 Store Pickup";
-  const paymentLabel = paymentMethod === "till" ? "Buy Goods Till #8951054" : paymentMethod.toUpperCase();
+  const paymentLabel = "M-Pesa STK Push";
   const address = deliveryAddress
     ? `${deliveryAddress.street}, ${deliveryAddress.area}, ${deliveryAddress.city}`
     : null;
