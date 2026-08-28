@@ -1,7 +1,7 @@
 -- 1. Extend sport constraint to include accessories
 alter table products drop constraint if exists products_sport_check;
 alter table products add constraint products_sport_check
-  check (sport in ('football', 'rugby', 'basketball', 'cricket', 'formula_one', 'accessories'));
+  check (sport in ('football', 'rugby', 'basketball', 'formula_one', 'accessories'));
 
 -- 2. Seed accessories products
 --    team field is used as subcategory: 'Balls' | 'Flags' | 'Socks'

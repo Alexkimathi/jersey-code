@@ -14,7 +14,7 @@ export interface TeamList {
   created_at: string;
 }
 
-export type Sport = "football" | "rugby" | "basketball" | "cricket" | "formula_one" | "accessories";
+export type Sport = "football" | "rugby" | "basketball" | "formula_one" | "accessories";
 
 export type FulfillmentMethod = "delivery" | "pickup";
 export type PaymentMethod = "mpesa" | "till" | "pay_on_pickup" | "cash_on_delivery";

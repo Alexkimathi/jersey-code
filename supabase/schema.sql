@@ -31,7 +31,7 @@ create table if not exists admin_permissions (
 create table if not exists products (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  sport text not null check (sport in ('football', 'rugby', 'basketball', 'cricket')),
+  sport text not null check (sport in ('football', 'rugby', 'basketball', 'formula_one')),
   team text,
   description text,
   price numeric(10,2) not null check (price >= 0),
@@ -68,7 +68,7 @@ create table if not exists banners (
   image_url text not null,
   video_url text,
   link_url text,
-  position text not null check (position in ('hero', 'category_football', 'category_rugby', 'category_basketball', 'category_cricket')),
+  position text not null check (position in ('hero', 'category_football', 'category_rugby', 'category_basketball', 'category_formula_one')),
   starts_at timestamptz,
   ends_at timestamptz,
   is_active boolean not null default true,

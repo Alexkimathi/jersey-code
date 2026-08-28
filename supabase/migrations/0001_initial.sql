@@ -20,7 +20,7 @@ create table if not exists admin_permissions (
 create table if not exists products (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  sport text not null check (sport in ('football', 'rugby', 'basketball', 'cricket')),
+  sport text not null check (sport in ('football', 'rugby', 'basketball', 'formula_one')),
   team text,
   description text,
   price numeric(10,2) not null check (price >= 0),
@@ -48,7 +48,7 @@ create table if not exists banners (
   image_url text not null,
   video_url text,
   link_url text,
-  position text not null check (position in ('hero', 'category_football', 'category_rugby', 'category_basketball', 'category_cricket')),
+  position text not null check (position in ('hero', 'category_football', 'category_rugby', 'category_basketball', 'category_formula_one')),
   starts_at timestamptz,
   ends_at timestamptz,
   is_active boolean not null default true,
@@ -414,8 +414,8 @@ values
   ('South Africa Springboks Rugby Jersey', 'rugby', 'South Africa', 'Green and gold rugby jersey with performance stretch fabric', 5600, null, false, false),
   ('Los Angeles Lakers Swingman Jersey', 'basketball', 'Los Angeles Lakers', 'Official swingman basketball jersey with performance fit', 4000, null, true, false),
   ('Chicago Bulls Swingman Jersey', 'basketball', 'Chicago Bulls', 'Red swingman jersey with iconic NBA styling', 4200, null, false, false),
-  ('Kenya Cricket Test Jersey', 'cricket', 'Kenya national team', 'Traditional cricket whites with modern comfort and durability', 5000, null, false, false),
-  ('England Cricket ODI Jersey', 'cricket', 'England', 'Official white and blue cricket jersey for limited overs', 5200, null, false, false);
+  ('Mercedes AMG F1 Team Jersey', 'formula_one', 'Mercedes AMG Petronas', 'Official Mercedes F1 team jersey with sublimated livery and lightweight mesh panels', 5000, null, false, false),
+  ('Ferrari Scuderia F1 Team Jersey', 'formula_one', 'Scuderia Ferrari', 'Iconic red Ferrari F1 team jersey with sublimated team livery', 5200, null, false, false);
 
 insert into product_variants (product_id, size, stock_quantity)
 select id, 'S', 10 from products where name = 'Harambee Stars Home Jersey'
@@ -502,14 +502,14 @@ union all select id, 'S', 10 from products where name = 'Chicago Bulls Swingman 
 union all select id, 'M', 15 from products where name = 'Chicago Bulls Swingman Jersey'
 union all select id, 'L', 20 from products where name = 'Chicago Bulls Swingman Jersey'
 union all select id, 'XL', 12 from products where name = 'Chicago Bulls Swingman Jersey'
-union all select id, 'S', 10 from products where name = 'Kenya Cricket Test Jersey'
-union all select id, 'M', 15 from products where name = 'Kenya Cricket Test Jersey'
-union all select id, 'L', 20 from products where name = 'Kenya Cricket Test Jersey'
-union all select id, 'XL', 12 from products where name = 'Kenya Cricket Test Jersey'
-union all select id, 'S', 10 from products where name = 'England Cricket ODI Jersey'
-union all select id, 'M', 15 from products where name = 'England Cricket ODI Jersey'
-union all select id, 'L', 20 from products where name = 'England Cricket ODI Jersey'
-union all select id, 'XL', 12 from products where name = 'England Cricket ODI Jersey';
+union all select id, 'S', 10 from products where name = 'Mercedes AMG F1 Team Jersey'
+union all select id, 'M', 15 from products where name = 'Mercedes AMG F1 Team Jersey'
+union all select id, 'L', 20 from products where name = 'Mercedes AMG F1 Team Jersey'
+union all select id, 'XL', 12 from products where name = 'Mercedes AMG F1 Team Jersey'
+union all select id, 'S', 10 from products where name = 'Ferrari Scuderia F1 Team Jersey'
+union all select id, 'M', 15 from products where name = 'Ferrari Scuderia F1 Team Jersey'
+union all select id, 'L', 20 from products where name = 'Ferrari Scuderia F1 Team Jersey'
+union all select id, 'XL', 12 from products where name = 'Ferrari Scuderia F1 Team Jersey';
 
 insert into banners (title, subtitle, image_url, video_url, link_url, position, is_active, sort_order)
 values

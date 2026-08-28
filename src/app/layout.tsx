@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Jersey Code | Premium Sports Jerseys",
-  description: "Shop premium football, rugby, basketball, and cricket jerseys with fast delivery and secure checkout.",
+  description: "Shop premium football, rugby, basketball, and formula one jerseys with fast delivery and secure checkout.",
   metadataBase: new URL("https://jerseystore.example"),
   openGraph: {
     title: "Jersey Code | Premium Sports Jerseys",
-    description: "Shop premium football, rugby, basketball, and cricket jerseys with fast delivery and secure checkout.",
+    description: "Shop premium football, rugby, basketball, and formula one jerseys with fast delivery and secure checkout.",
     type: "website",
   },
 };

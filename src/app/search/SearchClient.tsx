@@ -6,7 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ProductCard } from '@/components/storefront/ProductCard';
 import { Product, ProductVariant } from '@/lib/supabase/types';
 
-const SPORTS = ['football', 'rugby', 'basketball', 'cricket'];
+const SPORTS = [
+  { value: 'football', label: 'Football' },
+  { value: 'rugby', label: 'Rugby' },
+  { value: 'basketball', label: 'Basketball' },
+  { value: 'formula_one', label: 'Formula One' },
+];
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest' },
@@ -133,13 +138,13 @@ export default function SearchClient() {
                   </button>
                   {SPORTS.map((s) => (
                     <button
-                      key={s}
-                      onClick={() => setSport(sport === s ? '' : s)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all capitalize ${
-                        sport === s ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      key={s.value}
+                      onClick={() => setSport(sport === s.value ? '' : s.value)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                        sport === s.value ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
-                      {s}
+                      {s.label}
                     </button>
                   ))}
                 </div>

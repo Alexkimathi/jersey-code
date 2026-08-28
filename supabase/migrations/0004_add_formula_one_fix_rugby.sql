@@ -1,7 +1,7 @@
 -- 1. Update sport check constraint to include formula_one
 alter table products drop constraint if exists products_sport_check;
 alter table products add constraint products_sport_check
-  check (sport in ('football', 'rugby', 'basketball', 'cricket', 'formula_one'));
+  check (sport in ('football', 'rugby', 'basketball', 'formula_one'));
 
 -- 2. Fix rugby products with null image_url
 --    Bypass the update trigger temporarily (it guards auth users, not migrations)

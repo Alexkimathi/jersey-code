@@ -1,7 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { FooterNewsletter } from "./FooterNewsletter";
 
-const sports = ["Football", "Rugby", "Basketball", "Cricket"];
+const sports = [
+  { label: "Football", href: "/products/football" },
+  { label: "Rugby", href: "/products/rugby" },
+  { label: "Basketball", href: "/products/basketball" },
+  { label: "Formula One", href: "/products/formula-one" },
+];
 
 export function Footer() {
   return (
@@ -39,12 +45,12 @@ export function Footer() {
             </h4>
             <ul className="space-y-3 text-sm text-slate-300">
               {sports.map((sport) => (
-                <li key={sport}>
+                <li key={sport.label}>
                   <Link
-                    href={`/products/${sport.toLowerCase()}`}
+                    href={sport.href}
                     className="transition hover:text-white"
                   >
-                    {sport}
+                    {sport.label}
                   </Link>
                 </li>
               ))}
@@ -81,19 +87,7 @@ export function Footer() {
             <p className="text-sm text-slate-300 mb-4">
               Get drops, exclusive offers, and restock alerts delivered to your inbox.
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="w-full rounded-full border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-              />
-              <button
-                type="button"
-                className="whitespace-nowrap rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-              >
-                Subscribe
-              </button>
-            </div>
+            <FooterNewsletter />
           </div>
         </div>
 

@@ -142,21 +142,6 @@ function formulaOneDesc(product: Product): string {
   ].join("\n\n");
 }
 
-function cricketDesc(product: Product): string {
-  const team   = product.team ?? "the team";
-  const t      = detectType(product.name);
-  const season = t.season ? ` ${t.season}` : "";
-
-  return [
-    `Cricket is a game of patience, skill, and identity — and every true supporter knows what it means to wear the colours. This ${team}${season} cricket jersey lets you carry that pride from the opening over to the final delivery.`,
-
-    `Lightweight, moisture-managing fabric keeps you cool through long days in the stands or out in the middle. Clean design lines and team badge detailing give it a sharp matchday look that holds up wash after wash.`,
-
-    `Whether you're at the ground, in the nets, or watching the highlights at home, this is the jersey for supporters who take their cricket seriously.`,
-
-    `Back your team. Wear the colours.`,
-  ].join("\n\n");
-}
 
 function accessoryDesc(product: Product): string {
   return [
@@ -181,7 +166,6 @@ export function getProductDescription(product: Product): string {
     case "rugby":       return rugbyDesc(product);
     case "basketball":  return basketballDesc(product);
     case "formula_one": return formulaOneDesc(product);
-    case "cricket":     return cricketDesc(product);
     case "accessories": return accessoryDesc(product);
     default:            return footballDesc(product);
   }
@@ -231,10 +215,6 @@ export function getProductDetailPoints(product: Product): string[] {
     points.push("Bold screen-printed team graphics");
   }
 
-  if (product.sport === "cricket") {
-    points.push("Moisture-management fabric — stays cool through long innings");
-    points.push("Team crest and number sublimated for durability");
-  }
 
   if (product.sport === "football" && !t.isVintage) {
     points.push("Available for name, number and badge patch customisation");

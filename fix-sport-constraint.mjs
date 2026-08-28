@@ -10,7 +10,7 @@ const { error } = await supabase.rpc('exec_sql', {
   sql: `
     ALTER TABLE products DROP CONSTRAINT IF EXISTS products_sport_check;
     ALTER TABLE products ADD CONSTRAINT products_sport_check
-      CHECK (sport IN ('football','rugby','basketball','cricket','formula_one'));
+      CHECK (sport IN ('football','rugby','basketball','formula_one'));
   `
 });
 
@@ -24,7 +24,7 @@ if (error) {
       'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrdG5hdm9tZGJmanh6eW9scWxpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDYzMjM5MywiZXhwIjoyMTAwMjA4MzkzfQ.lzPbMq3xHmV8ii51MCvP4z1dyiuklxogvLjpgf8QpkI',
       'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrdG5hdm9tZGJmanh6eW9scWxpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDYzMjM5MywiZXhwIjoyMTAwMjA4MzkzfQ.lzPbMq3xHmV8ii51MCvP4z1dyiuklxogvLjpgf8QpkI',
     },
-    body: JSON.stringify({ sql: `ALTER TABLE products DROP CONSTRAINT IF EXISTS products_sport_check; ALTER TABLE products ADD CONSTRAINT products_sport_check CHECK (sport IN ('football','rugby','basketball','cricket','formula_one'));` })
+    body: JSON.stringify({ sql: `ALTER TABLE products DROP CONSTRAINT IF EXISTS products_sport_check; ALTER TABLE products ADD CONSTRAINT products_sport_check CHECK (sport IN ('football','rugby','basketball','formula_one'));` })
   });
   console.log('Direct fetch status:', res.status, await res.text());
 } else {
