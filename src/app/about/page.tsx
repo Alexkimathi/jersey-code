@@ -33,7 +33,7 @@ const values = [
 
 const reasons = [
   { num: "01", title: "Verified Authenticity", detail: "All items are official and licensed" },
-  { num: "02", title: "Fast Delivery",          detail: "1–2 days in Nairobi, express available" },
+  { num: "02", title: "Fast Delivery",          detail: "Same day in Nairobi, 1–2 days elsewhere" },
   { num: "03", title: "Competitive Pricing",    detail: "Best prices with regular promotions" },
   { num: "04", title: "Great Support",          detail: "Responsive team Mon–Sat 9AM–7PM" },
 ];

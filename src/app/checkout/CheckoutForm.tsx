@@ -226,9 +226,11 @@ export function CheckoutForm() {
                 <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
                   <Info className="w-4 h-4 text-amber-500 flex-none mt-0.5" />
                   <div className="text-sm text-amber-800 leading-relaxed">
-                    <p className="font-semibold mb-1">Heads up about delivery fees</p>
+                    <p className="font-semibold mb-1">Delivery fees</p>
                     <p className="text-amber-700">
-                      Deliveries within <span className="font-medium">Nairobi CBD</span> are handled directly by our team at no extra charge. If your location is <span className="font-medium">outside Nairobi CBD</span>, a delivery fee will apply — our team will reach out to confirm details.
+                      <span className="font-medium">Nairobi:</span> KSh 100–150 standard (same day) · KSh 250–800 express (same day).{" "}
+                      <span className="font-medium">Other areas:</span> KSh 100–300 (1–2 business days).{" "}
+                      Free delivery on orders above KSh 10,000.
                     </p>
                   </div>
                 </div>

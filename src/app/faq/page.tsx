@@ -7,11 +7,11 @@ export default function FAQPage() {
       items: [
         {
           q: 'How long does delivery take?',
-          a: 'Standard delivery takes 3-5 business days within Nairobi and 5-7 days for other areas. Express delivery is available for next-day delivery in Nairobi.',
+          a: 'Standard delivery within Nairobi is same day. For other areas outside Nairobi, delivery takes 1–2 business days. Express delivery (Nairobi only) is also same day.',
         },
         {
           q: 'Do you offer pickup?',
-          a: 'Yes! You can choose pickup at checkout. We have pickup points across Nairobi. You\'ll receive a notification when your order is ready.',
+          a: 'Yes! You can choose store pickup at checkout. Pickup is available from our Nairobi CBD store only — Tom Mboya St, next to Platinum Plaza, 1st floor shop C13.',
         },
         {
           q: 'How can I track my order?',
@@ -19,7 +19,7 @@ export default function FAQPage() {
         },
         {
           q: 'What are your delivery charges?',
-          a: 'Delivery costs KES 200 within Nairobi and KES 300-500 for other areas. Free delivery on orders above KES 5,000.',
+          a: 'Standard delivery within Nairobi costs KSh 100–150. Other areas cost KSh 100–300. Express delivery in Nairobi costs KSh 250–800. Orders above KSh 10,000 get free standard delivery.',
         },
       ],
     },
