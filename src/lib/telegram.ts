@@ -40,29 +40,67 @@ export function buildNewOrderMessage(
     quantity: number;
     price: number;
     customization?: {
+      edition?: string | null;
       printName?: string | null;
       printNumber?: string | null;
+      font?: string | null;
+      printColor?: string | null;
+      badge?: string | null;
+      badges?: string[] | null;
       addOnPrice?: number;
     } | null;
   }>
 ): string {
   const itemLines = items
     .map((i) => {
-      const unitPrice = i.price + (i.customization?.addOnPrice ?? 0);
-      const lines = [
-        `  • ${i.name} (${i.size ?? "—"}) ×${i.quantity} — KES ${Math.round(unitPrice * i.quantity).toLocaleString()}`,
+      const c = i.customization;
+      const addOn = c?.addOnPrice ?? 0;
+      const basePrice = i.price;
+      const unitTotal = basePrice + addOn;
+
+      const priceBreakdown =
+        addOn > 0
+          ? `KES ${Math.round(basePrice).toLocaleString()} + KES ${Math.round(addOn).toLocaleString()} customization`
+          : `KES ${Math.round(basePrice).toLocaleString()}`;
+
+      const lines: string[] = [
+        `  • *${i.name}*`,
+        `    Size: ${i.size ?? "—"}  |  Qty: ×${i.quantity}`,
+        `    Price: ${priceBreakdown} = *KES ${Math.round(unitTotal * i.quantity).toLocaleString()}*`,
       ];
-      if (i.customization?.printName || i.customization?.printNumber) {
-        lines.push(
-          `    ${[i.customization.printName, i.customization.printNumber ? `#${i.customization.printNumber}` : null].filter(Boolean).join(" ")}`
-        );
+
+      if (c) {
+        if (c.edition) {
+          lines.push(`    Edition: ${c.edition.charAt(0).toUpperCase() + c.edition.slice(1)}`);
+        }
+        if (c.printName || c.printNumber) {
+          const nameStr = c.printName ? `Name: ${c.printName}` : null;
+          const numStr = c.printNumber ? `No: #${c.printNumber}` : null;
+          lines.push(`    Print: ${[nameStr, numStr].filter(Boolean).join("  |  ")}`);
+        }
+        if (c.font) {
+          lines.push(`    Font: ${c.font}`);
+        }
+        if (c.printColor) {
+          lines.push(`    Print Colour: ${c.printColor}`);
+        }
+        // badges array takes priority; fall back to single badge field
+        const badgeList = c.badges?.length
+          ? c.badges
+          : c.badge && c.badge !== "none"
+          ? [c.badge]
+          : [];
+        if (badgeList.length) {
+          lines.push(`    Badge(s): ${badgeList.join(", ")}`);
+        }
       }
+
       return lines.join("\n");
     })
-    .join("\n");
+    .join("\n\n");
 
-  const fulfillmentLabel = fulfillmentMethod === "delivery" ? "🚚 Delivery" : "🏪 Store Pickup";
-  const paymentLabel = "M-Pesa STK Push";
+  const fulfillmentLabel =
+    fulfillmentMethod === "delivery" ? "🚚 *Delivery*" : "🏪 *Store Pickup*";
   const address = deliveryAddress || null;
 
   return [
@@ -71,16 +109,16 @@ export function buildNewOrderMessage(
     `👤 *Customer*`,
     `  Name: ${customerName}`,
     `  Phone: ${customerPhone}`,
-    customerEmail ? `  Email: ${customerEmail}` : null,
+    customerEmail ? `  Email: ${customerEmail}` : `  Email: —`,
     ``,
     `📦 *Items*`,
     itemLines,
     ``,
-    `💰 *Total: KES ${Math.round(total).toLocaleString()}*`,
+    `💰 *Order Total: KES ${Math.round(total).toLocaleString()}*`,
     ``,
     fulfillmentLabel,
     address ? `  📍 ${address}` : null,
-    `💳 Payment: ${paymentLabel}`,
+    `💳 *Payment:* M-Pesa STK Push`,
   ]
     .filter((l) => l !== null)
     .join("\n");
