@@ -217,8 +217,8 @@ export default function OrdersPage() {
                         const cd = item.customization_data;
                         const size = cd?.size ?? item.product_variants?.size ?? null;
                         const badges = cd?.badges?.length ? cd.badges.map(resolveBadgeLabel) : [];
-                        const hasCustomization = item.custom_name || item.custom_number || size ||
-                          cd?.edition || cd?.font || cd?.printColor || badges.length > 0;
+                        const hasCustomization = item.custom_name || item.custom_number ||
+                          cd?.font || cd?.printColor || badges.length > 0;
 
                         return (
                         <div key={item.id} className="flex items-start gap-3 py-3">
@@ -248,11 +248,6 @@ export default function OrdersPage() {
                               {size && (
                                 <span className="inline-flex px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px] font-semibold">
                                   Size {size}
-                                </span>
-                              )}
-                              {cd?.edition && (
-                                <span className="inline-flex px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] font-medium capitalize">
-                                  {cd.edition} edition
                                 </span>
                               )}
                               <span className="text-xs text-slate-400">Qty: {item.quantity}</span>
