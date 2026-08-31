@@ -1,9 +1,9 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Package, ShoppingCart, DollarSign, TrendingUp } from "lucide-react";
 
 async function getStats() {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
 
   const [
     productsResult,
