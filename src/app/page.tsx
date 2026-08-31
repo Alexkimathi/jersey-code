@@ -61,7 +61,7 @@ async function getBackgroundVideoUrl(): Promise<string | null> {
 
 async function getVariants(): Promise<ProductVariant[]> {
   const supabase = createServiceClient();
-  const { data } = await supabase.from("product_variants").select("*");
+  const { data } = await supabase.from("product_variants").select("*").limit(5000);
   return (data as ProductVariant[]) || [];
 }
 

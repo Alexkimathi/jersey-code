@@ -27,7 +27,8 @@ async function getProductVariants() {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("product_variants")
-    .select("*");
+    .select("*")
+    .limit(5000);
 
   if (error) {
     console.error("Error fetching variants:", error);
