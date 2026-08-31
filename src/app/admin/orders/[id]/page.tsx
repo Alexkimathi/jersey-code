@@ -294,7 +294,7 @@ export default function AdminOrderDetailPage() {
                   )
                 : [];
               const hasCustomization =
-                item.custom_name || item.custom_number || badges.length > 0 || cd?.font || cd?.edition;
+                item.custom_name || item.custom_number || badges.length > 0 || cd?.font;
 
               return (
                 <div key={item.id} className="py-4 flex gap-4">
@@ -325,11 +325,6 @@ export default function AdminOrderDetailPage() {
                       <span className="text-xs text-gray-500">
                         Qty: {item.quantity} × KES {Math.round(item.unit_price).toLocaleString()}
                       </span>
-                      {cd?.edition && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-medium capitalize">
-                          {cd.edition} edition
-                        </span>
-                      )}
                     </div>
 
                     {/* Customization details */}

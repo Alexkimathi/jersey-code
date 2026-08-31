@@ -30,8 +30,6 @@ function buildItemsHtml(itemsRich: any[]): string {
 
     if (item.size)
       customRows.push(`<tr><td style="color:#94a3b8;padding:2px 0;font-size:12px;">Size</td><td style="text-align:right;font-weight:600;color:#334155;font-size:12px;">${item.size}</td></tr>`);
-    if (item.edition)
-      customRows.push(`<tr><td style="color:#94a3b8;padding:2px 0;font-size:12px;">Edition</td><td style="text-align:right;font-weight:600;color:#334155;font-size:12px;text-transform:capitalize;">${item.edition}</td></tr>`);
     if (item.customName)
       customRows.push(`<tr><td style="color:#94a3b8;padding:2px 0;font-size:12px;">Print Name</td><td style="text-align:right;font-weight:700;color:#0f172a;font-size:12px;letter-spacing:0.05em;">${item.customName}</td></tr>`);
     if (item.customNumber)
@@ -75,7 +73,6 @@ function buildItemsText(itemsRich: any[]): string {
   return itemsRich.map((item) => {
     const lines = [`• ${item.name} x${item.quantity}`];
     if (item.size) lines.push(`  Size: ${item.size}`);
-    if (item.edition) lines.push(`  Edition: ${item.edition}`);
     if (item.customName) lines.push(`  Print Name: ${item.customName}`);
     if (item.customNumber) lines.push(`  Print Number: #${item.customNumber}`);
     if (item.font) lines.push(`  Font: ${item.font}`);

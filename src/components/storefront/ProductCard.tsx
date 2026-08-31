@@ -65,7 +65,6 @@ export function ProductCard({ product, variants, index = 0 }: ProductCardProps) 
       image_url:  product.image_url,
       ...(hasCustomization && (name || number) ? {
         customization: {
-          edition:     "fan",
           badge:       "none",
           addOnPrice,
           printName:   name   || undefined,

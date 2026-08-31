@@ -17,7 +17,6 @@ async function createOrderItems(supabase: any, orderId: string, items: any[]) {
     custom_number: item.customization?.printNumber ?? null,
     customization_data: {
       size: item.size ?? null,
-      edition: item.customization?.edition ?? null,
       font: item.customization?.font ?? null,
       printColor: item.customization?.printColor ?? null,
       badges: item.customization?.badges ?? [],
@@ -56,7 +55,6 @@ async function postCheckoutSideEffects(
     font: i.customization?.font ?? null,
     printColor: i.customization?.printColor ?? null,
     badges: i.customization?.badges ?? [],
-    edition: i.customization?.edition ?? null,
     addOnPrice: i.customization?.addOnPrice ?? 0,
   }));
 

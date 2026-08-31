@@ -149,7 +149,6 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
       quantity,
       image_url:  product.image_url,
       customization: {
-        edition: "fan",
         badge:   badges[0] ?? "none",
         badges:  badges.length > 0 ? badges : undefined,
         printName:   activeName   || undefined,

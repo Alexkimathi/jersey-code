@@ -40,7 +40,6 @@ export function buildNewOrderMessage(
     quantity: number;
     price: number;
     customization?: {
-      edition?: string | null;
       printName?: string | null;
       printNumber?: string | null;
       font?: string | null;
@@ -70,9 +69,6 @@ export function buildNewOrderMessage(
       ];
 
       if (c) {
-        if (c.edition) {
-          lines.push(`    Edition: ${c.edition.charAt(0).toUpperCase() + c.edition.slice(1)}`);
-        }
         if (c.printName || c.printNumber) {
           const nameStr = c.printName ? `Name: ${c.printName}` : null;
           const numStr = c.printNumber ? `No: #${c.printNumber}` : null;

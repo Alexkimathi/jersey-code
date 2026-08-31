@@ -122,7 +122,7 @@ export type JerseyEdition = 'fan' | 'player';
 export type JerseyBadge = string; // 'none' | 'champions_league' | 'league' | etc.
 
 export interface JerseyCustomization {
-  edition: JerseyEdition;
+  edition?: JerseyEdition;
   printName?: string;
   printNumber?: string;
   font?: string;
