@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createServerClient, createServiceClient } from "@/lib/supabase/server";
 import { Product, ProductVariant } from "@/lib/supabase/types";
 import { CategoryTabs } from "@/components/storefront/CategoryTabs";
 
@@ -27,7 +27,7 @@ async function getAccessories(): Promise<Product[]> {
 }
 
 async function getProductVariants(): Promise<ProductVariant[]> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
   const { data } = await supabase.from("product_variants").select("*");
   return (data as ProductVariant[]) || [];
 }

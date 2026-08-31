@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createServerClient, createServiceClient } from "@/lib/supabase/server";
 import { Product, ProductVariant } from "@/lib/supabase/types";
 import { ProductCard } from "@/components/storefront/ProductCard";
 
@@ -24,7 +24,7 @@ async function getProducts(sport: string): Promise<Product[]> {
 }
 
 async function getProductVariants() {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("product_variants")
     .select("*");
