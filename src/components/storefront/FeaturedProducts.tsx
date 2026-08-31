@@ -3,8 +3,8 @@ import { ProductCard } from "@/components/storefront/ProductCard";
 import Link from "next/link";
 
 async function getProductVariants(productId: string) {
-  const { createServerClient } = await import("@/lib/supabase/server");
-  const supabase = createServerClient();
+  const { createServiceClient } = await import("@/lib/supabase/server");
+  const supabase = createServiceClient();
   const { data } = await supabase
     .from("product_variants")
     .select("*")

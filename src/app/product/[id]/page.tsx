@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createServerClient, createServiceClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Product, ProductVariant } from "@/lib/supabase/types";
@@ -37,7 +37,7 @@ function sortVariantsBySize(variants: ProductVariant[]): ProductVariant[] {
 }
 
 async function getVariants(productId: string): Promise<ProductVariant[]> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("product_variants")
     .select("*")

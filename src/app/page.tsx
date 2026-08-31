@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { createServerClient } from "@/lib/supabase/server";
+import { createServerClient, createServiceClient } from "@/lib/supabase/server";
 import { Product, Banner, ProductVariant } from "@/lib/supabase/types";
 import { BannerCarousel } from "@/components/storefront/BannerCarousel";
 import { MarqueeBanner } from "@/components/storefront/MarqueeBanner";
@@ -60,7 +60,7 @@ async function getBackgroundVideoUrl(): Promise<string | null> {
 }
 
 async function getVariants(): Promise<ProductVariant[]> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
   const { data } = await supabase.from("product_variants").select("*");
   return (data as ProductVariant[]) || [];
 }

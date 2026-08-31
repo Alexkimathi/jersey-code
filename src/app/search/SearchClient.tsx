@@ -73,22 +73,9 @@ export default function SearchClient() {
         } else {
           const prods = data.products || [];
           setProducts(prods);
-
-          const { createClient } = await import('@supabase/supabase-js');
-          const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-          );
-          if (prods.length > 0) {
-            const productIds = prods.map((p: Product) => p.id);
-            const { data: variantData } = await supabase
-              .from('product_variants')
-              .select('*')
-              .in('product_id', productIds);
-            setVariants(variantData || []);
-          } else {
-            setVariants([]);
-          }
+          // Variants are already embedded in the search API response
+          const allVariants = prods.flatMap((p: any) => p.product_variants || []);
+          setVariants(allVariants);
         }
       } catch {
         setError('Failed to search products');
