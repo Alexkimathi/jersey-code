@@ -1,8 +1,9 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { createServerClient, createServiceClient } from "@/lib/supabase/server";
-import { Product, Banner, ProductVariant } from "@/lib/supabase/types";
+import { createServerClient } from "@/lib/supabase/server";
+import { Product, Banner } from "@/lib/supabase/types";
+import { getAllProductVariants } from "@/lib/supabase/queries";
 import { BannerCarousel } from "@/components/storefront/BannerCarousel";
 import { MarqueeBanner } from "@/components/storefront/MarqueeBanner";
 import { HomeSectionTabs } from "@/components/storefront/HomeSectionTabs";
@@ -57,12 +58,6 @@ async function getBackgroundVideoUrl(): Promise<string | null> {
     .eq("is_active", true)
     .single();
   return (data as { video_url: string | null } | null)?.video_url ?? null;
-}
-
-async function getVariants(): Promise<ProductVariant[]> {
-  const supabase = createServiceClient();
-  const { data } = await supabase.from("product_variants").select("*").limit(5000);
-  return (data as ProductVariant[]) || [];
 }
 
 async function getNewestProducts(): Promise<Product[]> {
@@ -135,7 +130,7 @@ export default async function HomePage() {
     getBanners(),
     getBackgroundVideoUrl(),
     getMarqueeItems(),
-    getVariants(),
+    getAllProductVariants(),
     getNewestProducts(),
     getBestSellers(),
     getAllFootballProducts(),

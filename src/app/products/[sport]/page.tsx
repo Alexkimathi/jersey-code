@@ -1,6 +1,7 @@
-import { createServerClient, createServiceClient } from "@/lib/supabase/server";
-import { Product, ProductVariant } from "@/lib/supabase/types";
+import { createServerClient } from "@/lib/supabase/server";
+import { Product } from "@/lib/supabase/types";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { getAllProductVariants } from "@/lib/supabase/queries";
 
 interface ProductsPageProps {
   params: Promise<{ sport: string }>;
@@ -23,27 +24,12 @@ async function getProducts(sport: string): Promise<Product[]> {
   return data || [];
 }
 
-async function getProductVariants() {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("product_variants")
-    .select("*")
-    .limit(5000);
-
-  if (error) {
-    console.error("Error fetching variants:", error);
-    return [];
-  }
-
-  return data as ProductVariant[];
-}
-
 export const dynamic = "force-dynamic";
 
 export default async function ProductsPage({ params }: ProductsPageProps) {
   const { sport } = await params;
   const products = await getProducts(sport);
-  const variants = await getProductVariants();
+  const variants = await getAllProductVariants();
 
   const sportTitle = sport.charAt(0).toUpperCase() + sport.slice(1);
 

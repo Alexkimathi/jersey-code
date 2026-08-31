@@ -1,6 +1,7 @@
-import { createServerClient, createServiceClient } from "@/lib/supabase/server";
-import { Product, ProductVariant } from "@/lib/supabase/types";
+import { createServerClient } from "@/lib/supabase/server";
+import { Product } from "@/lib/supabase/types";
 import { CategoryTabs } from "@/components/storefront/CategoryTabs";
+import { getAllProductVariants } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -15,16 +16,10 @@ async function getF1Products(): Promise<Product[]> {
   return (data ?? []) as Product[];
 }
 
-async function getProductVariants(): Promise<ProductVariant[]> {
-  const supabase = createServiceClient();
-  const { data } = await supabase.from("product_variants").select("*").limit(5000);
-  return (data as ProductVariant[]) || [];
-}
-
 export default async function FormulaOnePage() {
   const [jerseys, variants] = await Promise.all([
     getF1Products(),
-    getProductVariants(),
+    getAllProductVariants(),
   ]);
 
   const tabs = [

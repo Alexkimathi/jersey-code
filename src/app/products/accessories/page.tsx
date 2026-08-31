@@ -1,6 +1,7 @@
-import { createServerClient, createServiceClient } from "@/lib/supabase/server";
-import { Product, ProductVariant } from "@/lib/supabase/types";
+import { createServerClient } from "@/lib/supabase/server";
+import { Product } from "@/lib/supabase/types";
 import { CategoryTabs } from "@/components/storefront/CategoryTabs";
+import { getAllProductVariants } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -17,18 +18,12 @@ async function getAccessoriesByType(type: string): Promise<Product[]> {
   return all.filter((p) => p.sub_category === type || (!p.sub_category && p.team === type));
 }
 
-async function getProductVariants(): Promise<ProductVariant[]> {
-  const supabase = createServiceClient();
-  const { data } = await supabase.from("product_variants").select("*").limit(5000);
-  return (data as ProductVariant[]) || [];
-}
-
 export default async function AccessoriesPage() {
   const [balls, flags, socks, variants] = await Promise.all([
     getAccessoriesByType("Balls"),
     getAccessoriesByType("Flags"),
     getAccessoriesByType("Socks"),
-    getProductVariants(),
+    getAllProductVariants(),
   ]);
 
   const tabs = [
