@@ -47,12 +47,22 @@ export async function POST(req: NextRequest) {
 
     const validUntil = Date.now() + 60 * 60 * 1000; // 1 hour
 
-    const clientToken = await generateClientTokenFromReadWriteToken({
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      pathname,
-      allowOverwrite: true,
-      validUntil,
-    });
+    let clientToken: string;
+    try {
+      clientToken = await generateClientTokenFromReadWriteToken({
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+        pathname,
+        allowOverwrite: true,
+        validUntil,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("generateClientTokenFromReadWriteToken failed:", msg);
+      return NextResponse.json({
+        error: `Token generation failed: ${msg}`,
+        tokenPresent: !!process.env.BLOB_READ_WRITE_TOKEN,
+      }, { status: 500 });
+    }
 
     return NextResponse.json({ type: "blob.generate-client-token", clientToken });
   }
