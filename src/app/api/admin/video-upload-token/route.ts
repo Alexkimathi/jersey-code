@@ -1,4 +1,4 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const jsonResponse = await handleUpload({
       body,
       request: req,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
       onBeforeGenerateToken: async (_pathname, clientPayload) => {
         if (!clientPayload) throw new Error("Unauthorized");
         const admin = await verifyAdminToken(clientPayload);
