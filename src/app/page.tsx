@@ -375,8 +375,8 @@ export default async function HomePage() {
                     </div>
                     <div>
                       <p className="font-bold text-slate-900 text-sm">Jersey Code</p>
-                      <p className="text-sm text-slate-500 mt-0.5">Tom Mboya St, next to Platinum Plaza</p>
-                      <p className="text-sm text-slate-500">1st floor, shop C13</p>
+                      <p className="text-sm text-slate-500 mt-0.5">Tom Mboya St, Generation Two Exhibitions</p>
+                      <p className="text-sm text-slate-500">Next to Platinum Plaza, 1st floor Shop C13</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">

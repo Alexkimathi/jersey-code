@@ -29,7 +29,7 @@ const options = [
     rows: [
       { area: "Nairobi CBD", time: "Ready same day", cost: "Free" },
     ],
-    note: "Tom Mboya St, next to Platinum Plaza, 1st floor shop C13",
+    note: "Tom Mboya St, Generation Two Exhibitions, next to Platinum Plaza, 1st floor Shop C13",
     noteColor: "text-slate-500",
   },
 ];
@@ -114,8 +114,8 @@ export default function ShippingPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
             </svg>
             <div>
-              <p className="font-semibold text-slate-800">Tom Mboya St, next to Platinum Plaza</p>
-              <p className="text-slate-500">1st floor, shop C13 · Mon–Sat 9AM–7PM</p>
+              <p className="font-semibold text-slate-800">Tom Mboya St, Generation Two Exhibitions</p>
+              <p className="text-slate-500">Next to Platinum Plaza, 1st floor Shop C13 · Mon–Sat 9AM–7PM</p>
             </div>
           </div>
           <a href="https://maps.app.goo.gl/i8RcoaucfxFfboaK9" target="_blank" rel="noopener noreferrer"

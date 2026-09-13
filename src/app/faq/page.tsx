@@ -11,7 +11,7 @@ export default function FAQPage() {
         },
         {
           q: 'Do you offer pickup?',
-          a: 'Yes! You can choose store pickup at checkout. Pickup is available from our Nairobi CBD store only — Tom Mboya St, next to Platinum Plaza, 1st floor shop C13.',
+          a: 'Yes! You can choose store pickup at checkout. Pickup is available from our Nairobi CBD store only — Tom Mboya St, Generation Two Exhibitions, next to Platinum Plaza, 1st floor Shop C13.',
         },
         {
           q: 'How can I track my order?',

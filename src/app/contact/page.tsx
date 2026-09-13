@@ -170,8 +170,8 @@ export default function ContactPage() {
                     </svg>
                   </div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-400 mb-1">Visit Us</p>
-                  <p className="text-white font-semibold text-sm leading-snug">Tom Mboya St,<br />Shop C13 · 1st Floor</p>
-                  <p className="text-slate-500 text-xs mt-1">Next to Platinum Plaza</p>
+                  <p className="text-white font-semibold text-sm leading-snug">Tom Mboya St, Generation Two Exhibitions</p>
+                  <p className="text-slate-500 text-xs mt-1">Next to Platinum Plaza, 1st floor Shop C13</p>
                   <div className="mt-4 flex items-center gap-1 text-amber-400 text-xs font-semibold">
                     <span>Get directions</span>
                     <span className="ch-arrow">{CHEVRON}</span>
@@ -354,7 +354,7 @@ export default function ContactPage() {
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-sky-500 mb-1">Find us</p>
                 <h2 className="bc text-3xl text-slate-900">Our Store</h2>
-                <p className="text-sm text-slate-400 mt-1">Tom Mboya St · Next to Platinum Plaza · 1st floor, shop C13</p>
+                <p className="text-sm text-slate-400 mt-1">Tom Mboya St · Generation Two Exhibitions · Next to Platinum Plaza · 1st floor Shop C13</p>
               </div>
               <a href="https://maps.app.goo.gl/i8RcoaucfxFfboaK9"
                  target="_blank" rel="noopener noreferrer"
