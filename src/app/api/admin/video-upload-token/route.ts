@@ -29,13 +29,15 @@ export async function POST(req: NextRequest) {
 
   // blob.generate-client-token — the only step that needs BLOB_READ_WRITE_TOKEN
   if (body.type === "blob.generate-client-token") {
-    const { pathname = "", clientPayload } = body.payload ?? {};
+    const { pathname = "" } = body.payload ?? {};
 
-    if (!clientPayload) {
+    // Auth via Authorization header (same as all other admin routes)
+    const authToken = req.headers.get("authorization")?.split(" ")[1];
+    if (!authToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const admin = await verifyAdminToken(clientPayload);
+    const admin = await verifyAdminToken(authToken);
     if (!admin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

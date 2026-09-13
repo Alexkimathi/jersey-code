@@ -52,7 +52,7 @@ export default function BackgroundVideoPage() {
       const blob = await upload(`banners/hero.${ext}`, selectedFile, {
         access: "public",
         handleUploadUrl: "/api/admin/video-upload-token",
-        clientPayload: token,
+        headers: { Authorization: `Bearer ${token}` },
         onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       });
 
