@@ -72,7 +72,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Dashboard</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -84,7 +84,7 @@ export default function BackgroundVideoPage() {
 
   return (
     <AdminLayout>
-      <div className="max-w-xl p-8">
+      <div className="max-w-xl p-4 sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Background Video</h1>
         <p className="text-sm text-gray-500 mb-8">
           This video plays behind all banner slides on the homepage hero.

@@ -90,7 +90,7 @@ export default function MarqueePage() {
 
   return (
     <AdminLayout>
-      <div className="max-w-2xl p-8">
+      <div className="max-w-2xl p-4 sm:p-8">
         <div className="mb-2">
           <h1 className="text-2xl font-bold text-gray-900">Marquee Text</h1>
         </div>

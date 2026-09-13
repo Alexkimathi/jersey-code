@@ -34,10 +34,11 @@ export default async function AdminAuditPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Audit Log</h1>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -96,6 +97,7 @@ export default async function AdminAuditPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </AdminLayout>

@@ -168,7 +168,7 @@ export default function BannerForm({ params }: PageProps) {
 
   return (
     <AdminLayout>
-      <div className="max-w-2xl p-8">
+      <div className="max-w-2xl p-4 sm:p-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
             {isNew ? "New Banner" : "Edit Banner"}

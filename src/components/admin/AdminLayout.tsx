@@ -4,7 +4,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useSupabase } from "@/app/providers";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, FileText, Image, BarChart3, LogOut, X, ShoppingBag, Users, Tag } from "lucide-react";
+import { LayoutDashboard, Package, FileText, Image, BarChart3, LogOut, X, Menu, ShoppingBag, Users, Tag } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -47,6 +47,28 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile top bar */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-1.5 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <Link href="/admin" className="text-base font-bold text-gray-900">
+          Admin Panel
+        </Link>
+      </header>
+
+      {/* Overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex">
         <aside
           className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out ${
@@ -58,8 +80,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               Admin Panel
             </Link>
             <button
-              className="md:hidden"
+              className="md:hidden p-1 rounded text-gray-500 hover:text-gray-700"
               onClick={() => setSidebarOpen(false)}
+              aria-label="Close menu"
             >
               <X className="w-5 h-5" />
             </button>
@@ -115,7 +138,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <main className="flex-1 min-h-screen">
+        <main className="flex-1 min-h-screen pt-14 md:pt-0">
           {children}
         </main>
       </div>

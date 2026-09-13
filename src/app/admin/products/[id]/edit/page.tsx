@@ -710,7 +710,7 @@ export default function ProductForm({ params }: ProductFormProps) {
 
   return (
     <AdminLayout>
-      <div className="max-w-3xl p-8">
+      <div className="max-w-3xl p-4 sm:p-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
             {productId ? "Edit Product" : "New Product"}

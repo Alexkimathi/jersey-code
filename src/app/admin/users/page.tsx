@@ -140,7 +140,7 @@ export default function AdminUsersPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Admin Users</h1>
           {isSuperAdmin && (
@@ -281,6 +281,7 @@ export default function AdminUsersPage() {
 
         {/* Users Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -402,6 +403,7 @@ export default function AdminUsersPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
         {!isSuperAdmin && (
