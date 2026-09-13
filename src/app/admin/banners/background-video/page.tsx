@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { upload } from "@vercel/blob/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -44,46 +45,34 @@ export default function BackgroundVideoPage() {
     setUploading(true);
     setProgress(0);
 
+    const ext = selectedFile.name.split(".").pop()?.toLowerCase() ?? "mp4";
+
     try {
-      const url = await new Promise<string>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) {
-            setProgress(Math.round((e.loaded / e.total) * 100));
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const json = JSON.parse(xhr.responseText);
-              if (json.url) resolve(json.url);
-              else reject(new Error(json.error ?? "No URL returned"));
-            } catch {
-              reject(new Error("Invalid response from server"));
-            }
-          } else {
-            try {
-              const json = JSON.parse(xhr.responseText);
-              reject(new Error(json.error ?? `Upload failed (${xhr.status})`));
-            } catch {
-              reject(new Error(`Upload failed (${xhr.status})`));
-            }
-          }
-        });
-
-        xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
-        xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
-
-        xhr.open("POST", "/api/admin/upload-video");
-        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-        xhr.setRequestHeader("Content-Type", selectedFile.type);
-        xhr.setRequestHeader("X-Filename", selectedFile.name);
-        xhr.send(selectedFile); // raw binary — no FormData, no server buffering
+      // Upload directly from browser → Vercel Blob (no server middleman for the file)
+      const blob = await upload(`banners/hero.${ext}`, selectedFile, {
+        access: "public",
+        handleUploadUrl: "/api/admin/video-upload-token",
+        clientPayload: token,
+        onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       });
 
-      setCurrentVideoUrl(url);
+      // Save the URL to the database via the server
+      const res = await fetch("/api/admin/save-background-video", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: blob.url }),
+      });
+
+      if (!res.ok) {
+        const json = await res.json();
+        setError(json.error ?? "Failed to save video URL.");
+        return;
+      }
+
+      setCurrentVideoUrl(blob.url);
       setSelectedFile(null);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -140,11 +129,7 @@ export default function BackgroundVideoPage() {
             />
             <div className="px-4 py-2 bg-gray-50 flex items-center justify-between gap-2">
               <p className="text-xs text-gray-500 truncate">{currentVideoUrl}</p>
-              <button
-                type="button"
-                onClick={handleRemove}
-                className="text-xs text-red-600 hover:text-red-700 flex-none"
-              >
+              <button type="button" onClick={handleRemove} className="text-xs text-red-600 hover:text-red-700 flex-none">
                 Remove
               </button>
             </div>
@@ -153,9 +138,7 @@ export default function BackgroundVideoPage() {
 
         <form onSubmit={handleSave} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload video file
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Upload video file</label>
             <input
               type="file"
               accept="video/mp4,video/webm,video/mov,video/ogg"
@@ -177,7 +160,7 @@ export default function BackgroundVideoPage() {
           {uploading && (
             <div className="space-y-1">
               <div className="flex justify-between text-sm text-blue-600 font-medium">
-                <span>Uploading...</span>
+                <span>Uploading directly to storage...</span>
                 <span>{progress}%</span>
               </div>
               <div className="w-full bg-blue-100 rounded-full h-2">
