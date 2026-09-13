@@ -42,12 +42,54 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unsupported video format" }, { status: 400 });
   }
 
-  const blob = await put(`banners/hero.${ext}`, file, {
-    access: "public",
-    contentType: file.type,
-    allowOverwrite: true,
-    multipart: true,
-  });
+  let blob;
+  try {
+    blob = await put(`banners/hero.${ext}`, file, {
+      access: "public",
+      contentType: file.type,
+      allowOverwrite: true,
+      multipart: true,
+    });
+  } catch (err) {
+    console.error("Blob upload failed:", err);
+    return NextResponse.json({ error: "Upload failed. Check BLOB_READ_WRITE_TOKEN is configured." }, { status: 500 });
+  }
+
+  // Save the URL to the database using the service client (bypasses RLS)
+  const supabase = createServiceClient();
+  const { data: existing } = await (supabase as any)
+    .from("banners")
+    .select("id")
+    .eq("position", "background")
+    .single();
+
+  if (existing) {
+    const { error: updateError } = await (supabase as any)
+      .from("banners")
+      .update({ video_url: blob.url })
+      .eq("id", existing.id);
+
+    if (updateError) {
+      console.error("DB update failed:", updateError);
+      return NextResponse.json({ error: "Video uploaded but failed to save URL: " + updateError.message }, { status: 500 });
+    }
+  } else {
+    const { error: insertError } = await (supabase as any)
+      .from("banners")
+      .insert({
+        title: "Background Video",
+        image_url: "",
+        video_url: blob.url,
+        position: "background",
+        is_active: true,
+        sort_order: 0,
+      });
+
+    if (insertError) {
+      console.error("DB insert failed:", insertError);
+      return NextResponse.json({ error: "Video uploaded but failed to save URL: " + insertError.message }, { status: 500 });
+    }
+  }
 
   return NextResponse.json({ url: blob.url });
 }

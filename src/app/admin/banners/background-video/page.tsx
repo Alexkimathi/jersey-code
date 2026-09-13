@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { upload } from "@vercel/blob/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -10,11 +11,10 @@ import { useSupabase } from "@/app/providers";
 export default function BackgroundVideoPage() {
   const { adminUser, isLoading } = useAdminAuth();
   const { supabase } = useSupabase();
-  const [recordId, setRecordId] = useState<string | null>(null);
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -22,14 +22,11 @@ export default function BackgroundVideoPage() {
     async function load() {
       const { data } = await (supabase as any)
         .from("banners")
-        .select("id, video_url")
+        .select("video_url")
         .eq("position", "background")
         .single();
 
-      if (data) {
-        setRecordId(data.id);
-        setCurrentVideoUrl(data.video_url ?? "");
-      }
+      if (data?.video_url) setCurrentVideoUrl(data.video_url);
     }
     load();
   }, [supabase]);
@@ -39,90 +36,69 @@ export default function BackgroundVideoPage() {
     setError(null);
     if (!selectedFile) return;
 
-    setSaving(true);
-    setUploading(true);
-
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) {
       setError("Not authenticated. Please log in again.");
-      setSaving(false);
+      return;
+    }
+
+    setUploading(true);
+    setProgress(0);
+
+    const ext = selectedFile.name.split(".").pop()?.toLowerCase() ?? "mp4";
+
+    try {
+      // Upload directly from browser → Vercel Blob (no server middleman)
+      const blob = await upload(`banners/hero.${ext}`, selectedFile, {
+        access: "public",
+        handleUploadUrl: "/api/admin/video-upload-token",
+        clientPayload: token,
+        onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
+      });
+
+      // Save URL to DB via server
+      const res = await fetch("/api/admin/save-background-video", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: blob.url }),
+      });
+
+      if (!res.ok) {
+        const json = await res.json();
+        setError(json.error ?? "Failed to save video URL.");
+        return;
+      }
+
+      setCurrentVideoUrl(blob.url);
+      setSelectedFile(null);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
       setUploading(false);
-      return;
+      setProgress(0);
     }
-
-    const form = new FormData();
-    form.append("file", selectedFile);
-
-    const res = await fetch("/api/admin/upload-video", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: form,
-    });
-
-    const json = await res.json();
-    setUploading(false);
-
-    if (!res.ok) {
-      setError(json.error ?? "Upload failed.");
-      setSaving(false);
-      return;
-    }
-
-    const finalUrl = json.url;
-
-    const payload = {
-      title: "Background Video",
-      image_url: "",
-      video_url: finalUrl,
-      position: "background",
-      is_active: true,
-      sort_order: 0,
-    };
-
-    if (recordId) {
-      const { error: updateError } = await (supabase as any)
-        .from("banners")
-        .update({ video_url: finalUrl })
-        .eq("id", recordId);
-
-      if (updateError) {
-        setError(updateError.message);
-        setSaving(false);
-        return;
-      }
-    } else {
-      const { data: inserted, error: insertError } = await (supabase as any)
-        .from("banners")
-        .insert(payload)
-        .select()
-        .single();
-
-      if (insertError) {
-        setError(insertError.message);
-        setSaving(false);
-        return;
-      }
-      if (inserted) setRecordId(inserted.id);
-    }
-
-    setCurrentVideoUrl(finalUrl);
-    setSelectedFile(null);
-    setSuccess(true);
-    setSaving(false);
-    setTimeout(() => setSuccess(false), 3000);
   };
 
   const handleRemove = async () => {
-    if (!recordId || !confirm("Remove the background video?")) return;
-    setSaving(true);
-    await (supabase as any)
-      .from("banners")
-      .update({ video_url: null })
-      .eq("id", recordId);
+    if (!confirm("Remove the background video?")) return;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) return;
+
+    await fetch("/api/admin/remove-background-video", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     setCurrentVideoUrl("");
     setSelectedFile(null);
-    setSaving(false);
   };
 
   if (isLoading) {
@@ -158,6 +134,7 @@ export default function BackgroundVideoPage() {
         {currentVideoUrl && (
           <div className="mb-6 rounded-xl overflow-hidden border border-gray-200 bg-black">
             <video
+              key={currentVideoUrl}
               src={currentVideoUrl}
               className="w-full h-48 object-cover"
               muted
@@ -204,12 +181,23 @@ export default function BackgroundVideoPage() {
           </div>
 
           {uploading && (
-            <p className="text-sm text-blue-600 font-medium">Uploading video...</p>
+            <div className="space-y-1">
+              <div className="flex justify-between text-sm text-blue-600 font-medium">
+                <span>Uploading directly to storage...</span>
+                <span>{progress}%</span>
+              </div>
+              <div className="w-full bg-blue-100 rounded-full h-2">
+                <div
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
           )}
 
           <div className="flex items-center gap-4 pt-2">
-            <Button type="submit" disabled={saving || !selectedFile}>
-              {uploading ? "Uploading..." : saving ? "Saving…" : "Save Video"}
+            <Button type="submit" disabled={uploading || !selectedFile}>
+              {uploading ? `Uploading ${progress}%…` : "Save Video"}
             </Button>
             <Link href="/admin/banners">
               <Button variant="outline" type="button">

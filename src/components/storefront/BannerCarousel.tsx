@@ -29,6 +29,7 @@ export function BannerCarousel({
     setVideoError(false);
     const video = videoRef.current;
     if (!video) return;
+    video.load(); // required when src changes — browser won't reload automatically
     video.play().catch(() => {
       // Autoplay blocked — will play on first user interaction
     });
