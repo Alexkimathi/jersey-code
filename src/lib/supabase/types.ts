@@ -66,6 +66,9 @@ export interface ProductVariant {
   sku: string | null;
 }
 
+/** Product row with its variants already embedded (from a joined query). */
+export type ProductWithVariants = Product & { product_variants: ProductVariant[] };
+
 export interface Banner {
   id: string;
   title: string;

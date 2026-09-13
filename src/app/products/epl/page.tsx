@@ -1,26 +1,23 @@
-import { createServerClient } from "@/lib/supabase/server";
-import { Product } from "@/lib/supabase/types";
+import { createServiceClient } from "@/lib/supabase/server";
+import { ProductWithVariants } from "@/lib/supabase/types";
 import { CategoryTabs } from "@/components/storefront/CategoryTabs";
-import { getAllProductVariants } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
-async function getAllFootballProducts(): Promise<Product[]> {
-  const supabase = createServerClient();
+async function getAllFootballProducts(): Promise<ProductWithVariants[]> {
+  const supabase = createServiceClient();
   const { data } = await supabase
     .from("products")
-    .select("*")
+    .select("*, product_variants(*)")
     .eq("sport", "football")
     .eq("is_hidden", false)
     .order("created_at", { ascending: false });
-  return data || [];
+  return (data as ProductWithVariants[]) || [];
 }
 
 export default async function EplPage() {
-  const [allFootball, variants] = await Promise.all([
-    getAllFootballProducts(),
-    getAllProductVariants(),
-  ]);
+  const allFootball = await getAllFootballProducts();
+  const variants = allFootball.flatMap(p => p.product_variants || []);
 
   const tabs = [
     { label: "Club Jerseys",   products: allFootball.filter(p => p.sub_category === "epl_club" && !p.is_clearance) },
