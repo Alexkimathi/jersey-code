@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { upload } from "@vercel/blob/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { uploadToStorage } from "@/lib/uploadToStorage";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useSupabase } from "@/app/providers";
@@ -87,19 +87,9 @@ export default function BannerForm({ params }: PageProps) {
     if (!imageFile) return formData.image_url;
     const token = await getToken();
     if (!token) { setError("Not authenticated."); return formData.image_url; }
-
     setUploadingImage(true);
-    const form = new FormData();
-    form.append("file", imageFile);
     try {
-      const res = await fetch("/api/admin/upload-image", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Image upload failed");
-      return json.url as string;
+      return await uploadToStorage(imageFile, token, "banner-media");
     } finally {
       setUploadingImage(false);
     }
@@ -109,18 +99,10 @@ export default function BannerForm({ params }: PageProps) {
     if (!videoFile) return formData.video_url;
     const token = await getToken();
     if (!token) { setError("Not authenticated."); return formData.video_url; }
-
     setUploadingVideo(true);
     setVideoProgress(0);
-    const ext = videoFile.name.split(".").pop()?.toLowerCase() ?? "mp4";
     try {
-      const blob = await upload(`banners/banner-${Date.now()}.${ext}`, videoFile, {
-        access: "public",
-        handleUploadUrl: "/api/admin/video-upload-token",
-        headers: { Authorization: `Bearer ${token}` },
-        onUploadProgress: ({ percentage }) => setVideoProgress(Math.round(percentage)),
-      });
-      return blob.url;
+      return await uploadToStorage(videoFile, token, "banner-media", setVideoProgress);
     } finally {
       setUploadingVideo(false);
       setVideoProgress(0);
