@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { upload } from "@vercel/blob/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -25,7 +24,6 @@ export default function BackgroundVideoPage() {
         .select("video_url")
         .eq("position", "background")
         .single();
-
       if (data?.video_url) setCurrentVideoUrl(data.video_url);
     }
     load();
@@ -46,34 +44,46 @@ export default function BackgroundVideoPage() {
     setUploading(true);
     setProgress(0);
 
-    const ext = selectedFile.name.split(".").pop()?.toLowerCase() ?? "mp4";
-
     try {
-      // Upload directly from browser → Vercel Blob (no server middleman)
-      const blob = await upload(`banners/hero.${ext}`, selectedFile, {
-        access: "public",
-        handleUploadUrl: "/api/admin/video-upload-token",
-        clientPayload: token,
-        onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
+      const url = await new Promise<string>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            setProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const json = JSON.parse(xhr.responseText);
+              if (json.url) resolve(json.url);
+              else reject(new Error(json.error ?? "No URL returned"));
+            } catch {
+              reject(new Error("Invalid response from server"));
+            }
+          } else {
+            try {
+              const json = JSON.parse(xhr.responseText);
+              reject(new Error(json.error ?? `Upload failed (${xhr.status})`));
+            } catch {
+              reject(new Error(`Upload failed (${xhr.status})`));
+            }
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+        xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
+
+        xhr.open("POST", "/api/admin/upload-video");
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        xhr.setRequestHeader("Content-Type", selectedFile.type);
+        xhr.setRequestHeader("X-Filename", selectedFile.name);
+        xhr.send(selectedFile); // raw binary — no FormData, no server buffering
       });
 
-      // Save URL to DB via server
-      const res = await fetch("/api/admin/save-background-video", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: blob.url }),
-      });
-
-      if (!res.ok) {
-        const json = await res.json();
-        setError(json.error ?? "Failed to save video URL.");
-        return;
-      }
-
-      setCurrentVideoUrl(blob.url);
+      setCurrentVideoUrl(url);
       setSelectedFile(null);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -87,34 +97,24 @@ export default function BackgroundVideoPage() {
 
   const handleRemove = async () => {
     if (!confirm("Remove the background video?")) return;
-
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) return;
-
     await fetch("/api/admin/remove-background-video", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
-
     setCurrentVideoUrl("");
     setSelectedFile(null);
   };
 
-  if (isLoading) {
-    return <AdminLayout><div className="p-8">Loading...</div></AdminLayout>;
-  }
-
-  if (!adminUser) {
-    return <AdminLayout><div className="p-8 text-red-600">Access denied.</div></AdminLayout>;
-  }
+  if (isLoading) return <AdminLayout><div className="p-8">Loading...</div></AdminLayout>;
+  if (!adminUser) return <AdminLayout><div className="p-8 text-red-600">Access denied.</div></AdminLayout>;
 
   return (
     <AdminLayout>
       <div className="max-w-xl p-8">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-gray-900">Background Video</h1>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Background Video</h1>
         <p className="text-sm text-gray-500 mb-8">
           This video plays behind all banner slides on the homepage hero.
         </p>
@@ -130,17 +130,13 @@ export default function BackgroundVideoPage() {
           </div>
         )}
 
-        {/* Current video preview */}
         {currentVideoUrl && (
           <div className="mb-6 rounded-xl overflow-hidden border border-gray-200 bg-black">
             <video
               key={currentVideoUrl}
               src={currentVideoUrl}
               className="w-full h-48 object-cover"
-              muted
-              loop
-              autoPlay
-              playsInline
+              muted loop autoPlay playsInline
             />
             <div className="px-4 py-2 bg-gray-50 flex items-center justify-between gap-2">
               <p className="text-xs text-gray-500 truncate">{currentVideoUrl}</p>
@@ -166,15 +162,13 @@ export default function BackgroundVideoPage() {
               onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
               className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-slate-100 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-200"
             />
-            {selectedFile && (
+            {selectedFile && !uploading && (
               <>
                 <p className="text-xs text-amber-600 mt-1">{selectedFile.name} — uploads on save</p>
                 <video
                   src={URL.createObjectURL(selectedFile)}
                   className="mt-3 w-full h-40 object-cover rounded-lg bg-black"
-                  muted
-                  controls
-                  playsInline
+                  muted controls playsInline
                 />
               </>
             )}
@@ -183,12 +177,12 @@ export default function BackgroundVideoPage() {
           {uploading && (
             <div className="space-y-1">
               <div className="flex justify-between text-sm text-blue-600 font-medium">
-                <span>Uploading directly to storage...</span>
+                <span>Uploading...</span>
                 <span>{progress}%</span>
               </div>
               <div className="w-full bg-blue-100 rounded-full h-2">
                 <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-150"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -200,9 +194,7 @@ export default function BackgroundVideoPage() {
               {uploading ? `Uploading ${progress}%…` : "Save Video"}
             </Button>
             <Link href="/admin/banners">
-              <Button variant="outline" type="button">
-                Back
-              </Button>
+              <Button variant="outline" type="button">Back</Button>
             </Link>
           </div>
         </form>
