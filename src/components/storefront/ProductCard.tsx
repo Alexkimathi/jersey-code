@@ -99,7 +99,6 @@ export function ProductCard({ product, variants, index = 0 }: ProductCardProps) 
               src={product.image_url}
               alt={product.name}
               fill
-              unoptimized
               className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
               onError={() => setImageError(true)}
@@ -167,7 +166,7 @@ export function ProductCard({ product, variants, index = 0 }: ProductCardProps) 
               {/* Ghost jersey behind glass */}
               {product.image_url && !imageError && (
                 <div className="absolute inset-0 pointer-events-none opacity-[0.07]">
-                  <Image src={product.image_url} alt="" fill unoptimized className="object-contain p-8" />
+                  <Image src={product.image_url} alt="" fill className="object-contain p-8" />
                 </div>
               )}
 

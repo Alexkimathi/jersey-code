@@ -406,23 +406,30 @@ export function ProductFormClient({ productId }: ProductFormClientProps) {
 
     if (hasPending) {
       setUploading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token ?? "";
       for (const { slot, field } of IMAGE_SLOTS) {
         const file = selectedFiles[slot];
         if (!file) continue;
         try {
           const compressed = await compressImage(file);
-          const ext = file.name.split(".").pop() ?? "jpg";
-          const filePath = `products/${productId || "draft"}/${slot}-${Date.now()}.${ext}`;
-          const { data, error: uploadError } = await supabase.storage
-            .from("product-images")
-            .upload(filePath, compressed, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
-          if (uploadError || !data) {
-            setError(`Failed to upload ${slot} image: ${uploadError?.message ?? "unknown error"}`);
+          const fd = new FormData();
+          fd.append("file", compressed, `${slot}.jpg`);
+          fd.append("slot", slot);
+          fd.append("productId", productId || "draft");
+          const res = await fetch("/api/admin/upload-product-image", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${accessToken}` },
+            body: fd,
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            setError(`Failed to upload ${slot} image: ${(body as { error?: string }).error ?? res.statusText}`);
             setIsSubmitting(false); setUploading(false); return;
           }
-          const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(data.path);
-          updatedUrls[field] = urlData.publicUrl;
-          setPreviews((prev) => ({ ...prev, [slot]: urlData.publicUrl }));
+          const { url } = await res.json() as { url: string };
+          updatedUrls[field] = url;
+          setPreviews((prev) => ({ ...prev, [slot]: url }));
         } catch {
           setError(`Failed to upload ${slot} image.`);
           setIsSubmitting(false); setUploading(false); return;

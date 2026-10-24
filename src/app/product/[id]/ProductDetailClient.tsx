@@ -176,7 +176,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
             <Image
               src={activeImageUrl}
               alt={`${product.name} — ${JERSEY_VIEWS[activeView]} view`}
-              fill unoptimized
+              fill
               className="object-contain"
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -230,7 +230,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                     activeView === i ? "border-slate-900 shadow-sm" : "border-slate-200 hover:border-slate-400"
                   }`}
                 >
-                  <Image src={viewImages[i]!} alt={`${label} view`} fill unoptimized className="object-contain" sizes="10vw"/>
+                  <Image src={viewImages[i]!} alt={`${label} view`} fill className="object-contain" sizes="10vw"/>
                 </button>
               );
             })}
