@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { createServiceClient } from "@/lib/supabase/server";
+import { Product } from "@/lib/supabase/types";
 
 const IMAGE_FIELDS = ["image_url", "back_image_url", "side_image_url", "badge_url"] as const;
 type ImageField = (typeof IMAGE_FIELDS)[number];
@@ -40,9 +41,10 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServiceClient();
 
-  const { data: products, error: fetchError } = await supabase
+  const { data: rawProducts, error: fetchError } = await supabase
     .from("products")
-    .select(`id, ${IMAGE_FIELDS.join(", ")}`);
+    .select("*");
+  const products = rawProducts as Product[] | null;
 
   if (fetchError) {
     return NextResponse.json({ error: fetchError.message }, { status: 500 });
@@ -57,7 +59,7 @@ export async function POST(req: NextRequest) {
     const updates: Partial<Record<ImageField, string>> = {};
 
     for (const field of IMAGE_FIELDS) {
-      const url = (product as Record<string, unknown>)[field] as string | null;
+      const url = product[field] as string | null;
       if (!url || !url.includes(".supabase.co/storage")) {
         skipped++;
         continue;
@@ -101,7 +103,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (Object.keys(updates).length > 0) {
-      const { error: updateError } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: updateError } = await (supabase as any)
         .from("products")
         .update(updates)
         .eq("id", product.id);
