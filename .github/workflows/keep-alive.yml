@@ -2,7 +2,7 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: '0 2 */5 * *'  # Every 5 days at 2am UTC
+    - cron: '0 2 */3 * *'  # Every 3 days at 2am UTC
   workflow_dispatch:         # Allow manual trigger
 
 jobs:
@@ -11,11 +11,17 @@ jobs:
 
     steps:
       - name: Ping Supabase to prevent project pausing
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://rbqlfwqhqbypheyxeluf.supabase.co/rest/v1/)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/products?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
           echo "Supabase ping status: $STATUS"
-          if [ "$STATUS" -eq 0 ]; then
-            echo "ERROR: No response from Supabase"
+          if [ "$STATUS" != "200" ]; then
+            echo "ERROR: Unexpected status $STATUS"
             exit 1
           fi
           echo "Supabase is awake."

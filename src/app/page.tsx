@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // revalidate every 5 minutes
 
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
@@ -68,7 +68,8 @@ async function getNewestProducts(): Promise<Product[]> {
     .eq("is_hidden", false)
     .not("image_url", "is", null)
     .neq("sport", "accessories")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(12);
   return data || [];
 }
 
@@ -81,7 +82,8 @@ async function getBestSellers(): Promise<Product[]> {
     .eq("is_hidden", false)
     .not("image_url", "is", null)
     .neq("sport", "accessories")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(12);
   return data || [];
 }
 
