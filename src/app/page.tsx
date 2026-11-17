@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
-import { Product, Banner } from "@/lib/supabase/types";
+import { Product, Banner, Sport } from "@/lib/supabase/types";
 import { getAllProductVariants } from "@/lib/supabase/queries";
 import { BannerCarousel } from "@/components/storefront/BannerCarousel";
 import { MarqueeBanner } from "@/components/storefront/MarqueeBanner";
@@ -102,7 +102,7 @@ async function getProductsBySport(sport: string): Promise<Product[]> {
   const { data } = await supabase
     .from("products")
     .select("*")
-    .eq("sport", sport)
+    .eq("sport", sport as Sport)
     .eq("is_hidden", false)
     .not("image_url", "is", null)
     .order("created_at", { ascending: false })

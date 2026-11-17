@@ -6,13 +6,13 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export interface TeamList {
+export type TeamList = {
   id: string;
   name: string;
   list_type: "epl" | "national" | "other";
   sort_order: number;
   created_at: string;
-}
+};
 
 export type Sport = "football" | "rugby" | "basketball" | "formula_one" | "accessories";
 
@@ -23,22 +23,22 @@ export type OrderStatus = "processing" | "ready" | "out_for_delivery" | "complet
 
 export type AdminRole = "super_admin" | "admin";
 
-export interface AdminUser {
+export type AdminUser = {
   id: string;
   role: AdminRole;
   full_name: string | null;
   created_by: string | null;
   created_at: string;
-}
+};
 
-export interface AdminPermissions {
+export type AdminPermissions = {
   admin_id: string;
   can_create: boolean;
   can_edit: boolean;
   can_hide: boolean;
-}
+};
 
-export interface Product {
+export type Product = {
   id: string;
   name: string;
   sport: Sport;
@@ -56,20 +56,20 @@ export interface Product {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
-export interface ProductVariant {
+export type ProductVariant = {
   id: string;
   product_id: string;
   size: string;
   stock_quantity: number;
   sku: string | null;
-}
+};
 
 /** Product row with its variants already embedded (from a joined query). */
 export type ProductWithVariants = Product & { product_variants: ProductVariant[] };
 
-export interface Banner {
+export type Banner = {
   id: string;
   title: string;
   subtitle: string | null;
@@ -82,9 +82,9 @@ export interface Banner {
   is_active: boolean;
   sort_order: number;
   created_at: string;
-}
+};
 
-export interface Order {
+export type Order = {
   id: string;
   customer_name: string | null;
   customer_phone: string;
@@ -98,9 +98,9 @@ export interface Order {
   mpesa_merchant_request_id: string | null;
   delivery_address: Json | null;
   created_at: string;
-}
+};
 
-export interface OrderItem {
+export type OrderItem = {
   id: string;
   order_id: string;
   product_id: string | null;
@@ -109,9 +109,9 @@ export interface OrderItem {
   unit_price: number;
   custom_name: string | null;
   custom_number: string | null;
-}
+};
 
-export interface AuditLog {
+export type AuditLog = {
   id: string;
   admin_id: string | null;
   action: string;
@@ -119,7 +119,7 @@ export interface AuditLog {
   record_id: string | null;
   details: Json;
   created_at: string;
-}
+};
 
 export type JerseyEdition = 'fan' | 'player';
 export type JerseyBadge = string; // 'none' | 'champions_league' | 'league' | etc.

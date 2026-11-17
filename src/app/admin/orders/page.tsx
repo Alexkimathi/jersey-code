@@ -1,6 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Order } from "@/lib/supabase/types";
+import { Order, OrderStatus } from "@/lib/supabase/types";
 import Link from "next/link";
 
 const ORDER_STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
@@ -36,7 +36,7 @@ async function getOrders(orderStatus?: string) {
     .limit(200);
 
   if (orderStatus) {
-    query = query.eq("order_status", orderStatus);
+    query = query.eq("order_status", orderStatus as OrderStatus);
   }
 
   const { data, error } = await query;

@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
-import { Product } from "@/lib/supabase/types";
+import { Product, Sport } from "@/lib/supabase/types";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { getAllProductVariants } from "@/lib/supabase/queries";
 
@@ -12,7 +12,7 @@ async function getProducts(sport: string): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .eq("sport", sport)
+    .eq("sport", sport as Sport)
     .eq("is_hidden", false)
     .order("image_url", { ascending: false, nullsFirst: false });
 
