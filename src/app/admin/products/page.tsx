@@ -87,6 +87,8 @@ export default async function AdminProductsPage({
                 className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
                   filter === tab.value
                     ? "bg-gray-900 text-white"
+                    : tab.value === "hidden" && tab.count > 0
+                    ? "bg-amber-100 text-amber-700"
                     : "bg-gray-100 text-gray-500"
                 }`}
               >
