@@ -3,6 +3,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Product } from "@/lib/supabase/types";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { ToggleVisibilityButton } from "@/components/admin/ToggleVisibilityButton";
 import { Plus, Edit } from "lucide-react";
 
 async function getProducts() {
@@ -62,7 +63,10 @@ export default async function AdminProductsPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
+                <tr
+                  key={product.id}
+                  className={`hover:bg-gray-50 ${product.is_hidden ? "opacity-50" : ""}`}
+                >
                   <td className="px-6 py-4">
                     <div>
                       <div className="font-medium text-gray-900">
@@ -94,6 +98,10 @@ export default async function AdminProductsPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end space-x-2">
+                      <ToggleVisibilityButton
+                        productId={product.id}
+                        isHidden={product.is_hidden}
+                      />
                       <Link href={`/admin/products/${product.id}/edit`}>
                         <Button variant="ghost" size="sm">
                           <Edit className="w-4 h-4" />

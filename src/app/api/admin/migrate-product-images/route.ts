@@ -3,6 +3,8 @@ import { put } from "@vercel/blob";
 import { createServiceClient } from "@/lib/supabase/server";
 import { Product } from "@/lib/supabase/types";
 
+export const maxDuration = 300;
+
 const IMAGE_FIELDS = ["image_url", "back_image_url", "side_image_url", "badge_url"] as const;
 type ImageField = (typeof IMAGE_FIELDS)[number];
 
@@ -28,7 +30,7 @@ function parseSupabaseStorageUrl(url: string): { bucket: string; path: string } 
 }
 
 export async function POST(req: NextRequest) {
-  const token = req.headers.get("authorization")?.split(" ")[1];
+  const token = req.headers.get("authorization")?.split(" ")[1] ?? "";
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const admin = await verifyAdmin(token);
@@ -41,9 +43,15 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServiceClient();
 
+  const { searchParams } = new URL(req.url);
+  const offset = parseInt(searchParams.get("offset") ?? "0", 10);
+  const limit = parseInt(searchParams.get("limit") ?? "50", 10);
+
   const { data: rawProducts, error: fetchError } = await supabase
     .from("products")
-    .select("*");
+    .select("*")
+    .order("created_at", { ascending: true })
+    .range(offset, offset + limit - 1);
   const products = rawProducts as Product[] | null;
 
   if (fetchError) {
@@ -54,6 +62,7 @@ export async function POST(req: NextRequest) {
   let skipped = 0;
   let failed = 0;
   const errors: string[] = [];
+  const urlMappings: Record<string, Partial<Record<ImageField, string>>> = {};
 
   for (const product of products ?? []) {
     const updates: Partial<Record<ImageField, string>> = {};
@@ -103,17 +112,30 @@ export async function POST(req: NextRequest) {
     }
 
     if (Object.keys(updates).length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: updateError } = await (supabase as any)
-        .from("products")
-        .update(updates)
-        .eq("id", product.id);
-
-      if (updateError) {
-        errors.push(`${product.id}: DB update failed: ${updateError.message}`);
+      urlMappings[product.id] = updates;
+      // Use the admin user's JWT (not service role) so the products trigger's
+      // auth.uid() check passes — service role has no uid.
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const updateRes = await fetch(
+        `${supabaseUrl}/rest/v1/products?id=eq.${product.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": anonKey,
+            "Authorization": `Bearer ${token}`,
+            "Prefer": "return=minimal",
+          },
+          body: JSON.stringify(updates),
+        }
+      );
+      if (!updateRes.ok) {
+        const errText = await updateRes.text();
+        errors.push(`${product.id}: DB update failed: ${errText}`);
       }
     }
   }
 
-  return NextResponse.json({ migrated, skipped, failed, errors });
+  return NextResponse.json({ migrated, skipped, failed, errors, offset, limit, count: products?.length ?? 0, urlMappings });
 }

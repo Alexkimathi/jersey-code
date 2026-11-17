@@ -1,7 +1,7 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProductCard } from '@/components/storefront/ProductCard';
 import { Product, ProductVariant } from '@/lib/supabase/types';
@@ -38,6 +38,7 @@ function SkeletonCard() {
 
 export default function SearchClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [variants, setVariants] = useState<(ProductVariant & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +51,26 @@ export default function SearchClient() {
   const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
 
   const query = searchParams.get('q') || '';
+
+  // Re-sync local state when URL changes (e.g. browser back/forward navigation)
+  useEffect(() => {
+    setSport(searchParams.get('sport') || '');
+    setTeam(searchParams.get('team') || '');
+    setMinPrice(searchParams.get('minPrice') || '');
+    setMaxPrice(searchParams.get('maxPrice') || '');
+    setSize(searchParams.get('size') || '');
+    setSort(searchParams.get('sort') || 'newest');
+  }, [searchParams]);
+
+  // Update URL to reflect current filters (uses replace so filters don't pollute history)
+  const updateURL = useCallback((updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    });
+    router.replace(`/search?${params.toString()}`);
+  }, [searchParams, router]);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -116,7 +137,7 @@ export default function SearchClient() {
                 </label>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => setSport('')}
+                    onClick={() => { setSport(''); updateURL({ sport: '' }); }}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                       sport === '' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
@@ -126,7 +147,7 @@ export default function SearchClient() {
                   {SPORTS.map((s) => (
                     <button
                       key={s.value}
-                      onClick={() => setSport(sport === s.value ? '' : s.value)}
+                      onClick={() => { const v = sport === s.value ? '' : s.value; setSport(v); updateURL({ sport: v }); }}
                       className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                         sport === s.value ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
@@ -183,7 +204,7 @@ export default function SearchClient() {
                   {SIZES.map((s) => (
                     <button
                       key={s}
-                      onClick={() => setSize(size === s ? '' : s)}
+                      onClick={() => { const v = size === s ? '' : s; setSize(v); updateURL({ size: v }); }}
                       className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${
                         size === s
                           ? 'bg-slate-900 text-white shadow-sm'
@@ -203,7 +224,7 @@ export default function SearchClient() {
                 </label>
                 <select
                   value={sort}
-                  onChange={(e) => setSort(e.target.value)}
+                  onChange={(e) => { setSort(e.target.value); updateURL({ sort: e.target.value }); }}
                   className="w-full rounded-xl bg-slate-100 border-0 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
                 >
                   {SORT_OPTIONS.map((opt) => (

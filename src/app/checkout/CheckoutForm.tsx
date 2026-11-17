@@ -52,7 +52,7 @@ export function CheckoutForm() {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (mounted && items.length === 0 && !checkoutSuccess.current) router.push("/cart");
+    if (mounted && items.length === 0 && !checkoutSuccess.current) router.replace("/cart");
   }, [mounted, items.length, router]);
 
   const [formData, setFormData] = useState<CheckoutFormData>({
