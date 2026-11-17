@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Product } from "@/lib/supabase/types";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import { ToggleVisibilityButton } from "@/components/admin/ToggleVisibilityButto
 import { Plus, Edit } from "lucide-react";
 
 async function getProducts() {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
