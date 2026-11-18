@@ -70,7 +70,7 @@ export function CategoryTabs({ tabs, defaultTab, variants }: CategoryTabsProps) 
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {current.products.map((product) => {
+          {current.products.map((product, i) => {
             const productVariants = variants.filter(
               (v) => v.product_id === product.id
             );
@@ -79,6 +79,7 @@ export function CategoryTabs({ tabs, defaultTab, variants }: CategoryTabsProps) 
                 key={product.id}
                 product={product}
                 variants={productVariants}
+                priority={i < 4}
               />
             );
           })}

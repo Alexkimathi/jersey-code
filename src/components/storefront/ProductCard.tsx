@@ -12,14 +12,16 @@ interface ProductCardProps {
   product: Product;
   variants: (ProductVariant & { id: string })[];
   index?: number;
+  priority?: boolean;
 }
 
-export function ProductCard({ product, variants, index = 0 }: ProductCardProps) {
+export function ProductCard({ product, variants, index = 0, priority = false }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const inStockVariants = variants.filter(v => v.stock_quantity > 0);
   const inStock = inStockVariants.length > 0;
 
   const [imageError,   setImageError]   = useState(false);
+  const [imageLoaded,  setImageLoaded]  = useState(false);
   const [added,        setAdded]        = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -93,14 +95,16 @@ export function ProductCard({ product, variants, index = 0 }: ProductCardProps) 
         className="group relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl transition-shadow duration-300 h-full w-full"
       >
         {/* Image */}
-        <div className="relative flex-none h-64 bg-slate-100 overflow-hidden">
+        <div className={`relative flex-none h-64 overflow-hidden ${product.image_url && !imageError && !imageLoaded ? "bg-slate-100 animate-pulse" : "bg-slate-100"}`}>
           {product.image_url && !imageError ? (
             <Image
               src={product.image_url}
               alt={product.name}
               fill
-              className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+              priority={priority}
+              className={`object-contain p-4 group-hover:scale-105 transition-transform duration-500 transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
+              onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
             />
           ) : (

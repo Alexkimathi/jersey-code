@@ -69,6 +69,7 @@ export function HomeSectionTabs({
                 product={product}
                 variants={productVariants}
                 index={index}
+                priority={index < 4}
               />
             );
           })}
@@ -89,6 +90,7 @@ export function HomeSectionTabs({
                     product={product}
                     variants={productVariants}
                     index={index}
+                    priority={index < 4}
                   />
                 </div>
               );

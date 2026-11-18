@@ -3,7 +3,7 @@ import { Product } from "@/lib/supabase/types";
 import { CategoryTabs } from "@/components/storefront/CategoryTabs";
 import { getAllProductVariants } from "@/lib/supabase/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 async function getF1Products(): Promise<Product[]> {
   const supabase = createServerClient();
