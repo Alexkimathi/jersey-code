@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Product, ProductVariant } from "@/lib/supabase/types";
 import { ProductCard } from "./ProductCard";
 
@@ -17,8 +17,19 @@ interface CategoryTabsProps {
 }
 
 export function CategoryTabs({ tabs, defaultTab, variants }: CategoryTabsProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab ?? tabs[0]?.label);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const paramTab = searchParams.get("tab");
+  const validTab = tabs.find((t) => t.label === paramTab)?.label;
+  const activeTab = validTab ?? defaultTab ?? tabs[0]?.label;
   const current = tabs.find((t) => t.label === activeTab) ?? tabs[0];
+
+  function selectTab(label: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", label);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
 
   return (
     <div>
@@ -28,7 +39,7 @@ export function CategoryTabs({ tabs, defaultTab, variants }: CategoryTabsProps) 
         {tabs.map((tab) => (
           <button
             key={tab.label}
-            onClick={() => setActiveTab(tab.label)}
+            onClick={() => selectTab(tab.label)}
             className={`flex-none px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
               activeTab === tab.label
                 ? "bg-slate-900 text-white shadow"
