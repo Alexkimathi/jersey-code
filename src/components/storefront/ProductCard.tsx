@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +22,13 @@ export function ProductCard({ product, variants, index = 0, priority = false }: 
 
   const [imageError,   setImageError]   = useState(false);
   const [imageLoaded,  setImageLoaded]  = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  // For cached images, onLoad fires before React attaches the handler — check complete on mount
+  useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      setImageLoaded(true);
+    }
+  }, []);
   const [added,        setAdded]        = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -98,11 +105,12 @@ export function ProductCard({ product, variants, index = 0, priority = false }: 
         <div className={`relative flex-none h-64 overflow-hidden ${product.image_url && !imageError && !imageLoaded ? "bg-slate-100 animate-pulse" : "bg-slate-100"}`}>
           {product.image_url && !imageError ? (
             <Image
+              ref={imgRef}
               src={product.image_url}
               alt={product.name}
               fill
               priority={priority}
-              className={`object-contain p-4 group-hover:scale-105 transition-transform duration-500 transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+              className={`object-contain p-4 group-hover:scale-105 transition duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
