@@ -29,14 +29,15 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
   const [activeView, setActiveView]     = useState(0);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [descOpen, setDescOpen] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   const addItem = useCartStore((state) => state.addItem);
 
   const teamExtra = product.team ? (TEAM_IMAGES[product.team] ?? {}) : {};
   const viewImages: (string | null)[] = [
-    product.image_url      ?? null,
-    product.back_image_url ?? teamExtra.back  ?? null,
-    product.side_image_url ?? teamExtra.side  ?? null,
-    product.badge_url      ?? teamExtra.badge ?? null,
+    !imageErrors[0] ? (product.image_url      ?? null) : null,
+    !imageErrors[1] ? (product.back_image_url ?? teamExtra.back  ?? null) : null,
+    !imageErrors[2] ? (product.side_image_url ?? teamExtra.side  ?? null) : null,
+    !imageErrors[3] ? (product.badge_url      ?? teamExtra.badge ?? null) : null,
   ];
   const activeImageUrl = viewImages[activeView] ?? null;
 
@@ -180,6 +181,7 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
               className="object-contain"
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
+              onError={() => setImageErrors(prev => ({ ...prev, [activeView]: true }))}
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-400">
@@ -230,7 +232,9 @@ export function ProductDetailClient({ product, variants }: ProductDetailClientPr
                     activeView === i ? "border-slate-900 shadow-sm" : "border-slate-200 hover:border-slate-400"
                   }`}
                 >
-                  <Image src={viewImages[i]!} alt={`${label} view`} fill className="object-contain" sizes="10vw"/>
+                  <Image src={viewImages[i]!} alt={`${label} view`} fill className="object-contain" sizes="10vw"
+                    onError={() => setImageErrors(prev => ({ ...prev, [i]: true }))}
+                  />
                 </button>
               );
             })}

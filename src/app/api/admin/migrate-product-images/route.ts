@@ -69,31 +69,57 @@ export async function POST(req: NextRequest) {
 
     for (const field of IMAGE_FIELDS) {
       const url = product[field] as string | null;
-      if (!url || !url.includes(".supabase.co/storage")) {
+      if (!url) {
         skipped++;
         continue;
       }
 
-      const parsed = parseSupabaseStorageUrl(url);
-      if (!parsed) {
-        errors.push(`${product.id}/${field}: could not parse URL: ${url}`);
-        failed++;
+      const isAlreadyBlob = url.includes(".blob.vercel-storage.com");
+      if (isAlreadyBlob) {
+        skipped++;
         continue;
       }
 
-      try {
-        const { data: fileData, error: downloadError } = await supabase.storage
-          .from(parsed.bucket)
-          .download(parsed.path);
+      const isSupabaseStorage = url.includes(".supabase.co/storage");
+      const fieldSlug = field.replace("_url", "").replace("_image", "");
 
-        if (downloadError || !fileData) {
-          errors.push(`${product.id}/${field}: download failed: ${downloadError?.message ?? "no data"}`);
-          failed++;
-          continue;
+      try {
+        let fileData: Blob;
+        let ext: string;
+
+        if (isSupabaseStorage) {
+          const parsed = parseSupabaseStorageUrl(url);
+          if (!parsed) {
+            errors.push(`${product.id}/${field}: could not parse URL: ${url}`);
+            failed++;
+            continue;
+          }
+
+          const { data, error: downloadError } = await supabase.storage
+            .from(parsed.bucket)
+            .download(parsed.path);
+
+          if (downloadError || !data) {
+            errors.push(`${product.id}/${field}: download failed: ${downloadError?.message ?? "no data"}`);
+            failed++;
+            continue;
+          }
+
+          fileData = data;
+          ext = parsed.path.split(".").pop()?.toLowerCase() ?? "jpg";
+        } else {
+          // External URL (CDN, TheSportsDB, etc.) — fetch directly
+          const res = await fetch(url);
+          if (!res.ok) {
+            errors.push(`${product.id}/${field}: fetch failed ${res.status}: ${url}`);
+            failed++;
+            continue;
+          }
+          fileData = await res.blob();
+          const urlPath = new URL(url).pathname;
+          ext = urlPath.split(".").pop()?.toLowerCase() ?? "jpg";
         }
 
-        const ext = parsed.path.split(".").pop()?.toLowerCase() ?? "jpg";
-        const fieldSlug = field.replace("_url", "").replace("_image", "");
         const blobPath = `products/${product.id}/${fieldSlug}-migrated.${ext}`;
 
         const blob = await put(blobPath, fileData, {
