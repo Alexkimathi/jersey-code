@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Product, ProductVariant } from "@/lib/supabase/types";
 import { ProductCard } from "./ProductCard";
@@ -16,7 +17,15 @@ interface CategoryTabsProps {
   variants: ProductVariant[];
 }
 
-export function CategoryTabs({ tabs, defaultTab, variants }: CategoryTabsProps) {
+export function CategoryTabs(props: CategoryTabsProps) {
+  return (
+    <Suspense>
+      <CategoryTabsInner {...props} />
+    </Suspense>
+  );
+}
+
+function CategoryTabsInner({ tabs, defaultTab, variants }: CategoryTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
